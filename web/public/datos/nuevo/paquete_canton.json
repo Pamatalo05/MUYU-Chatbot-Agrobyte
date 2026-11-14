@@ -1,0 +1,633 @@
+{
+  "meta": {
+    "proyecto": "Kallpa",
+    "alcance_geografico": "Cuenca Baja del Río Guayas: Daule (Guayas) y Babahoyo (Los Ríos)",
+    "arquitectura": "Híbrida Offline-First (JSON satelital/ML local) + Online Opcional (Open-Meteo + Gemini)",
+    "periodo_analizado": "2005-2025",
+    "actualizado_utc": "2026-11-14T18:37:35.649198+00:00"
+  },
+  "ml_metadata": {
+    "modelo_seleccionado": "Ridge",
+    "r2_test": 0.9561,
+    "mae_test": 0.0161,
+    "rmse_test": 0.0212,
+    "cv_tscv5_mae_train": 0.013
+  },
+  "auditoria_reproducibilidad": {
+    "entrenamiento": "2005-2020",
+    "prueba_out_of_sample": "2021-2025",
+    "n_filas_train": 382,
+    "n_filas_test": 120,
+    "garantia_sin_fuga": "Rezagos t-1 calculados por cantón y estadísticos de baseline ajustados únicamente en 2005-2020."
+  },
+  "fuentes_metodologia": {
+    "clima_hidrologia": "NASA POWER Agroclimatology API v2 (2005-2025, resolución mensual); NASA SMAP L3 SPL3SMP (2023-2025, 36 km); Terra MODIS MOD13Q1 v061 NDVI (250 m, percentil 75 libre de nubes); NASA SRTMGL1 (30 m).",
+    "indices_enso": "NOAA Climate Prediction Center ERSSTv5 (Anomalías SST Niño 1+2 [0°-10°S, 90°W-80°W] y ONI Niño 3.4, 2005-2025; umbral combinado ±0.5 °C ONI / ±1.0 °C Niño 1+2).",
+    "agronomia_rotaciones": "INIAP Estación Experimental Boliche/Pichilingue (Fichas Varietales Soya INIAP-308, Fréjol Caupí INIAP-463, Maní INIAP-381 y Abono Verde Mucuna pruriens); FAO (2016) Guía de Fijación Biológica de Nitrógeno.",
+    "economia_insumos": "Ministerio de Agricultura y Ganadería (MAG) / SIPA Ecuador — Boletín de Precios de Fertilizantes (referencia saco de Urea 46% N de 50 kg = $38.00 USD)."
+  },
+  "cantones": {
+    "daule": {
+      "nombre": "Daule, Guayas",
+      "region": "costa_aluvial",
+      "coordenadas": {
+        "lat": -1.86,
+        "lon": -79.98
+      },
+      "terreno": {
+        "elevacion_msnm": 5.02,
+        "pendiente_srtm_pct": 1.52
+      },
+      "suelo_referencia": "Franco-arcilloso aluvial (llanura arrocera y maicera de la cuenca baja del río Guayas)",
+      "serie_satelital_ml": [
+        {
+          "mes": 1,
+          "lluvia_mm": 136.6,
+          "temp_c": 37.7,
+          "ndvi_modis": 0.63,
+          "smap_humedad_superficial": 0.347,
+          "humedad_raiz_predicha": {
+            "neutro": 0.668,
+            "nino": 0.701,
+            "nina": 0.639
+          }
+        },
+        {
+          "mes": 2,
+          "lluvia_mm": 224.1,
+          "temp_c": 35.6,
+          "ndvi_modis": 0.665,
+          "smap_humedad_superficial": 0.394,
+          "humedad_raiz_predicha": {
+            "neutro": 0.758,
+            "nino": 0.833,
+            "nina": 0.693
+          }
+        },
+        {
+          "mes": 3,
+          "lluvia_mm": 188.9,
+          "temp_c": 34.3,
+          "ndvi_modis": 0.691,
+          "smap_humedad_superficial": 0.418,
+          "humedad_raiz_predicha": {
+            "neutro": 0.803,
+            "nino": 0.895,
+            "nina": 0.723
+          }
+        },
+        {
+          "mes": 4,
+          "lluvia_mm": 128.6,
+          "temp_c": 35.6,
+          "ndvi_modis": 0.7,
+          "smap_humedad_superficial": 0.411,
+          "humedad_raiz_predicha": {
+            "neutro": 0.791,
+            "nino": 0.879,
+            "nina": 0.714
+          }
+        },
+        {
+          "mes": 5,
+          "lluvia_mm": 38.1,
+          "temp_c": 36.4,
+          "ndvi_modis": 0.691,
+          "smap_humedad_superficial": 0.374,
+          "humedad_raiz_predicha": {
+            "neutro": 0.72,
+            "nino": 0.783,
+            "nina": 0.664
+          }
+        },
+        {
+          "mes": 6,
+          "lluvia_mm": 20.3,
+          "temp_c": 37.8,
+          "ndvi_modis": 0.665,
+          "smap_humedad_superficial": 0.342,
+          "humedad_raiz_predicha": {
+            "neutro": 0.657,
+            "nino": 0.7,
+            "nina": 0.618
+          }
+        },
+        {
+          "mes": 7,
+          "lluvia_mm": 5.9,
+          "temp_c": 38.8,
+          "ndvi_modis": 0.63,
+          "smap_humedad_superficial": 0.312,
+          "humedad_raiz_predicha": {
+            "neutro": 0.6,
+            "nino": 0.627,
+            "nina": 0.574
+          }
+        },
+        {
+          "mes": 8,
+          "lluvia_mm": 3.3,
+          "temp_c": 39.4,
+          "ndvi_modis": 0.595,
+          "smap_humedad_superficial": 0.289,
+          "humedad_raiz_predicha": {
+            "neutro": 0.556,
+            "nino": 0.573,
+            "nina": 0.539
+          }
+        },
+        {
+          "mes": 9,
+          "lluvia_mm": 2.9,
+          "temp_c": 39.6,
+          "ndvi_modis": 0.569,
+          "smap_humedad_superficial": 0.272,
+          "humedad_raiz_predicha": {
+            "neutro": 0.523,
+            "nino": 0.534,
+            "nina": 0.512
+          }
+        },
+        {
+          "mes": 10,
+          "lluvia_mm": 7.6,
+          "temp_c": 39.3,
+          "ndvi_modis": 0.56,
+          "smap_humedad_superficial": 0.262,
+          "humedad_raiz_predicha": {
+            "neutro": 0.503,
+            "nino": 0.511,
+            "nina": 0.494
+          }
+        },
+        {
+          "mes": 11,
+          "lluvia_mm": 8.9,
+          "temp_c": 38.2,
+          "ndvi_modis": 0.569,
+          "smap_humedad_superficial": 0.256,
+          "humedad_raiz_predicha": {
+            "neutro": 0.493,
+            "nino": 0.499,
+            "nina": 0.485
+          }
+        },
+        {
+          "mes": 12,
+          "lluvia_mm": 27.2,
+          "temp_c": 38.2,
+          "ndvi_modis": 0.595,
+          "smap_humedad_superficial": 0.26,
+          "humedad_raiz_predicha": {
+            "neutro": 0.5,
+            "nino": 0.51,
+            "nina": 0.489
+          }
+        }
+      ],
+      "top_rotaciones_ml": [
+        {
+          "id": "soya_iniap_308",
+          "cultivo": "Soya de rotación (INIAP-308)",
+          "region": "costa_aluvial",
+          "ciclo_dias": 105,
+          "fijacion_n_kg_ha": 85.0,
+          "ahorro_urea_kg_ha": 185.0,
+          "costo_insumos_ha": 520.0,
+          "ingreso_bruto_ha": 1180.0,
+          "fuente_tecnica": "INIAP Estación Experimental Boliche — Ficha Varietal Soya INIAP-308; FAO (2016) Fijación Biológica de Nitrógeno; MAG SIPA"
+        },
+        {
+          "id": "frejol_caupi_iniap_463",
+          "cultivo": "Fréjol Caupí (INIAP-463)",
+          "region": "costa_aluvial",
+          "ciclo_dias": 75,
+          "fijacion_n_kg_ha": 68.0,
+          "ahorro_urea_kg_ha": 148.0,
+          "costo_insumos_ha": 430.0,
+          "ingreso_bruto_ha": 980.0,
+          "fuente_tecnica": "INIAP Programa Nacional de Leguminosas — Guía Técnica Caupí INIAP-463 (Litoral Ecuatoriano); MAG SIPA"
+        },
+        {
+          "id": "mucuna_pruriens",
+          "cultivo": "Mucuna (Mucuna pruriens — Abono verde)",
+          "region": "costa_aluvial",
+          "ciclo_dias": 75,
+          "fijacion_n_kg_ha": 110.0,
+          "ahorro_urea_kg_ha": 235.0,
+          "costo_insumos_ha": 195.0,
+          "ingreso_bruto_ha": 410.0,
+          "fuente_tecnica": "INIAP Estación Experimental Boliche/Pichilingue — Abonos Verdes (Mucuna pruriens) en Litoral; FAO (2016)"
+        }
+      ],
+      "top_rotaciones_por_enso": {
+        "neutro": [
+          {
+            "id": "soya_iniap_308",
+            "cultivo": "Soya de rotación (INIAP-308)",
+            "region": "costa_aluvial",
+            "ciclo_dias": 105,
+            "fijacion_n_kg_ha": 85.0,
+            "ahorro_urea_kg_ha": 185.0,
+            "costo_insumos_ha": 520.0,
+            "ingreso_bruto_ha": 1180.0,
+            "fuente_tecnica": "INIAP Estación Experimental Boliche — Ficha Varietal Soya INIAP-308; FAO (2016) Fijación Biológica de Nitrógeno; MAG SIPA"
+          },
+          {
+            "id": "frejol_caupi_iniap_463",
+            "cultivo": "Fréjol Caupí (INIAP-463)",
+            "region": "costa_aluvial",
+            "ciclo_dias": 75,
+            "fijacion_n_kg_ha": 68.0,
+            "ahorro_urea_kg_ha": 148.0,
+            "costo_insumos_ha": 430.0,
+            "ingreso_bruto_ha": 980.0,
+            "fuente_tecnica": "INIAP Programa Nacional de Leguminosas — Guía Técnica Caupí INIAP-463 (Litoral Ecuatoriano); MAG SIPA"
+          },
+          {
+            "id": "mucuna_pruriens",
+            "cultivo": "Mucuna (Mucuna pruriens — Abono verde)",
+            "region": "costa_aluvial",
+            "ciclo_dias": 75,
+            "fijacion_n_kg_ha": 110.0,
+            "ahorro_urea_kg_ha": 235.0,
+            "costo_insumos_ha": 195.0,
+            "ingreso_bruto_ha": 410.0,
+            "fuente_tecnica": "INIAP Estación Experimental Boliche/Pichilingue — Abonos Verdes (Mucuna pruriens) en Litoral; FAO (2016)"
+          }
+        ],
+        "nino": [
+          {
+            "id": "frejol_caupi_iniap_463",
+            "cultivo": "Fréjol Caupí (INIAP-463)",
+            "region": "costa_aluvial",
+            "ciclo_dias": 75,
+            "fijacion_n_kg_ha": 68.0,
+            "ahorro_urea_kg_ha": 148.0,
+            "costo_insumos_ha": 430.0,
+            "ingreso_bruto_ha": 980.0,
+            "fuente_tecnica": "INIAP Programa Nacional de Leguminosas — Guía Técnica Caupí INIAP-463 (Litoral Ecuatoriano); MAG SIPA"
+          },
+          {
+            "id": "mucuna_pruriens",
+            "cultivo": "Mucuna (Mucuna pruriens — Abono verde)",
+            "region": "costa_aluvial",
+            "ciclo_dias": 75,
+            "fijacion_n_kg_ha": 110.0,
+            "ahorro_urea_kg_ha": 235.0,
+            "costo_insumos_ha": 195.0,
+            "ingreso_bruto_ha": 410.0,
+            "fuente_tecnica": "INIAP Estación Experimental Boliche/Pichilingue — Abonos Verdes (Mucuna pruriens) en Litoral; FAO (2016)"
+          },
+          {
+            "id": "soya_iniap_308",
+            "cultivo": "Soya de rotación (INIAP-308)",
+            "region": "costa_aluvial",
+            "ciclo_dias": 105,
+            "fijacion_n_kg_ha": 85.0,
+            "ahorro_urea_kg_ha": 185.0,
+            "costo_insumos_ha": 520.0,
+            "ingreso_bruto_ha": 1180.0,
+            "fuente_tecnica": "INIAP Estación Experimental Boliche — Ficha Varietal Soya INIAP-308; FAO (2016) Fijación Biológica de Nitrógeno; MAG SIPA"
+          }
+        ],
+        "nina": [
+          {
+            "id": "mani_iniap_381",
+            "cultivo": "Maní de rotación (INIAP-381)",
+            "region": "costa_aluvial",
+            "ciclo_dias": 115,
+            "fijacion_n_kg_ha": 72.0,
+            "ahorro_urea_kg_ha": 156.0,
+            "costo_insumos_ha": 610.0,
+            "ingreso_bruto_ha": 1420.0,
+            "fuente_tecnica": "INIAP Estación Experimental Portoviejo/Boliche — Variedad INIAP-381; MAG SIPA Boletín Precios Insumos"
+          },
+          {
+            "id": "soya_iniap_308",
+            "cultivo": "Soya de rotación (INIAP-308)",
+            "region": "costa_aluvial",
+            "ciclo_dias": 105,
+            "fijacion_n_kg_ha": 85.0,
+            "ahorro_urea_kg_ha": 185.0,
+            "costo_insumos_ha": 520.0,
+            "ingreso_bruto_ha": 1180.0,
+            "fuente_tecnica": "INIAP Estación Experimental Boliche — Ficha Varietal Soya INIAP-308; FAO (2016) Fijación Biológica de Nitrógeno; MAG SIPA"
+          },
+          {
+            "id": "frejol_caupi_iniap_463",
+            "cultivo": "Fréjol Caupí (INIAP-463)",
+            "region": "costa_aluvial",
+            "ciclo_dias": 75,
+            "fijacion_n_kg_ha": 68.0,
+            "ahorro_urea_kg_ha": 148.0,
+            "costo_insumos_ha": 430.0,
+            "ingreso_bruto_ha": 980.0,
+            "fuente_tecnica": "INIAP Programa Nacional de Leguminosas — Guía Técnica Caupí INIAP-463 (Litoral Ecuatoriano); MAG SIPA"
+          }
+        ]
+      }
+    },
+    "babahoyo": {
+      "nombre": "Babahoyo, Los Ríos",
+      "region": "costa_aluvial",
+      "coordenadas": {
+        "lat": -1.8,
+        "lon": -79.53
+      },
+      "terreno": {
+        "elevacion_msnm": 8.15,
+        "pendiente_srtm_pct": 1.85
+      },
+      "suelo_referencia": "Franco-arcilloso a franco-limoso aluvial (zona arrocera y maicera de la subcuenca Babahoyo)",
+      "serie_satelital_ml": [
+        {
+          "mes": 1,
+          "lluvia_mm": 136.1,
+          "temp_c": 32.1,
+          "ndvi_modis": 0.66,
+          "smap_humedad_superficial": 0.325,
+          "humedad_raiz_predicha": {
+            "neutro": 0.625,
+            "nino": 0.658,
+            "nina": 0.597
+          }
+        },
+        {
+          "mes": 2,
+          "lluvia_mm": 199.4,
+          "temp_c": 30.5,
+          "ndvi_modis": 0.695,
+          "smap_humedad_superficial": 0.374,
+          "humedad_raiz_predicha": {
+            "neutro": 0.719,
+            "nino": 0.788,
+            "nina": 0.659
+          }
+        },
+        {
+          "mes": 3,
+          "lluvia_mm": 181.4,
+          "temp_c": 30.0,
+          "ndvi_modis": 0.721,
+          "smap_humedad_superficial": 0.402,
+          "humedad_raiz_predicha": {
+            "neutro": 0.774,
+            "nino": 0.861,
+            "nina": 0.699
+          }
+        },
+        {
+          "mes": 4,
+          "lluvia_mm": 138.9,
+          "temp_c": 30.8,
+          "ndvi_modis": 0.73,
+          "smap_humedad_superficial": 0.407,
+          "humedad_raiz_predicha": {
+            "neutro": 0.782,
+            "nino": 0.869,
+            "nina": 0.706
+          }
+        },
+        {
+          "mes": 5,
+          "lluvia_mm": 63.6,
+          "temp_c": 31.4,
+          "ndvi_modis": 0.721,
+          "smap_humedad_superficial": 0.382,
+          "humedad_raiz_predicha": {
+            "neutro": 0.735,
+            "nino": 0.803,
+            "nina": 0.674
+          }
+        },
+        {
+          "mes": 6,
+          "lluvia_mm": 45.7,
+          "temp_c": 32.5,
+          "ndvi_modis": 0.695,
+          "smap_humedad_superficial": 0.357,
+          "humedad_raiz_predicha": {
+            "neutro": 0.687,
+            "nino": 0.739,
+            "nina": 0.639
+          }
+        },
+        {
+          "mes": 7,
+          "lluvia_mm": 22.6,
+          "temp_c": 33.7,
+          "ndvi_modis": 0.66,
+          "smap_humedad_superficial": 0.329,
+          "humedad_raiz_predicha": {
+            "neutro": 0.632,
+            "nino": 0.669,
+            "nina": 0.597
+          }
+        },
+        {
+          "mes": 8,
+          "lluvia_mm": 21.3,
+          "temp_c": 34.6,
+          "ndvi_modis": 0.625,
+          "smap_humedad_superficial": 0.306,
+          "humedad_raiz_predicha": {
+            "neutro": 0.588,
+            "nino": 0.616,
+            "nina": 0.562
+          }
+        },
+        {
+          "mes": 9,
+          "lluvia_mm": 16.9,
+          "temp_c": 34.8,
+          "ndvi_modis": 0.599,
+          "smap_humedad_superficial": 0.288,
+          "humedad_raiz_predicha": {
+            "neutro": 0.553,
+            "nino": 0.573,
+            "nina": 0.533
+          }
+        },
+        {
+          "mes": 10,
+          "lluvia_mm": 33.3,
+          "temp_c": 34.1,
+          "ndvi_modis": 0.59,
+          "smap_humedad_superficial": 0.282,
+          "humedad_raiz_predicha": {
+            "neutro": 0.542,
+            "nino": 0.562,
+            "nina": 0.522
+          }
+        },
+        {
+          "mes": 11,
+          "lluvia_mm": 35.9,
+          "temp_c": 32.6,
+          "ndvi_modis": 0.599,
+          "smap_humedad_superficial": 0.281,
+          "humedad_raiz_predicha": {
+            "neutro": 0.541,
+            "nino": 0.561,
+            "nina": 0.52
+          }
+        },
+        {
+          "mes": 12,
+          "lluvia_mm": 48.6,
+          "temp_c": 32.7,
+          "ndvi_modis": 0.625,
+          "smap_humedad_superficial": 0.285,
+          "humedad_raiz_predicha": {
+            "neutro": 0.549,
+            "nino": 0.573,
+            "nina": 0.526
+          }
+        }
+      ],
+      "top_rotaciones_ml": [
+        {
+          "id": "soya_iniap_308",
+          "cultivo": "Soya de rotación (INIAP-308)",
+          "region": "costa_aluvial",
+          "ciclo_dias": 105,
+          "fijacion_n_kg_ha": 85.0,
+          "ahorro_urea_kg_ha": 185.0,
+          "costo_insumos_ha": 520.0,
+          "ingreso_bruto_ha": 1180.0,
+          "fuente_tecnica": "INIAP Estación Experimental Boliche — Ficha Varietal Soya INIAP-308; FAO (2016) Fijación Biológica de Nitrógeno; MAG SIPA"
+        },
+        {
+          "id": "frejol_caupi_iniap_463",
+          "cultivo": "Fréjol Caupí (INIAP-463)",
+          "region": "costa_aluvial",
+          "ciclo_dias": 75,
+          "fijacion_n_kg_ha": 68.0,
+          "ahorro_urea_kg_ha": 148.0,
+          "costo_insumos_ha": 430.0,
+          "ingreso_bruto_ha": 980.0,
+          "fuente_tecnica": "INIAP Programa Nacional de Leguminosas — Guía Técnica Caupí INIAP-463 (Litoral Ecuatoriano); MAG SIPA"
+        },
+        {
+          "id": "mucuna_pruriens",
+          "cultivo": "Mucuna (Mucuna pruriens — Abono verde)",
+          "region": "costa_aluvial",
+          "ciclo_dias": 75,
+          "fijacion_n_kg_ha": 110.0,
+          "ahorro_urea_kg_ha": 235.0,
+          "costo_insumos_ha": 195.0,
+          "ingreso_bruto_ha": 410.0,
+          "fuente_tecnica": "INIAP Estación Experimental Boliche/Pichilingue — Abonos Verdes (Mucuna pruriens) en Litoral; FAO (2016)"
+        }
+      ],
+      "top_rotaciones_por_enso": {
+        "neutro": [
+          {
+            "id": "soya_iniap_308",
+            "cultivo": "Soya de rotación (INIAP-308)",
+            "region": "costa_aluvial",
+            "ciclo_dias": 105,
+            "fijacion_n_kg_ha": 85.0,
+            "ahorro_urea_kg_ha": 185.0,
+            "costo_insumos_ha": 520.0,
+            "ingreso_bruto_ha": 1180.0,
+            "fuente_tecnica": "INIAP Estación Experimental Boliche — Ficha Varietal Soya INIAP-308; FAO (2016) Fijación Biológica de Nitrógeno; MAG SIPA"
+          },
+          {
+            "id": "frejol_caupi_iniap_463",
+            "cultivo": "Fréjol Caupí (INIAP-463)",
+            "region": "costa_aluvial",
+            "ciclo_dias": 75,
+            "fijacion_n_kg_ha": 68.0,
+            "ahorro_urea_kg_ha": 148.0,
+            "costo_insumos_ha": 430.0,
+            "ingreso_bruto_ha": 980.0,
+            "fuente_tecnica": "INIAP Programa Nacional de Leguminosas — Guía Técnica Caupí INIAP-463 (Litoral Ecuatoriano); MAG SIPA"
+          },
+          {
+            "id": "mucuna_pruriens",
+            "cultivo": "Mucuna (Mucuna pruriens — Abono verde)",
+            "region": "costa_aluvial",
+            "ciclo_dias": 75,
+            "fijacion_n_kg_ha": 110.0,
+            "ahorro_urea_kg_ha": 235.0,
+            "costo_insumos_ha": 195.0,
+            "ingreso_bruto_ha": 410.0,
+            "fuente_tecnica": "INIAP Estación Experimental Boliche/Pichilingue — Abonos Verdes (Mucuna pruriens) en Litoral; FAO (2016)"
+          }
+        ],
+        "nino": [
+          {
+            "id": "frejol_caupi_iniap_463",
+            "cultivo": "Fréjol Caupí (INIAP-463)",
+            "region": "costa_aluvial",
+            "ciclo_dias": 75,
+            "fijacion_n_kg_ha": 68.0,
+            "ahorro_urea_kg_ha": 148.0,
+            "costo_insumos_ha": 430.0,
+            "ingreso_bruto_ha": 980.0,
+            "fuente_tecnica": "INIAP Programa Nacional de Leguminosas — Guía Técnica Caupí INIAP-463 (Litoral Ecuatoriano); MAG SIPA"
+          },
+          {
+            "id": "mucuna_pruriens",
+            "cultivo": "Mucuna (Mucuna pruriens — Abono verde)",
+            "region": "costa_aluvial",
+            "ciclo_dias": 75,
+            "fijacion_n_kg_ha": 110.0,
+            "ahorro_urea_kg_ha": 235.0,
+            "costo_insumos_ha": 195.0,
+            "ingreso_bruto_ha": 410.0,
+            "fuente_tecnica": "INIAP Estación Experimental Boliche/Pichilingue — Abonos Verdes (Mucuna pruriens) en Litoral; FAO (2016)"
+          },
+          {
+            "id": "soya_iniap_308",
+            "cultivo": "Soya de rotación (INIAP-308)",
+            "region": "costa_aluvial",
+            "ciclo_dias": 105,
+            "fijacion_n_kg_ha": 85.0,
+            "ahorro_urea_kg_ha": 185.0,
+            "costo_insumos_ha": 520.0,
+            "ingreso_bruto_ha": 1180.0,
+            "fuente_tecnica": "INIAP Estación Experimental Boliche — Ficha Varietal Soya INIAP-308; FAO (2016) Fijación Biológica de Nitrógeno; MAG SIPA"
+          }
+        ],
+        "nina": [
+          {
+            "id": "mani_iniap_381",
+            "cultivo": "Maní de rotación (INIAP-381)",
+            "region": "costa_aluvial",
+            "ciclo_dias": 115,
+            "fijacion_n_kg_ha": 72.0,
+            "ahorro_urea_kg_ha": 156.0,
+            "costo_insumos_ha": 610.0,
+            "ingreso_bruto_ha": 1420.0,
+            "fuente_tecnica": "INIAP Estación Experimental Portoviejo/Boliche — Variedad INIAP-381; MAG SIPA Boletín Precios Insumos"
+          },
+          {
+            "id": "soya_iniap_308",
+            "cultivo": "Soya de rotación (INIAP-308)",
+            "region": "costa_aluvial",
+            "ciclo_dias": 105,
+            "fijacion_n_kg_ha": 85.0,
+            "ahorro_urea_kg_ha": 185.0,
+            "costo_insumos_ha": 520.0,
+            "ingreso_bruto_ha": 1180.0,
+            "fuente_tecnica": "INIAP Estación Experimental Boliche — Ficha Varietal Soya INIAP-308; FAO (2016) Fijación Biológica de Nitrógeno; MAG SIPA"
+          },
+          {
+            "id": "frejol_caupi_iniap_463",
+            "cultivo": "Fréjol Caupí (INIAP-463)",
+            "region": "costa_aluvial",
+            "ciclo_dias": 75,
+            "fijacion_n_kg_ha": 68.0,
+            "ahorro_urea_kg_ha": 148.0,
+            "costo_insumos_ha": 430.0,
+            "ingreso_bruto_ha": 980.0,
+            "fuente_tecnica": "INIAP Programa Nacional de Leguminosas — Guía Técnica Caupí INIAP-463 (Litoral Ecuatoriano); MAG SIPA"
+          }
+        ]
+      }
+    }
+  }
+}
