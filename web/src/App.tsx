@@ -3,6 +3,7 @@ import Muyu, { type MuyuState } from "./character/Muyu";
 import MuyuDebugPanel from "./character/MuyuDebugPanel";
 import ChatPanel from "./chat/ChatPanel";
 import { useChat } from "./chat/useChat";
+import { deriveMuyuState } from "./state/assistant";
 import { useBackendHealth, type BackendStatus } from "./useBackendHealth";
 
 const STATUS_TEXT: Record<BackendStatus, string> = {
@@ -14,20 +15,22 @@ const STATUS_TEXT: Record<BackendStatus, string> = {
 
 export default function App() {
   const status = useBackendHealth();
-  const { messages, isThinking, send } = useChat();
+  const { messages, phase, isBusy, send } = useChat();
+  const [isUserTyping, setIsUserTyping] = useState(false);
   // Solo en desarrollo: permite forzar un estado desde el panel de prueba.
   const [forcedState, setForcedState] = useState<MuyuState | null>(null);
 
-  // Bloque 8 conectará el resto de estados (attentive, speaking, happy, error).
-  const chatState: MuyuState = isThinking ? "thinking" : "idle";
-  const muyuState = forcedState ?? chatState;
+  const muyuState = forcedState ?? deriveMuyuState(phase, isUserTyping);
 
   return (
     <main className="layout">
       <section className="character-area" aria-label="Personaje Muyu">
         <Muyu state={muyuState} size={340} />
         {import.meta.env.DEV && (
-          <MuyuDebugPanel value={forcedState} onChange={setForcedState} />
+          <details className="debug-toggle">
+            <summary>Probar estados</summary>
+            <MuyuDebugPanel value={forcedState} onChange={setForcedState} />
+          </details>
         )}
       </section>
 
@@ -38,7 +41,13 @@ export default function App() {
             {STATUS_TEXT[status]}
           </p>
         </header>
-        <ChatPanel messages={messages} isThinking={isThinking} onSend={send} />
+        <ChatPanel
+          messages={messages}
+          isThinking={phase === "thinking"}
+          isBusy={isBusy}
+          onSend={send}
+          onTypingChange={setIsUserTyping}
+        />
       </section>
     </main>
   );

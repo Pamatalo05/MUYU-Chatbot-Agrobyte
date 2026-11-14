@@ -4,20 +4,37 @@ import "./ChatPanel.css";
 
 interface ChatPanelProps {
   messages: ChatMessage[];
+  /** Muestra la burbuja "Muyu está pensando…". */
   isThinking: boolean;
+  /** Muyu está pensando o escribiendo: no se puede enviar. */
+  isBusy: boolean;
   onSend: (text: string) => void;
+  /** Avisa si el usuario tiene texto escrito (Muyu se pone atento). */
+  onTypingChange?: (isTyping: boolean) => void;
 }
 
 const MAX_LENGTH = 500;
 
-export default function ChatPanel({ messages, isThinking, onSend }: ChatPanelProps) {
+export default function ChatPanel({
+  messages,
+  isThinking,
+  isBusy,
+  onSend,
+  onTypingChange,
+}: ChatPanelProps) {
   const [draft, setDraft] = useState("");
   const listEndRef = useRef<HTMLDivElement>(null);
-  const canSend = draft.trim().length > 0 && !isThinking;
+  const hasText = draft.trim().length > 0;
+  const canSend = hasText && !isBusy;
+
+  // "auto" (sin animación) para que el efecto de escritura no dé tirones.
+  useEffect(() => {
+    listEndRef.current?.scrollIntoView({ block: "end" });
+  }, [messages, isThinking]);
 
   useEffect(() => {
-    listEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages, isThinking]);
+    onTypingChange?.(hasText);
+  }, [hasText, onTypingChange]);
 
   const submit = () => {
     if (!canSend) return;
@@ -40,7 +57,8 @@ export default function ChatPanel({ messages, isThinking, onSend }: ChatPanelPro
 
   return (
     <div className="chat">
-      <div className="chat__messages" aria-live="polite">
+      {/* aria-busy evita que el lector de pantalla lea la respuesta a medias. */}
+      <div className="chat__messages" aria-live="polite" aria-busy={isBusy}>
         {messages.map((message) => (
           <p key={message.id} className={`bubble bubble--${message.role}`}>
             <span className="visually-hidden">
