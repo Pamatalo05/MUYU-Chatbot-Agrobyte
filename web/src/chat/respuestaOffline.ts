@@ -110,11 +110,12 @@ function responderUrea(paquete: PaqueteCanton, contexto: MuyuContexto): ChatRepl
     };
   }
   const fija = paquete.cultivos.find((c) => c.id === mejor.id)?.fija_nitrogeno;
-  return {
+    return {
     text:
-      `Si siembras ${nombreCorto(mejor.nombre)}, ahorras unos ${numero(mejor.ahorro_urea_ha)} USD por hectárea en urea` +
+      `Si siembras ${nombreCorto(mejor.nombre)}, ` +
+      `el ahorro estimado en urea es de ${numero(mejor.ahorro_urea_ha)} USD por hectárea` +
       (fija ? " porque fija nitrógeno en el suelo." : ".") +
-      ` En 5 hectáreas serían ${numero(mejor.ahorro_urea_ha * 5)} USD.`,
+      ` Para calcular el ahorro total, necesito saber cuántas hectáreas tienes.`,
     emotion: "happy",
   };
 }

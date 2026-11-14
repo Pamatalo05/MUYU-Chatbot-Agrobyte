@@ -35,12 +35,14 @@ describe("responderOffline", () => {
     expect(r.emotion).toBe("happy");
   });
 
-  it("urea: calcula el ahorro por hectárea y en 5 hectáreas", () => {
+  it("urea: calcula el ahorro por hectárea sin asumir el tamaño de la parcela", () => {
     const r = responderOffline(paquete, daule, "", "urea");
-    expect(r.text).toContain("290 USD");
-    expect(r.text).toContain("1.450 USD");
-  });
 
+    expect(r.text).toContain("290 USD");
+    expect(r.text).toContain("por hectárea");
+    expect(r.text).toContain("cuántas hectáreas tienes");
+    expect(r.text).not.toContain("1.450 USD");
+  });
   it("ENSO: compara la lluvia y explica el riesgo para sembrar", () => {
     const r = responderOffline(paquete, daule, "", "enso");
     expect(r.text).toContain("enero");
