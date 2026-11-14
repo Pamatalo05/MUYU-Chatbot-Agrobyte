@@ -56,8 +56,9 @@ export default function ContextoSimulado({ paquete, contexto, onChange }: Contex
       <label>
         Cantón
         <select value={contexto.cantonId} onChange={(e) => cambiarCanton(e.target.value)}>
-          {Object.entries(paquete.cantones).map(([id, canton]) => (
-            <option key={id} value={id}>
+{Object.entries(paquete.cantones)
+  .filter(([id]) => ["daule", "babahoyo"].includes(id))
+  .map(([id, canton]) => (            <option key={id} value={id}>
               {canton.nombre.replace(", ", " · ")}
             </option>
           ))}
