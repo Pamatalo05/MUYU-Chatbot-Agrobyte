@@ -66,6 +66,11 @@ body {
   font-weight: 700;
 }
 
+.badge--en_vivo {
+  background: var(--muyu-dark);
+  color: #ffffff;
+}
+
 .status--ok {
   color: var(--muyu-chakana);
 }
