@@ -84,6 +84,38 @@ body {
   color: var(--tierra);
 }
 
+.chat-header__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
+.voz-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 36px;
+  padding: 0 0.7rem;
+  border: 1.5px solid var(--verde-hoja);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--verde-bosque);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.voz-toggle[aria-pressed="true"] {
+  background: #eef6e4;
+}
+
+.voz-toggle:focus-visible {
+  outline: 3px solid var(--oro);
+  outline-offset: 2px;
+}
+
 .conexion {
   display: inline-flex;
   align-items: center;

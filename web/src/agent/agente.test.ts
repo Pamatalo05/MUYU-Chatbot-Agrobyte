@@ -60,8 +60,14 @@ describe("conversar", () => {
     const { fetchImpl, recibido } = geminiFalso([{ status: 429 }, { parts: [{ text: "Hola" }] }]);
     const r = await conversar(peticion, { apiKey: "k", paquete, fetchImpl });
     expect(r.text).toBe("Hola");
-    expect(recibido[0].url).toContain("gemini-2.5-flash:");
-    expect(recibido[1].url).toContain("gemini-2.5-flash-lite:");
+    expect(recibido[0].url).toContain("gemini-flash-latest:");
+    expect(recibido[1].url).toContain("gemini-3.8-flash:");
+  });
+
+  it("si un modelo fue retirado (404) prueba el siguiente", async () => {
+    const { fetchImpl, recibido } = geminiFalso([{ status: 404 }, { parts: [{ text: "Hola" }] }]);
+    expect((await conversar(peticion, { apiKey: "k", paquete, fetchImpl })).text).toBe("Hola");
+    expect(recibido).toHaveLength(2);
   });
 
   it("no reintenta ante una clave inválida", async () => {

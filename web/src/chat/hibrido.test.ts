@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { elegirModo, PAUSA_TRAS_FALLO_MS, responderHibrido } from "./hibrido";
 import type { ChatReply } from "./types";
 
@@ -29,7 +29,11 @@ describe("responderHibrido", () => {
   });
 
   it("cae al modo campo si Gemini falla, sin ensuciar la respuesta", async () => {
+    // El fallo es simulado: silenciamos el aviso para no ensuciar la salida de los tests.
+    const aviso = vi.spyOn(console, "warn").mockImplementation(() => {});
     const r = await responderHibrido("en_vivo", async () => { throw new Error("503"); }, campo);
+    expect(aviso).toHaveBeenCalledOnce();
+    aviso.mockRestore();
     expect(r.modo).toBe("campo");
     expect(r.fallo).toBe(true);
     expect(r.reply.text).toBe("Siembra soya.");

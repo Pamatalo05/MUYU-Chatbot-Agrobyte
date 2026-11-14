@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import MuyuAvatar from "../character/MuyuAvatar";
+import { useEscucha } from "../voz/useEscucha";
 import { PREGUNTAS_RAPIDAS, type AccionRapida } from "./preguntasRapidas";
 import type { ChatMessage } from "./types";
 import "./ChatPanel.css";
@@ -15,6 +16,12 @@ interface ChatPanelProps {
   onTypingChange?: (isTyping: boolean) => void;
   /** Aviso discreto sobre la conexión; no se mezcla con las respuestas. */
   aviso?: string | null;
+  /** Hay internet: el reconocimiento de voz del navegador lo necesita. */
+  puedeEscuchar?: boolean;
+  /** Si existe, cada respuesta de Muyu tiene un botón para oírla. */
+  onEscuchar?: (texto: string) => void;
+  /** Se llama antes de abrir el micrófono (p. ej. para que Muyu deje de hablar). */
+  onAntesDeEscuchar?: () => void;
 }
 
 const MAX_LENGTH = 500;
@@ -28,8 +35,13 @@ export default function ChatPanel({
   onSend,
   onTypingChange,
   aviso,
+  puedeEscuchar = false,
+  onEscuchar,
+  onAntesDeEscuchar,
 }: ChatPanelProps) {
   const [draft, setDraft] = useState("");
+  const escucha = useEscucha();
+  const microfono = escucha.disponible && puedeEscuchar;
   const listEndRef = useRef<HTMLDivElement>(null);
   const hasText = draft.trim().length > 0;
   const canSend = hasText && !isBusy;
@@ -39,9 +51,21 @@ export default function ChatPanel({
     listEndRef.current?.scrollIntoView({ block: "end" });
   }, [messages, isThinking]);
 
+  // Muyu se pone atento mientras escribes o mientras te escucha.
   useEffect(() => {
-    onTypingChange?.(hasText);
-  }, [hasText, onTypingChange]);
+    onTypingChange?.(hasText || escucha.escuchando);
+  }, [hasText, escucha.escuchando, onTypingChange]);
+
+  const alternarMicrofono = () => {
+    if (escucha.escuchando) return escucha.detener();
+    onAntesDeEscuchar?.();
+    escucha.iniciar(setDraft, (texto) => {
+      // Lo dicho se envía solo, como en una conversación.
+      if (isBusy) return;
+      onSend(texto);
+      setDraft("");
+    });
+  };
 
   const submit = () => {
     if (!canSend) return;
@@ -69,12 +93,22 @@ export default function ChatPanel({
         {messages.map((message) => (
           <div key={message.id} className={`chat__row chat__row--${message.role}`}>
             {message.role === "muyu" && <MuyuAvatar />}
-            <p className={`bubble bubble--${message.role}`}>
-              <span className="visually-hidden">
-                {message.role === "muyu" ? "Muyu dice:" : "Tú dices:"}
-              </span>
-              {message.text}
-            </p>
+            <div className="chat__burbuja">
+              <p className={`bubble bubble--${message.role}`}>
+                <span className="visually-hidden">
+                  {message.role === "muyu" ? "Muyu dice:" : "Tú dices:"}
+                </span>
+                {message.text}
+              </p>
+              {message.role === "muyu" && onEscuchar && (
+                <button type="button" className="chat__oir" onClick={() => onEscuchar(message.text)}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z" fill="currentColor" />
+                  </svg>
+                  Escuchar
+                </button>
+              )}
+            </div>
           </div>
         ))}
 
@@ -93,6 +127,12 @@ export default function ChatPanel({
         )}
         <div ref={listEndRef} />
       </div>
+
+      {escucha.error && (
+        <p className="chat__aviso" role="alert">
+          {escucha.error}
+        </p>
+      )}
 
       {aviso && (
         <p className="chat__aviso" role="status">
@@ -124,18 +164,40 @@ export default function ChatPanel({
           className="chat__input"
           rows={1}
           maxLength={MAX_LENGTH}
-          placeholder="Escribe tu pregunta…"
+          placeholder={escucha.escuchando ? "Te escucho…" : microfono ? "Escribe o toca el micrófono…" : "Escribe tu pregunta…"}
           aria-describedby={draft.length >= AVISO_LARGO ? "chat-restantes" : undefined}
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           onKeyDown={handleKeyDown}
         />
+        {microfono && (
+          <button
+            type="button"
+            className={`chat__mic${escucha.escuchando ? " chat__mic--activo" : ""}`}
+            onClick={alternarMicrofono}
+            disabled={isBusy && !escucha.escuchando}
+            aria-pressed={escucha.escuchando}
+            aria-label={escucha.escuchando ? "Dejar de escuchar" : "Hablarle a Muyu"}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1a7 7 0 0 0 6-6.9h-2z"
+                fill="currentColor"
+              />
+            </svg>
+          </button>
+        )}
         <button type="submit" className="chat__send" disabled={!canSend} aria-label="Enviar">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M3.4 20.4 21 12 3.4 3.6 3.4 10l12 2-12 2z" fill="currentColor" />
           </svg>
         </button>
       </form>
+      {escucha.escuchando && (
+        <p className="chat__restantes" role="status">
+          Escuchando… habla y espera un momento. Tu voz la procesa el servicio de voz del navegador.
+        </p>
+      )}
       {draft.length >= AVISO_LARGO && (
         <p id="chat-restantes" className="chat__restantes">
           Te quedan {MAX_LENGTH - draft.length} caracteres

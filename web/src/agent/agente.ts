@@ -4,8 +4,14 @@ import { esFueraDeTema, pareceManipulacion, reglasDeAlcance, RESPUESTA_FUERA_DE_
 import { declararHerramientas, ejecutarHerramienta } from "./herramientas";
 import type { PeticionChat } from "./peticion";
 
-/** Modelos gratis, en orden: si uno está saturado (429/503) se usa el siguiente. */
-export const MODELOS_GEMINI = ["gemini-2.5-flash", "gemini-2.5-flash-lite"];
+/**
+ * Modelos con plan gratis, en orden. Los alias "-latest" los mantiene Google apuntando
+ * al Flash vigente, así un retiro de modelo (como el de 2.5 en octubre de 2026) no rompe
+ * a Muyu. Si un modelo no existe (404) o está saturado (429/503), se prueba el siguiente.
+ */
+export const MODELOS_GEMINI = ["gemini-flash-latest", "gemini-3.8-flash", "gemini-flash-lite-latest"];
+/** Errores en los que vale la pena probar otro modelo (no aplica a clave inválida). */
+const PROBAR_OTRO_MODELO = new Set([404, 429, 503]);
 const URL_GEMINI = "https://generativelanguage.googleapis.com/v1beta/models";
 /** Máximo de idas y vueltas con herramientas antes de rendirse. */
 const MAX_TURNOS = 4;
@@ -62,8 +68,10 @@ async function generar(cuerpo: unknown, { apiKey, modelos = MODELOS_GEMINI, fetc
       body: JSON.stringify(cuerpo),
     });
     if (respuesta.ok) return (await respuesta.json()) as { candidates?: { content?: Contenido }[] };
-    ultimoError = `${modelo} respondió ${respuesta.status}`;
-    if (respuesta.status !== 429 && respuesta.status !== 503) break;
+    // El motivo de Google ayuda a diagnosticar (va al log del servidor, nunca al usuario).
+    const motivo = await respuesta.text().then((t) => t.slice(0, 200)).catch(() => "");
+    ultimoError = `${modelo} respondió ${respuesta.status} ${motivo}`.trim();
+    if (!PROBAR_OTRO_MODELO.has(respuesta.status)) break;
   }
   throw new AgenteError(ultimoError);
 }
@@ -85,7 +93,9 @@ export async function conversar(peticion: PeticionChat, opciones: OpcionesAgente
   const base = {
     systemInstruction: { parts: [{ text: instrucciones(paquete, peticion) }] },
     tools: [{ functionDeclarations: declararHerramientas(paquete) }],
-    generationConfig: { temperature: 0.3, maxOutputTokens: 400, thinkingConfig: { thinkingBudget: 0 } },
+    // Sin thinkingConfig: cada familia de Gemini acepta opciones distintas y una inválida da 400.
+    // El margen de tokens cubre el razonamiento interno; las instrucciones piden 3 frases.
+    generationConfig: { temperature: 0.3, maxOutputTokens: 1024 },
   };
   let recomendo = false;
 

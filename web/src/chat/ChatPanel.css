@@ -26,8 +26,47 @@
   justify-content: flex-end;
 }
 
-.bubble {
+.chat__burbuja {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
   max-width: 85%;
+}
+
+.chat__row--user .chat__burbuja {
+  align-items: flex-end;
+}
+
+/* Botón pequeño para oír la respuesta: discreto, pero de 32 px para el dedo. */
+.chat__oir {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 32px;
+  padding: 0 0.6rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--tierra);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.chat__oir:hover {
+  background: #eef6e4;
+  color: var(--verde-bosque);
+}
+
+.chat__oir svg {
+  width: 16px;
+  height: 16px;
+}
+
+.bubble {
+  max-width: 100%;
   margin: 0;
   padding: 0.7rem 0.95rem;
   border-radius: 18px;
@@ -160,6 +199,42 @@
   cursor: not-allowed;
 }
 
+.chat__mic {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border: 1.5px solid var(--verde-hoja);
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--verde-bosque);
+  cursor: pointer;
+}
+
+.chat__mic svg {
+  width: 22px;
+  height: 22px;
+}
+
+.chat__mic:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Escuchando: rojo suave y un pulso, para que se note que está grabando. */
+.chat__mic--activo {
+  border-color: #c8372d;
+  background: #c8372d;
+  color: #ffffff;
+  animation: chat-mic-pulso 1.2s ease-in-out infinite;
+}
+
+@keyframes chat-mic-pulso {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(200, 55, 45, 0.45); }
+  50% { box-shadow: 0 0 0 8px rgba(200, 55, 45, 0); }
+}
+
 .chat__restantes {
   margin: -0.3rem 0 0;
   font-size: 0.8rem;
@@ -168,6 +243,8 @@
 }
 
 .chat__quick-button:focus-visible,
+.chat__oir:focus-visible,
+.chat__mic:focus-visible,
 .chat__input:focus-visible,
 .chat__send:focus-visible {
   outline: 3px solid var(--oro);
@@ -184,7 +261,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dots span {
+  .dots span,
+  .chat__mic--activo {
     animation: none;
   }
 }

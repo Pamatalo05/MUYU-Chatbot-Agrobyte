@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Muyu, { type MuyuState } from "./character/Muyu";
 import MuyuDebugPanel from "./character/MuyuDebugPanel";
 import ChatPanel from "./chat/ChatPanel";
@@ -14,6 +14,8 @@ import { CONTEXTO_INICIAL, type MuyuContexto } from "./knowledge/contexto";
 import { evaluarSemaforo } from "./knowledge/semaforo";
 import { usePaquete } from "./knowledge/usePaquete";
 import { deriveMuyuState } from "./state/assistant";
+import { useLecturaAutomatica } from "./voz/useLecturaAutomatica";
+import { useVoz } from "./voz/useVoz";
 
 export default function App() {
   const paquete = usePaquete();
@@ -57,6 +59,26 @@ export default function App() {
       : null;
 
   const { messages, phase, isBusy, send } = useChat(responder);
+  const voz = useVoz();
+  const [lecturaAutomatica, setLecturaAutomatica] = useLecturaAutomatica();
+  const fasePrevia = useRef(phase);
+
+  // Cuando Muyu termina de escribir una respuesta, la lee en voz alta (si está activado).
+  useEffect(() => {
+    const termino = fasePrevia.current === "speaking" && phase !== "speaking" && phase !== "error";
+    fasePrevia.current = phase;
+    const ultimo = messages[messages.length - 1];
+    if (termino && lecturaAutomatica && ultimo?.role === "muyu") voz.hablar(ultimo.text);
+  }, [phase, messages, lecturaAutomatica, voz]);
+
+  // Al preguntar algo nuevo, Muyu deja de hablar.
+  const enviar = useCallback<typeof send>(
+    (texto, accion) => {
+      voz.callar();
+      send(texto, accion);
+    },
+    [send, voz],
+  );
   const [isUserTyping, setIsUserTyping] = useState(false);
   // Solo en desarrollo: permite forzar un estado desde el panel de prueba.
   const [forcedState, setForcedState] = useState<MuyuState | null>(null);
@@ -65,7 +87,10 @@ export default function App() {
     () => (paquete.estado === "listo" ? evaluarSemaforo(paquete.paquete, contexto) : null),
     [paquete, contexto],
   );
-  const muyuState = forcedState ?? deriveMuyuState(phase, isUserTyping, semaforo?.color === "rojo");
+  // Mientras suena su voz, Muyu mueve la boca aunque el texto ya terminó de escribirse.
+  const hablaConVoz = voz.hablando && phase !== "thinking" && phase !== "error";
+  const muyuState =
+    forcedState ?? (hablaConVoz ? "speaking" : deriveMuyuState(phase, isUserTyping, semaforo?.color === "rojo"));
 
   return (
     <main className="layout">
@@ -91,10 +116,26 @@ export default function App() {
             <h1>Muyu</h1>
             <p className="chat-header__sub">Tu asistente de siembra</p>
           </div>
-          <p className={`conexion conexion--${modoVisible}`} role="status">
-            <span className="conexion__punto" aria-hidden="true" />
-            {modoVisible === "en_vivo" ? "En línea" : "Datos guardados"}
-          </p>
+          <div className="chat-header__acciones">
+            {voz.disponible && (
+              <button
+                type="button"
+                className="voz-toggle"
+                aria-pressed={lecturaAutomatica}
+                onClick={() => {
+                  if (lecturaAutomatica) voz.callar();
+                  setLecturaAutomatica(!lecturaAutomatica);
+                }}
+              >
+                <span aria-hidden="true">{lecturaAutomatica ? "🔊" : "🔇"}</span>
+                {lecturaAutomatica ? "Voz" : "Sin voz"}
+              </button>
+            )}
+            <p className={`conexion conexion--${modoVisible}`} role="status">
+              <span className="conexion__punto" aria-hidden="true" />
+              {modoVisible === "en_vivo" ? "En línea" : "Datos guardados"}
+            </p>
+          </div>
         </header>
         {paquete.estado === "error" && (
           <p className="chat__error" role="alert">
@@ -106,9 +147,12 @@ export default function App() {
           messages={messages}
           isThinking={phase === "thinking"}
           isBusy={isBusy}
-          onSend={send}
+          onSend={enviar}
           onTypingChange={setIsUserTyping}
           aviso={aviso}
+          puedeEscuchar={enLinea}
+          onEscuchar={voz.disponible ? voz.hablar : undefined}
+          onAntesDeEscuchar={voz.callar}
         />
       </section>
     </main>
