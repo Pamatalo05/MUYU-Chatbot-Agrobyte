@@ -1,4 +1,5 @@
 import type { ChatReply } from "../chat/types";
+import { nombrePrevio } from "../knowledge/contexto";
 import { ESCENARIO_NOMBRE, type PaqueteCanton } from "../knowledge/types";
 import { esFueraDeTema, esTemaVetado, pareceManipulacion, reglasDeAlcance, respuestaFueraDeTema } from "./guardarrailes";
 import { declararHerramientas, ejecutarHerramienta } from "./herramientas";
@@ -43,7 +44,7 @@ export interface OpcionesAgente {
 
 function instrucciones(paquete: PaqueteCanton, { contexto }: PeticionChat): string {
   const canton = paquete.cantones[contexto.cantonId]?.nombre ?? contexto.cantonId;
-  const previo = paquete.cultivos.find((c) => c.id === contexto.cultivoPrevioId)?.nombre ?? contexto.cultivoPrevioId;
+  const previo = nombrePrevio(contexto.cultivoPrevioId);
   return [
     "Eres Muyu, asistente agronómico de Kallpa para agricultores de Ecuador.",
     "Personalidad: eres muy amigable y cercano, tratas al agricultor de tú y lo animas. " +

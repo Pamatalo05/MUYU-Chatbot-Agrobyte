@@ -36,30 +36,23 @@ export function declararHerramientas(paquete: PaqueteCanton): DeclaracionHerrami
   return [
     {
       name: "resumen_canton",
-      description: "Clima (temperatura, lluvia, humedad en raíz), verdor NDVI y humedad predicha por el modelo ML de un cantón en un mes y escenario.",
+      description: "Lluvia y temperatura máxima típicas del mes, verdor NDVI y humedad del suelo en la raíz que predice el modelo ML para ese escenario.",
       parameters: { type: "OBJECT", properties: { canton_id: canton, escenario, mes }, required: ["canton_id", "escenario", "mes"] },
     },
     {
       name: "recomendar_rotacion",
-      description: "Mejores cultivos para sembrar después del cultivo cosechado en un mes dado, con margen neto, ahorro en urea, fuente, balance de lluvia de los próximos 3 meses y semáforo de riesgo.",
+      description:
+        "Cultivos de rotación en el orden que recomienda Kallpa para ese escenario ENSO, con ganancia por hectárea, " +
+        "nitrógeno que fijan, ahorro de urea en kg, sacos y USD, fuente, y el semáforo de riesgo para sembrar en ese mes.",
       parameters: {
         type: "OBJECT",
-        properties: {
-          canton_id: canton,
-          cultivo_previo_id: {
-            type: "STRING",
-            description: "Id del cultivo que se acaba de cosechar",
-            enum: paquete.cultivos.map((cultivo) => cultivo.id),
-          },
-          escenario,
-          mes,
-        },
-        required: ["canton_id", "cultivo_previo_id", "escenario", "mes"],
+        properties: { canton_id: canton, escenario, mes },
+        required: ["canton_id", "escenario", "mes"],
       },
     },
     {
       name: "comparar_escenarios",
-      description: "Compara el mismo mes en Neutro, El Niño y La Niña: lluvia, temperatura y humedad frente a Neutro.",
+      description: "Compara la humedad del suelo en la raíz del mismo mes en Neutro, El Niño y La Niña (modelo ML).",
       parameters: { type: "OBJECT", properties: { canton_id: canton, mes }, required: ["canton_id", "mes"] },
     },
   ];
@@ -87,7 +80,7 @@ export function ejecutarHerramienta(
         return { ...resumenCanton(paquete, cantonId, args.escenario, mes) };
       case "recomendar_rotacion": {
         if (!esEscenario(args.escenario)) return { error: "escenario inválido" };
-        const consulta = { cantonId, cultivoPrevioId: texto(args.cultivo_previo_id), escenario: args.escenario, mes };
+        const consulta = { cantonId, cultivoPrevioId: "", escenario: args.escenario, mes };
         return { ...recomendarRotacion(paquete, consulta), semaforo: evaluarSemaforo(paquete, consulta) };
       }
       case "comparar_escenarios":

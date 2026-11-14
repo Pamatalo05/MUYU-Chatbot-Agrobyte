@@ -18,13 +18,15 @@ if (!existsSync(origen)) {
 
 // Revisión rápida; la validación completa la hacen las pruebas (npm test).
 const datos = JSON.parse(readFileSync(origen, "utf-8"));
-if (!datos.cantones || !Array.isArray(datos.cultivos)) {
-  console.error("El JSON no tiene 'cantones' y 'cultivos': ¿es el paquete correcto?");
+const cantones = Object.values(datos.cantones ?? {});
+if (cantones.length === 0 || !cantones.every((c) => c.serie_satelital_ml && c.top_rotaciones_por_enso)) {
+  console.error("El JSON no tiene 'cantones' con 'serie_satelital_ml' y 'top_rotaciones_por_enso': ¿es el paquete correcto?");
   process.exit(1);
 }
 
 mkdirSync(dirname(destino), { recursive: true });
 copyFileSync(origen, destino);
 const kb = Math.round(statSync(destino).size / 1024);
-console.log(`Copiado (${kb} KB): ${Object.keys(datos.cantones).length} cantones, ${datos.cultivos.length} cultivos.`);
+const nombres = cantones.map((c) => c.nombre.split(",")[0]).join(", ");
+console.log(`Copiado (${kb} KB): ${cantones.length} cantones (${nombres}).`);
 console.log("Ahora ejecuta: npm test");

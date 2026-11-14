@@ -3,17 +3,17 @@ import {
   ESCENARIOS,
   ESCENARIO_NOMBRE,
   type Canton,
-  type Cultivo,
   type Escenario,
-  type MesClima,
+  type MesSatelital,
   type PaqueteCanton,
-  type Piso,
+  type Rotacion,
 } from "./types";
 
 /**
  * Motor de conocimiento de Muyu.
  * Funciones puras sobre paquete_canton.json: las usa el modo campo (sin internet)
  * y Gemini como herramientas (con internet), así ambos modos dan las mismas cifras.
+ * El orden de rotación es el que define Kallpa por fase ENSO: Muyu no inventa otro.
  */
 
 export class ConsultaInvalidaError extends Error {
@@ -38,123 +38,93 @@ function validarMes(mes: number): void {
   }
 }
 
-function obtenerMes(canton: Canton, escenario: Escenario, mes: number): MesClima {
+const mesDe = (canton: Canton, mes: number): MesSatelital => {
   validarMes(mes);
-  return canton.escenarios_climaticos[escenario][mes - 1];
-}
-
-export const pisoDeRegion = (region: string): Piso => (region.startsWith("sierra") ? "sierra" : "costa");
-
-/** "costa_humeda" → "costa húmeda" */
-export const nombreRegion = (region: string) =>
-  region.replace("_", " ").replace("humeda", "húmeda");
-
-const redondear = (valor: number, decimales = 2) => {
-  const factor = 10 ** decimales;
-  return Math.round(valor * factor) / factor;
+  return canton.serie_satelital_ml[mes - 1];
 };
+
+const redondear = (valor: number, decimales = 2) => Math.round(valor * 10 ** decimales) / 10 ** decimales;
+
+// ------------------------------------------------------------------- precio urea
+
+/** Precio de referencia por defecto (MAG/SIPA): saco de urea 46 % N de 50 kg. */
+const UREA_POR_DEFECTO = { usdSaco: 38, kgSaco: 50 };
+
+/**
+ * Lee el precio del saco de urea del texto de fuentes ("saco de Urea 46% N de 50 kg = $38.00").
+ * El paquete no lo trae como número; si el texto cambia, se usa la referencia por defecto.
+ */
+export function precioUrea(paquete: PaqueteCanton): { usdSaco: number; kgSaco: number } {
+  const texto = paquete.fuentes_metodologia.economia_insumos ?? "";
+  const usd = Number(texto.match(/\$\s*(\d+(?:\.\d+)?)/)?.[1]);
+  const kg = Number(texto.match(/de\s*(\d+)\s*kg/i)?.[1]);
+  return {
+    usdSaco: Number.isFinite(usd) && usd > 0 ? usd : UREA_POR_DEFECTO.usdSaco,
+    kgSaco: Number.isFinite(kg) && kg > 0 ? kg : UREA_POR_DEFECTO.kgSaco,
+  };
+}
 
 // ---------------------------------------------------------------- resumenCanton
 
-export interface ResumenCanton extends MesClima {
+export interface ResumenCanton {
   cantonId: string;
   canton: string;
   suelo: string;
   elevacion_msnm: number;
-  region: string;
-  piso: Piso;
+  mes: number;
   escenario: Escenario;
   escenarioNombre: string;
-  /** Verdor medido por MODIS en ese mes (0 a 1). */
+  /** Lluvia típica del mes (2005-2025). */
+  lluvia_mm: number;
+  /** Temperatura máxima típica del mes. */
+  temp_max_c: number;
   ndvi_modis: number;
-  /** Humedad en raíz que predice el modelo de ML para ese escenario. */
-  humedad_raiz_ml: number;
+  humedad_superficial: number;
+  /** Humedad en raíz que predice el modelo de ML para ese escenario (0 a 1). */
+  humedad_raiz: number;
 }
 
-/** Clima, humedad, verdor y predicción de ML de un cantón en un mes y escenario. */
-export function resumenCanton(
-  paquete: PaqueteCanton,
-  cantonId: string,
-  escenario: Escenario,
-  mes: number,
-): ResumenCanton {
+/** Clima típico, verdor y humedad del suelo predicha de un cantón en un mes y escenario. */
+export function resumenCanton(paquete: PaqueteCanton, cantonId: string, escenario: Escenario, mes: number): ResumenCanton {
   const canton = obtenerCanton(paquete, cantonId);
-  const satelital = canton.serie_satelital_ml[mes - 1];
+  const m = mesDe(canton, mes);
   return {
-    ...obtenerMes(canton, escenario, mes),
     cantonId,
     canton: canton.nombre,
     suelo: canton.suelo_referencia,
     elevacion_msnm: Math.round(canton.terreno.elevacion_msnm),
-    region: canton.region,
-    piso: pisoDeRegion(canton.region),
+    mes,
     escenario,
     escenarioNombre: ESCENARIO_NOMBRE[escenario],
-    ndvi_modis: satelital.ndvi_modis,
-    humedad_raiz_ml: satelital.humedad_raiz_predicha[CLAVE_ML[escenario]],
+    lluvia_mm: m.lluvia_mm,
+    temp_max_c: m.temp_c,
+    ndvi_modis: m.ndvi_modis,
+    humedad_superficial: m.smap_humedad_superficial,
+    humedad_raiz: m.humedad_raiz_predicha[CLAVE_ML[escenario]],
   };
 }
 
-// --------------------------------------------------------------- balanceHidrico
+// --------------------------------------------------------------- humedadVentana
 
-/** Meses que dura una siembra típica: el agua se evalúa en esa ventana. */
-const VENTANA_MESES = 3;
-const UMBRAL = {
-  /** +20 % y al menos 50 mm más que en Neutro: riesgo de encharcamiento. */
-  EXCESO: { relativo: 1.2, mm: 50 },
-  /** −20 % y al menos 30 mm menos que en Neutro: riesgo de sequía. */
-  DEFICIT: { relativo: 0.8, mm: 30 },
-} as const;
+/** Meses que dura una siembra típica: el riesgo se evalúa en esa ventana. */
+export const VENTANA_MESES = 3;
 
-export type Balance = "exceso" | "deficit" | "normal";
-
-export interface BalanceHidrico {
-  balance: Balance;
-  lluvia_ventana_mm: number;
-  lluvia_ventana_neutro_mm: number;
-  /** Cambio frente a Neutro, en %. */
-  cambio_pct: number;
-}
-
-/**
- * Lluvia de los próximos 3 meses frente a un año Neutro, con los datos del propio cantón.
- * No se asume que El Niño siempre trae más lluvia: en la Sierra muchas veces no es así.
- */
-export function balanceHidrico(
-  paquete: PaqueteCanton,
-  cantonId: string,
-  escenario: Escenario,
-  mes: number,
-): BalanceHidrico {
+/** Humedad en raíz promedio (0 a 1) de los próximos 3 meses según el modelo, para un escenario. */
+export function humedadVentana(paquete: PaqueteCanton, cantonId: string, escenario: Escenario, mes: number): number {
   validarMes(mes);
   const canton = obtenerCanton(paquete, cantonId);
-  const lluvia = (e: Escenario) =>
-    Array.from({ length: VENTANA_MESES }, (_, i) => canton.escenarios_climaticos[e][(mes - 1 + i) % 12])
-      .reduce((total, m) => total + m.lluvia_mm_mes, 0);
-
-  const actual = lluvia(escenario);
-  const neutro = lluvia("neutro");
-  const diferencia = actual - neutro;
-  let balance: Balance = "normal";
-  if (actual >= neutro * UMBRAL.EXCESO.relativo && diferencia >= UMBRAL.EXCESO.mm) balance = "exceso";
-  else if (actual <= neutro * UMBRAL.DEFICIT.relativo && -diferencia >= UMBRAL.DEFICIT.mm) balance = "deficit";
-
-  return {
-    balance,
-    lluvia_ventana_mm: Math.round(actual),
-    lluvia_ventana_neutro_mm: Math.round(neutro),
-    cambio_pct: neutro === 0 ? 0 : Math.round((diferencia / neutro) * 100),
-  };
+  const valores = Array.from(
+    { length: VENTANA_MESES },
+    (_, i) => canton.serie_satelital_ml[(mes - 1 + i) % 12].humedad_raiz_predicha[CLAVE_ML[escenario]],
+  );
+  return redondear(valores.reduce((a, b) => a + b, 0) / VENTANA_MESES, 3);
 }
 
 // ------------------------------------------------------------ recomendarRotacion
 
 export interface ConsultaRotacion {
   cantonId: string;
-  cultivoPrevioId: string;
   escenario: Escenario;
-  /** Mes de siembra (1-12): define la ventana de lluvia que se evalúa. */
-  mes: number;
   /** Cuántas recomendaciones devolver. Por defecto 3. */
   limite?: number;
 }
@@ -162,152 +132,78 @@ export interface ConsultaRotacion {
 export interface Recomendacion {
   id: string;
   nombre: string;
-  puntaje: number;
-  /** ingreso − costo de insumos + ahorro en urea (USD/ha). */
-  margen_neto_ha: number;
+  ciclo_dias: number;
+  fijacion_n_kg_ha: number;
   ingreso_bruto_ha: number;
   costo_insumos_ha: number;
-  ahorro_urea_ha: number;
-  dias_ciclo: number;
+  /** Ingreso por vender menos costo de insumos (USD/ha). */
+  ganancia_ha: number;
+  /** Urea que deja de necesitar el siguiente cultivo. */
+  ahorro_urea_kg_ha: number;
+  ahorro_urea_sacos: number;
+  ahorro_urea_usd: number;
   fuente: string;
-  razones: string[];
 }
 
 export interface ResultadoRotacion {
-  balance: BalanceHidrico;
   recomendaciones: Recomendacion[];
-  descartados: { id: string; motivo: string }[];
-  avisos: string[];
 }
 
-const PUNTOS = {
-  MISMO_TIPO: -3,
-  AGUA_DEFICIT: { baja: 3, media: 0, alta: -3 },
-  FIJA_N_NORMAL: 2,
-  FIJA_N_OTRO: 1,
-} as const;
+/** "INIAP Estación Experimental Boliche — Ficha…; FAO…" → "INIAP Estación Experimental Boliche" */
+const fuenteCorta = (fuente: string) => fuente.split(/\s+—\s+|;/)[0].trim();
 
-/**
- * Top de rotaciones tras el cultivo cosechado, con las reglas de la propuesta Kallpa:
- *  1. Ruptura de monocultivo: descarta el mismo cultivo y penaliza el mismo tipo.
- *  2. Zona: solo cultivos de la región del cantón (costa húmeda, seca, sierra…).
- *  3. Balance hídrico de los próximos 3 meses en ese escenario: con exceso de lluvia
- *     descarta los que no toleran encharcamiento; con déficit prioriza baja demanda
- *     de agua; en condiciones normales prioriza leguminosas.
- *  4. Desempate económico: mayor margen neto por hectárea.
- */
+function aRecomendacion(r: Rotacion, urea: { usdSaco: number; kgSaco: number }): Recomendacion {
+  const sacos = r.ahorro_urea_kg_ha / urea.kgSaco;
+  return {
+    id: r.id,
+    nombre: r.cultivo,
+    ciclo_dias: r.ciclo_dias,
+    fijacion_n_kg_ha: r.fijacion_n_kg_ha,
+    ingreso_bruto_ha: r.ingreso_bruto_ha,
+    costo_insumos_ha: r.costo_insumos_ha,
+    ganancia_ha: r.ingreso_bruto_ha - r.costo_insumos_ha,
+    ahorro_urea_kg_ha: r.ahorro_urea_kg_ha,
+    ahorro_urea_sacos: redondear(sacos, 1),
+    ahorro_urea_usd: Math.round(sacos * urea.usdSaco),
+    fuente: fuenteCorta(r.fuente_tecnica),
+  };
+}
+
+/** Cultivos de rotación en el orden que Kallpa recomienda para ese escenario ENSO. */
 export function recomendarRotacion(
   paquete: PaqueteCanton,
-  { cantonId, cultivoPrevioId, escenario, mes, limite = 3 }: ConsultaRotacion,
+  { cantonId, escenario, limite = 3 }: ConsultaRotacion,
 ): ResultadoRotacion {
   const canton = obtenerCanton(paquete, cantonId);
-  const previo = paquete.cultivos.find((cultivo) => cultivo.id === cultivoPrevioId);
-  if (!previo) {
-    const disponibles = paquete.cultivos.map((cultivo) => cultivo.id).join(", ");
-    throw new ConsultaInvalidaError(`Cultivo "${cultivoPrevioId}" no existe. Disponibles: ${disponibles}`);
-  }
-
-  const balance = balanceHidrico(paquete, cantonId, escenario, mes);
-  const descartados: ResultadoRotacion["descartados"] = [];
-  const candidatos: Recomendacion[] = [];
-
-  for (const cultivo of paquete.cultivos) {
-    const motivo = motivoDeDescarte(cultivo, previo, canton.region, balance.balance);
-    if (motivo) descartados.push({ id: cultivo.id, motivo });
-    else candidatos.push(puntuar(cultivo, previo, balance));
-  }
-
-  candidatos.sort((a, b) => b.puntaje - a.puntaje || b.margen_neto_ha - a.margen_neto_ha);
-
-  const avisos: string[] = [];
-  if (candidatos.length < limite) {
-    avisos.push(
-      candidatos.length === 0
-        ? `No hay cultivos del paquete para la ${nombreRegion(canton.region)} con ${ESCENARIO_NOMBRE[escenario]}.`
-        : `Solo ${candidatos.length} cultivo(s) cumplen las condiciones de ${ESCENARIO_NOMBRE[escenario]}.`,
-    );
-  }
-
-  return { balance, recomendaciones: candidatos.slice(0, limite), descartados, avisos };
-}
-
-function motivoDeDescarte(cultivo: Cultivo, previo: Cultivo, region: string, balance: Balance): string | null {
-  if (cultivo.id === previo.id) return "repetiría el mismo cultivo (monocultivo)";
-  if (!cultivo.regiones.includes(region)) return `no se cultiva en la ${nombreRegion(region)}`;
-  if (balance === "exceso" && !cultivo.tolera_encharcamiento) {
-    return "no tolera el exceso de lluvia previsto (riesgo de pudrición radicular)";
-  }
-  return null;
-}
-
-function puntuar(cultivo: Cultivo, previo: Cultivo, balance: BalanceHidrico): Recomendacion {
-  let puntaje = 0;
-  const razones: string[] = [];
-
-  if (cultivo.tipo === previo.tipo) {
-    puntaje += PUNTOS.MISMO_TIPO;
-    razones.push(`es del mismo tipo que el cultivo anterior (${cultivo.tipo})`);
-  } else {
-    razones.push("rompe el ciclo de monocultivo");
-  }
-
-  if (balance.balance === "deficit") {
-    puntaje += PUNTOS.AGUA_DEFICIT[cultivo.demanda_agua];
-    if (cultivo.demanda_agua === "baja") {
-      razones.push(`necesita poca agua (se espera ${Math.abs(balance.cambio_pct)} % menos lluvia)`);
-    }
-  } else if (balance.balance === "exceso") {
-    razones.push(`tolera el encharcamiento (se espera ${balance.cambio_pct} % más lluvia)`);
-  }
-
-  if (cultivo.fija_nitrogeno) {
-    puntaje += balance.balance === "normal" ? PUNTOS.FIJA_N_NORMAL : PUNTOS.FIJA_N_OTRO;
-    razones.push(`fija nitrógeno: ahorra ${cultivo.ahorro_urea_ha} USD/ha en urea`);
-  }
-
+  const urea = precioUrea(paquete);
   return {
-    id: cultivo.id,
-    nombre: cultivo.nombre,
-    puntaje,
-    margen_neto_ha: cultivo.ingreso_bruto_ha - cultivo.costo_insumos_ha + cultivo.ahorro_urea_ha,
-    ingreso_bruto_ha: cultivo.ingreso_bruto_ha,
-    costo_insumos_ha: cultivo.costo_insumos_ha,
-    ahorro_urea_ha: cultivo.ahorro_urea_ha,
-    dias_ciclo: cultivo.dias_ciclo,
-    fuente: cultivo.fuente,
-    razones,
+    recomendaciones: canton.top_rotaciones_por_enso[CLAVE_ML[escenario]].slice(0, limite).map((r) => aRecomendacion(r, urea)),
   };
+}
+
+/** Todos los cultivos de rotación que aparecen en el paquete, sin repetir. */
+export function cultivosDelPaquete(paquete: PaqueteCanton): Rotacion[] {
+  const vistos = new Map<string, Rotacion>();
+  for (const canton of Object.values(paquete.cantones)) {
+    for (const lista of Object.values(canton.top_rotaciones_por_enso)) {
+      for (const r of lista) if (!vistos.has(r.id)) vistos.set(r.id, r);
+    }
+  }
+  return [...vistos.values()];
 }
 
 // ------------------------------------------------------------ compararEscenarios
 
 export interface ComparacionEscenario extends ResumenCanton {
-  /** Diferencias frente al escenario Neutro (0 en el propio Neutro). */
-  diferencia: {
-    temp_max_c: number;
-    lluvia_mm_mes: number;
-    humedad_raiz: number;
-    humedad_raiz_ml: number;
-  };
+  /** Diferencia de humedad en raíz frente a Neutro, en puntos de 0 a 1 (0 en el propio Neutro). */
+  diferencia_humedad: number;
 }
 
-/** Cómo cambia el mismo mes en Neutro, El Niño y La Niña. */
-export function compararEscenarios(
-  paquete: PaqueteCanton,
-  cantonId: string,
-  mes: number,
-): ComparacionEscenario[] {
+/** Cómo cambia la humedad del suelo del mismo mes en Neutro, El Niño y La Niña (modelo de ML). */
+export function compararEscenarios(paquete: PaqueteCanton, cantonId: string, mes: number): ComparacionEscenario[] {
   const base = resumenCanton(paquete, cantonId, "neutro", mes);
   return ESCENARIOS.map((escenario) => {
     const r = resumenCanton(paquete, cantonId, escenario, mes);
-    return {
-      ...r,
-      diferencia: {
-        temp_max_c: redondear(r.temp_max_c - base.temp_max_c),
-        lluvia_mm_mes: redondear(r.lluvia_mm_mes - base.lluvia_mm_mes),
-        humedad_raiz: redondear(r.humedad_raiz - base.humedad_raiz),
-        humedad_raiz_ml: redondear(r.humedad_raiz_ml - base.humedad_raiz_ml, 3),
-      },
-    };
+    return { ...r, diferencia_humedad: redondear(r.humedad_raiz - base.humedad_raiz, 3) };
   });
 }

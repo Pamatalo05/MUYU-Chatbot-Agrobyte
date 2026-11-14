@@ -86,10 +86,13 @@ npm run datos          # o: npm run datos -- C:\ruta\Kallpa-AgroByte-2026
 npm test
 ```
 
-Muyu ignora a propósito dos campos del paquete:
-- `smap_humedad_superficial`: trae el valor de relleno −9999 de SMAP sin filtrar.
-- `top_rotaciones_ml`: no depende del cultivo previo ni del escenario. Muyu calcula
-  la rotación con sus reglas (zona, monocultivo, lluvia real de 3 meses, margen neto).
+Muyu usa el paquete tal cual lo publica Kallpa (hoy: Daule y Babahoyo, 4 cultivos):
+- **Cantones:** salen de `cantones`; si el equipo agrega uno, aparece solo en Muyu.
+- **Rotación:** el orden de `top_rotaciones_por_enso`, el mismo que muestra la app.
+- **Riesgo (semáforo):** humedad en raíz predicha por el modelo para los próximos 3 meses;
+  umbrales en `web/src/knowledge/semaforo.ts` (`UMBRALES_HUMEDAD`).
+- **Urea:** kg del paquete convertidos a sacos y USD con el precio de `fuentes_metodologia`.
+- `top_rotaciones_ml` se ignora: repite el escenario neutro.
 
 ## Seguridad
 
