@@ -72,13 +72,13 @@ export default function App() {
   }, [phase, messages, lecturaAutomatica, voz]);
 
   // Al preguntar algo nuevo, Muyu deja de hablar.
-  const enviar = useCallback<typeof send>(
-    (texto, accion) => {
-      voz.callar();
-      send(texto, accion);
-    },
-    [send, voz],
-  );
+const enviar = useCallback<typeof send>(
+  async (texto, accion) => {
+    voz.callar();
+    await send(texto, accion);
+  },
+  [send, voz],
+);
   const [isUserTyping, setIsUserTyping] = useState(false);
   // Solo en desarrollo: permite forzar un estado desde el panel de prueba.
   const [forcedState, setForcedState] = useState<MuyuState | null>(null);
