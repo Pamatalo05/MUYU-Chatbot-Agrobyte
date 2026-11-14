@@ -3,6 +3,10 @@
  * Los puntos de giro (transform-origin) están en % del lienzo de las capas:
  *   tallo del brote ≈ (49%, 32%) · hombro derecho ≈ (64%, 62%)
  *   hombro izquierdo ≈ (37%, 61%) · centro de los ojos ≈ (50%, 45%)
+ *   centro de la chakana ≈ (50%, 69%) · boca ≈ (51%, 50%)
+ *
+ * Cada estado agrega la clase .muyu--<estado> (idle, attentive, thinking,
+ * speaking, happy, error). Sus animaciones propias van en el Bloque 7.
  */
 
 .muyu {
@@ -46,6 +50,27 @@
   animation: muyu-blink 4.5s infinite;
 }
 
+.muyu__chakana {
+  transform-origin: 50% 69%;
+}
+
+/* La boca solo se ve al hablar. */
+.muyu__mouth {
+  opacity: 0;
+  transform-origin: 51% 50%;
+  transition: opacity 150ms ease;
+}
+
+.muyu--speaking .muyu__mouth {
+  opacity: 1;
+  animation: muyu-talk 0.32s ease-in-out infinite;
+}
+
+@keyframes muyu-talk {
+  0%, 100% { transform: scaleY(0.5); }
+  50% { transform: scaleY(1.4); }
+}
+
 @keyframes muyu-float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-2%); }
@@ -76,7 +101,8 @@
   .muyu__sprout,
   .muyu__arm-right,
   .muyu__arm-left,
-  .muyu__eyes--open {
+  .muyu__eyes--open,
+  .muyu--speaking .muyu__mouth {
     animation: none;
   }
 }

@@ -74,6 +74,24 @@ for file_name, name in LAYERS.items():
     save(rgba, name)
     print(name, "bbox (y0,y1,x0,x1):", bbox(rgba[..., 3]))
 
+# Chakana: se copia del cuerpo a su propia capa para poder hacerla brillar.
+# Se toman los trazos verdes que quedan dentro del pecho (no el contorno).
+CHEST_BOX = (740, 1000, 480, 790)  # y0, y1, x0, x1 en el lienzo de 1254 px
+body_rgb = np.array(Image.open(SRC / "cuerpo.jpeg").convert("RGB"))
+red, green, blue = (body_rgb[..., i].astype(int) for i in range(3))
+is_green = (green - red > 25) & (green - blue > 15)
+labels, count = ndimage.label(is_green)
+y0, y1, x0, x1 = CHEST_BOX
+chakana_mask = np.zeros(is_green.shape, dtype=bool)
+for index, piece in enumerate(ndimage.find_objects(labels), start=1):
+    ys, xs = piece
+    if ys.start >= y0 and ys.stop <= y1 and xs.start >= x0 and xs.stop <= x1:
+        chakana_mask |= labels == index
+chakana_mask = ndimage.binary_dilation(chakana_mask, iterations=2)
+chakana = np.dstack([body_rgb, np.where(chakana_mask, 255, 0).astype(np.uint8)])
+save(chakana, "chakana")
+print("chakana", "bbox (y0,y1,x0,x1):", bbox(chakana[..., 3]))
+
 # Ojos: 3 filas (abiertos, felices, ^^). Se recortan y se alinean
 # verticalmente al centro de la fila "abiertos", que ya está sobre el visor.
 eyes = remove_background(np.array(Image.open(SRC / EYES_FILE).convert("RGB")))

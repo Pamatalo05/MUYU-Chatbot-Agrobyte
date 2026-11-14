@@ -18,7 +18,7 @@ export default function App() {
     <main className="layout">
       <section className="character-area" aria-label="Personaje Muyu">
         {/* Bloques 7 y 8: los estados de Muyu se conectarán al chat */}
-        <Muyu eyes={isThinking ? "open" : "happy"} size={340} />
+        <Muyu state={isThinking ? "thinking" : "idle"} size={340} />
       </section>
 
       <section className="chat-area" aria-label="Conversación">
