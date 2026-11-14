@@ -35,12 +35,12 @@ export function declararHerramientas(paquete: PaqueteCanton): DeclaracionHerrami
   return [
     {
       name: "resumen_canton",
-      description: "Clima, lluvia, humedad en raíz, verdor y rendimiento previsto de un cantón en un mes y escenario.",
+      description: "Clima (temperatura, lluvia, humedad en raíz), verdor NDVI y humedad predicha por el modelo ML de un cantón en un mes y escenario.",
       parameters: { type: "OBJECT", properties: { canton_id: canton, escenario, mes }, required: ["canton_id", "escenario", "mes"] },
     },
     {
       name: "recomendar_rotacion",
-      description: "Mejores cultivos para sembrar después del cultivo cosechado, con ingreso y ahorro en urea por hectárea.",
+      description: "Mejores cultivos para sembrar después del cultivo cosechado en un mes dado, con margen neto, ahorro en urea, fuente y el balance de lluvia de los próximos 3 meses.",
       parameters: {
         type: "OBJECT",
         properties: {
@@ -51,13 +51,14 @@ export function declararHerramientas(paquete: PaqueteCanton): DeclaracionHerrami
             enum: paquete.cultivos.map((cultivo) => cultivo.id),
           },
           escenario,
+          mes,
         },
-        required: ["canton_id", "cultivo_previo_id", "escenario"],
+        required: ["canton_id", "cultivo_previo_id", "escenario", "mes"],
       },
     },
     {
       name: "comparar_escenarios",
-      description: "Compara el mismo mes en Neutro, El Niño y La Niña: lluvia, humedad y rendimiento frente a Neutro.",
+      description: "Compara el mismo mes en Neutro, El Niño y La Niña: lluvia, temperatura y humedad frente a Neutro.",
       parameters: { type: "OBJECT", properties: { canton_id: canton, mes }, required: ["canton_id", "mes"] },
     },
   ];
@@ -90,6 +91,7 @@ export function ejecutarHerramienta(
             cantonId,
             cultivoPrevioId: texto(args.cultivo_previo_id),
             escenario: args.escenario,
+            mes,
           }),
         };
       case "comparar_escenarios":

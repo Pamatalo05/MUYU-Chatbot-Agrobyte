@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import datosJson from "../../public/data/paquete_canton.json";
+import datosJson from "../../public/datos/paquete_canton.json";
 import type { MuyuContexto } from "../knowledge/contexto";
 import { validarPaquete } from "../knowledge/validarPaquete";
 import { detectarAccion } from "./preguntasRapidas";
@@ -19,42 +19,42 @@ describe("detectarAccion", () => {
 });
 
 describe("responderOffline", () => {
-  it("rotación: recomienda soya tras arroz en Neutro, con cifras", () => {
-    const respuesta = responderOffline(paquete, daule, "", "rotacion");
-    expect(respuesta.text).toContain("soya");
-    expect(respuesta.text).toContain("85");
-    expect(respuesta.emotion).toBe("happy");
+  it("rotación: recomienda soya tras arroz en Neutro, con margen y fuente", () => {
+    const r = responderOffline(paquete, daule, "", "rotacion");
+    expect(r.text).toContain("soya");
+    expect(r.text).toContain("750 USD/ha");
+    expect(r.text).toContain("INIAP");
+    expect(r.emotion).toBe("happy");
   });
 
   it("urea: calcula el ahorro por hectárea y en 5 hectáreas", () => {
-    const respuesta = responderOffline(paquete, daule, "", "urea");
-    expect(respuesta.text).toContain("85 USD");
-    expect(respuesta.text).toContain("425 USD");
+    const r = responderOffline(paquete, daule, "", "urea");
+    expect(r.text).toContain("290 USD");
+    expect(r.text).toContain("1.450 USD");
   });
 
-  it("ENSO: compara lluvia y humedad con cifras del paquete", () => {
-    const respuesta = responderOffline(paquete, daule, "", "enso");
-    expect(respuesta.text).toContain("enero");
-    expect(respuesta.text).toContain("340 mm");
-    expect(respuesta.text).toContain("+160");
-    expect(respuesta.text).toContain("cae");
+  it("ENSO: compara la lluvia y explica el riesgo para sembrar", () => {
+    const r = responderOffline(paquete, daule, "", "enso");
+    expect(r.text).toContain("enero");
+    expect(r.text).toContain("+22");
+    expect(r.text).toContain("exceso de lluvia");
+    expect(r.text).toContain("sequía");
   });
 
   it("resumen: usa el escenario y mes del contexto", () => {
-    const respuesta = responderOffline(paquete, { ...daule, escenario: "la_nina" }, "", "resumen");
-    expect(respuesta.text).toContain("Daule");
-    expect(respuesta.text).toContain("La Niña");
-    expect(respuesta.text).toContain("70 mm");
+    const r = responderOffline(paquete, { ...daule, escenario: "la_nina" }, "", "resumen");
+    expect(r.text).toContain("Daule");
+    expect(r.text).toContain("La Niña");
+    expect(r.text).toContain("115 mm");
   });
 
-  it("Sierra: avisa que faltan cultivos en lugar de inventar", () => {
-    const respuesta = responderOffline(paquete, { ...daule, cantonId: "latacunga" }, "", "rotacion");
-    expect(respuesta.text).toContain("Sierra");
-    expect(respuesta.emotion).toBe("neutral");
+  it("Sierra: recomienda cultivos de altura", () => {
+    const r = responderOffline(paquete, { ...daule, cantonId: "latacunga", cultivoPrevioId: "papa" }, "", "rotacion");
+    expect(r.text).toContain("haba");
+    expect(r.emotion).toBe("happy");
   });
 
   it("pregunta desconocida: ofrece los botones sin inventar", () => {
-    const respuesta = responderOffline(paquete, daule, "cuéntame un chiste");
-    expect(respuesta.text).toContain("botones");
+    expect(responderOffline(paquete, daule, "cuéntame un chiste").text).toContain("botones");
   });
 });

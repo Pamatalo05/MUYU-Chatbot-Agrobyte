@@ -2,7 +2,7 @@ import type { PaqueteCanton } from "./types";
 import { validarPaquete } from "./validarPaquete";
 
 /** Ruta pública del paquete (la PWA lo deja en caché para uso sin internet). */
-export const RUTA_PAQUETE = "/data/paquete_canton.json";
+export const RUTA_PAQUETE = "/datos/paquete_canton.json";
 
 let enCache: Promise<PaqueteCanton> | null = null;
 

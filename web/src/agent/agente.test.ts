@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import datosJson from "../../public/data/paquete_canton.json";
+import datosJson from "../../public/datos/paquete_canton.json";
 import { validarPaquete } from "../knowledge/validarPaquete";
 import { AgenteError, conversar } from "./agente";
 import { ejecutarHerramienta } from "./herramientas";
@@ -30,6 +30,7 @@ describe("ejecutarHerramienta", () => {
       canton_id: "daule",
       cultivo_previo_id: "arroz",
       escenario: "neutro",
+      mes: 1,
     }) as { recomendaciones: { id: string }[] };
     expect(r.recomendaciones[0].id).toBe("soya");
   });
@@ -43,11 +44,11 @@ describe("ejecutarHerramienta", () => {
 describe("conversar", () => {
   it("ejecuta la herramienta que pide Gemini y devuelve su respuesta final", async () => {
     const { fetchImpl, recibido } = geminiFalso([
-      { parts: [{ functionCall: { name: "recomendar_rotacion", args: { canton_id: "daule", cultivo_previo_id: "arroz", escenario: "neutro" } } }] },
-      { parts: [{ text: "Te recomiendo soya, ahorras 85 USD/ha." }] },
+      { parts: [{ functionCall: { name: "recomendar_rotacion", args: { canton_id: "daule", cultivo_previo_id: "arroz", escenario: "neutro", mes: 1 } } }] },
+      { parts: [{ text: "Te recomiendo soya, ahorras 180 USD/ha." }] },
     ]);
     const r = await conversar(peticion, { apiKey: "k", paquete, fetchImpl });
-    expect(r).toEqual({ text: "Te recomiendo soya, ahorras 85 USD/ha.", emotion: "happy" });
+    expect(r).toEqual({ text: "Te recomiendo soya, ahorras 180 USD/ha.", emotion: "happy" });
     const respuestaHerramienta = recibido[1].body.contents[recibido[1].body.contents.length - 1].parts[0].functionResponse;
     expect(respuestaHerramienta.response.recomendaciones[0].id).toBe("soya");
     expect(recibido[0].body.systemInstruction.parts[0].text).toContain("Daule");

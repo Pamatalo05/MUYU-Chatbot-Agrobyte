@@ -12,11 +12,21 @@ interface ContextoSimuladoProps {
 
 /**
  * Selector temporal del contexto de Muyu, mientras esta app vive fuera de Kallpa.
- * En K5 se reemplaza por el mapa, el cultivo cosechado y los botones ENSO de Kallpa.
+ * Se reemplaza por el mapa, el cultivo cosechado y los botones ENSO de Kallpa.
  */
 export default function ContextoSimulado({ paquete, contexto, onChange }: ContextoSimuladoProps) {
   const cambiar = <K extends keyof MuyuContexto>(campo: K, valor: MuyuContexto[K]) =>
     onChange({ ...contexto, [campo]: valor });
+
+  // Solo cultivos de la zona del cantón (no se cosecha papa en Daule).
+  const cultivosDeZona = (cantonId: string) =>
+    paquete.cultivos.filter((c) => c.regiones.includes(paquete.cantones[cantonId].region));
+
+  const cambiarCanton = (cantonId: string) => {
+    const zona = cultivosDeZona(cantonId);
+    const previo = zona.some((c) => c.id === contexto.cultivoPrevioId) ? contexto.cultivoPrevioId : zona[0]?.id;
+    onChange({ ...contexto, cantonId, cultivoPrevioId: previo ?? contexto.cultivoPrevioId });
+  };
 
   return (
     <fieldset className="contexto">
@@ -24,7 +34,7 @@ export default function ContextoSimulado({ paquete, contexto, onChange }: Contex
 
       <label>
         Cantón
-        <select value={contexto.cantonId} onChange={(e) => cambiar("cantonId", e.target.value)}>
+        <select value={contexto.cantonId} onChange={(e) => cambiarCanton(e.target.value)}>
           {Object.entries(paquete.cantones).map(([id, canton]) => (
             <option key={id} value={id}>
               {canton.nombre}
@@ -36,7 +46,7 @@ export default function ContextoSimulado({ paquete, contexto, onChange }: Contex
       <label>
         Cosechado
         <select value={contexto.cultivoPrevioId} onChange={(e) => cambiar("cultivoPrevioId", e.target.value)}>
-          {paquete.cultivos.map((cultivo) => (
+          {cultivosDeZona(contexto.cantonId).map((cultivo) => (
             <option key={cultivo.id} value={cultivo.id}>
               {cultivo.nombre.split(" (")[0]}
             </option>

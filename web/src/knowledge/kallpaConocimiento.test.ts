@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import datosJson from "../../public/data/paquete_canton.json";
+import datosJson from "../../public/datos/paquete_canton.json";
 import {
+  balanceHidrico,
   ConsultaInvalidaError,
   compararEscenarios,
   recomendarRotacion,
@@ -12,29 +13,37 @@ import { PaqueteInvalidoError, validarPaquete } from "./validarPaquete";
 /** Copia nueva del JSON en cada uso, para que una prueba no altere a otra. */
 const leerJson = (): unknown => structuredClone(datosJson);
 const paquete: PaqueteCanton = validarPaquete(leerJson());
+const rotacion = (cantonId: string, cultivoPrevioId: string, escenario: "neutro" | "el_nino" | "la_nina", mes = 1) =>
+  recomendarRotacion(paquete, { cantonId, cultivoPrevioId, escenario, mes });
 
 describe("validarPaquete", () => {
-  it("acepta el paquete actual", () => {
+  it("acepta el paquete del repo de Kallpa", () => {
     expect(Object.keys(paquete.cantones)).toHaveLength(8);
-    expect(paquete.cultivos.length).toBeGreaterThan(0);
+    expect(paquete.cultivos).toHaveLength(11);
   });
 
   it("señala la ruta exacta del campo que falla", () => {
-    const roto = leerJson() as PaqueteCanton;
-    (roto.cantones.daule as unknown as Record<string, unknown>).altitud_m = "ocho";
+    const roto = leerJson() as { cantones: { daule: { terreno: Record<string, unknown> } } };
+    roto.cantones.daule.terreno.elevacion_msnm = "cinco";
     expect(() => validarPaquete(roto)).toThrow(PaqueteInvalidoError);
-    expect(() => validarPaquete(roto)).toThrow("cantones.daule.altitud_m");
+    expect(() => validarPaquete(roto)).toThrow("cantones.daule.terreno.elevacion_msnm");
+  });
+
+  it("rechaza regiones guardadas como texto en vez de lista", () => {
+    const roto = leerJson() as { cultivos: Record<string, unknown>[] };
+    roto.cultivos[0].regiones = "['costa_humeda']";
+    expect(() => validarPaquete(roto)).toThrow("cultivos[0].regiones");
   });
 });
 
 describe("resumenCanton", () => {
-  it("devuelve los datos del mes y escenario pedidos", () => {
-    const resumen = resumenCanton(paquete, "daule", "la_nina", 1);
-    expect(resumen.canton).toBe("Daule");
-    expect(resumen.region).toBe("costa");
-    expect(resumen.lluvia_mm_mes).toBe(70);
-    expect(resumen.humedad_raiz).toBe(0.17);
-    expect(resumen.escenarioNombre).toBe("La Niña");
+  it("une clima del escenario, NDVI y la predicción de ML", () => {
+    const r = resumenCanton(paquete, "daule", "la_nina", 1);
+    expect(r.piso).toBe("costa");
+    expect(r.lluvia_mm_mes).toBe(115.05);
+    expect(r.ndvi_modis).toBe(0.434);
+    expect(r.humedad_raiz_ml).toBe(0.637);
+    expect(resumenCanton(paquete, "latacunga", "neutro", 1).piso).toBe("sierra");
   });
 
   it("rechaza cantones o meses inválidos con un mensaje claro", () => {
@@ -43,74 +52,59 @@ describe("resumenCanton", () => {
   });
 });
 
+describe("balanceHidrico", () => {
+  it("usa la lluvia real del cantón, no un factor fijo por escenario", () => {
+    expect(balanceHidrico(paquete, "daule", "el_nino", 1).balance).toBe("exceso");
+    expect(balanceHidrico(paquete, "daule", "la_nina", 1).balance).toBe("deficit");
+    // En Latacunga, El Niño casi no cambia la lluvia de enero a marzo.
+    expect(balanceHidrico(paquete, "latacunga", "el_nino", 1).balance).toBe("normal");
+  });
+});
+
 describe("recomendarRotacion", () => {
   it("nunca recomienda repetir el cultivo previo", () => {
     for (const escenario of ["neutro", "el_nino", "la_nina"] as const) {
-      const { recomendaciones } = recomendarRotacion(paquete, {
-        cantonId: "daule",
-        cultivoPrevioId: "arroz",
-        escenario,
-      });
-      expect(recomendaciones.map((r) => r.id)).not.toContain("arroz");
+      expect(rotacion("daule", "arroz", escenario).recomendaciones.map((r) => r.id)).not.toContain("arroz");
     }
   });
 
-  it("con La Niña empieza por un cultivo de baja demanda de agua", () => {
-    const { recomendaciones } = recomendarRotacion(paquete, {
-      cantonId: "daule",
-      cultivoPrevioId: "arroz",
-      escenario: "la_nina",
-    });
-    const primero = paquete.cultivos.find((c) => c.id === recomendaciones[0].id);
-    expect(primero?.demanda_agua).toBe("baja");
-    expect(recomendaciones).toHaveLength(3);
+  it("solo recomienda cultivos de la región del cantón", () => {
+    for (const r of rotacion("latacunga", "papa", "neutro").recomendaciones) {
+      expect(paquete.cultivos.find((c) => c.id === r.id)?.regiones).toContain("sierra_centro");
+    }
+    expect(rotacion("daule", "arroz", "neutro").descartados.find((d) => d.id === "mani")?.motivo).toContain("costa húmeda");
   });
 
-  it("con El Niño descarta los que no toleran encharcamiento", () => {
-    const { recomendaciones, descartados } = recomendarRotacion(paquete, {
-      cantonId: "daule",
-      cultivoPrevioId: "arroz",
-      escenario: "el_nino",
-    });
+  it("en Neutro prioriza leguminosas y desempata por margen neto", () => {
+    const { recomendaciones } = rotacion("daule", "arroz", "neutro");
+    expect(recomendaciones[0].id).toBe("soya");
+    expect(recomendaciones[0].margen_neto_ha).toBe(1190 - 620 + 180);
+  });
+
+  it("con déficit de lluvia empieza por un cultivo de baja demanda de agua", () => {
+    const { recomendaciones } = rotacion("daule", "arroz", "la_nina");
+    expect(paquete.cultivos.find((c) => c.id === recomendaciones[0].id)?.demanda_agua).toBe("baja");
+  });
+
+  it("con exceso de lluvia descarta los que no toleran encharcamiento y lo avisa", () => {
+    const { recomendaciones, descartados, avisos } = rotacion("daule", "arroz", "el_nino");
     for (const r of recomendaciones) {
       expect(paquete.cultivos.find((c) => c.id === r.id)?.tolera_encharcamiento).toBe(true);
     }
     expect(descartados.some((d) => d.id === "soya")).toBe(true);
-  });
-
-  it("en Neutro prioriza leguminosas que fijan nitrógeno", () => {
-    const { recomendaciones } = recomendarRotacion(paquete, {
-      cantonId: "daule",
-      cultivoPrevioId: "arroz",
-      escenario: "neutro",
-    });
-    expect(paquete.cultivos.find((c) => c.id === recomendaciones[0].id)?.fija_nitrogeno).toBe(true);
-    expect(recomendaciones[0].razones.join(" ")).toContain("urea");
-  });
-
-  it("avisa que no hay cultivos de Sierra en cantones de altura", () => {
-    const { recomendaciones, avisos } = recomendarRotacion(paquete, {
-      cantonId: "latacunga",
-      cultivoPrevioId: "arroz",
-      escenario: "neutro",
-    });
-    expect(recomendaciones).toHaveLength(0);
-    expect(avisos[0]).toContain("Sierra");
+    expect(avisos[0]).toContain("Solo 1");
   });
 
   it("rechaza un cultivo previo inexistente", () => {
-    expect(() =>
-      recomendarRotacion(paquete, { cantonId: "daule", cultivoPrevioId: "cacao", escenario: "neutro" }),
-    ).toThrow(ConsultaInvalidaError);
+    expect(() => rotacion("daule", "cacao", "neutro")).toThrow(ConsultaInvalidaError);
   });
 });
 
 describe("compararEscenarios", () => {
   it("compara los 3 escenarios contra Neutro", () => {
-    const comparacion = compararEscenarios(paquete, "daule", 1);
-    expect(comparacion.map((c) => c.escenario)).toEqual(["neutro", "el_nino", "la_nina"]);
-    expect(comparacion[0].diferencia.lluvia_mm_mes).toBe(0);
-    expect(comparacion[1].diferencia.lluvia_mm_mes).toBe(160);
-    expect(comparacion[2].diferencia.humedad_raiz).toBe(-0.18);
+    const [neutro, nino, nina] = compararEscenarios(paquete, "daule", 1);
+    expect(neutro.diferencia.lluvia_mm_mes).toBe(0);
+    expect(nino.diferencia.lluvia_mm_mes).toBe(22.23);
+    expect(nina.escenario).toBe("la_nina");
   });
 });
