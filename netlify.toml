@@ -1,0 +1,15 @@
+# Despliegue gratis en Netlify: la web (Vite) + la función /api/chat.
+[build]
+  command = "npm --prefix web ci && npm --prefix web run build"
+  publish = "web/dist"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# `npx netlify dev` levanta Vite y la función juntas en http://localhost:8888
+[dev]
+  command = "npm --prefix web run dev"
+  targetPort = 5173
+  port = 8888
+  framework = "#custom"
