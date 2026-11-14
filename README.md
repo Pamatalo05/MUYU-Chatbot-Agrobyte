@@ -68,6 +68,22 @@ Invoke-RestMethod -Method Post -Uri http://localhost:8888/api/chat -ContentType 
 Para publicar: conecta el repo en Netlify (plan gratis) y añade `GEMINI_API_KEY`
 en Site configuration → Environment variables. `netlify.toml` ya trae la configuración.
 
+## Datos (repo Kallpa)
+
+La fuente única es `Kallpa-AgroByte-2026/datos/procesados/paquete_canton.json`.
+Cuando el equipo de datos lo regenere, cópialo y verifica:
+
+```powershell
+cd web
+npm run datos          # o: npm run datos -- C:\ruta\Kallpa-AgroByte-2026
+npm test
+```
+
+Muyu ignora a propósito dos campos del paquete:
+- `smap_humedad_superficial`: trae el valor de relleno −9999 de SMAP sin filtrar.
+- `top_rotaciones_ml`: no depende del cultivo previo ni del escenario. Muyu calcula
+  la rotación con sus reglas (zona, monocultivo, lluvia real de 3 meses, margen neto).
+
 ## Seguridad
 
 - La clave de Gemini va solo en `.env` (raíz o `api/`) y en Netlify; los `.env` están en `.gitignore`.

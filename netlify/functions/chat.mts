@@ -3,7 +3,7 @@
  * La clave GEMINI_API_KEY vive solo aquí, en las variables de entorno de Netlify;
  * nunca llega al navegador.
  */
-import datos from "../../web/public/data/paquete_canton.json";
+import datos from "../../web/public/datos/paquete_canton.json";
 import { AgenteError, conversar, MODELOS_GEMINI } from "../../web/src/agent/agente";
 import { PeticionInvalidaError, validarPeticion } from "../../web/src/agent/peticion";
 import { validarPaquete } from "../../web/src/knowledge/validarPaquete";
