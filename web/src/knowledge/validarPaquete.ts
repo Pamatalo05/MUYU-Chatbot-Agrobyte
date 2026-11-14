@@ -26,6 +26,29 @@ function numeros(o: Objeto, campos: readonly string[], ruta: string): void {
   }
 }
 
+function validarRango(
+  datos: Objeto,
+  campo: string,
+  minimo: number,
+  maximo: number,
+  ruta: string
+): void {
+  const valor = datos[campo];
+
+  if (
+    typeof valor !== "number" ||
+    !Number.isFinite(valor) ||
+    valor < minimo ||
+    valor > maximo
+  ) {
+    throw new PaqueteInvalidoError(
+      `${ruta}.${campo}`,
+      `valor ${String(valor)} fuera del rango [${minimo}, ${maximo}]`
+    );
+  }
+}
+
+
 function textos(o: Objeto, campos: readonly string[], ruta: string): void {
   for (const campo of campos) {
     if (typeof o[campo] !== "string" || o[campo] === "") {
@@ -61,6 +84,27 @@ const CAMPOS_CLIMA = [
   "humedad_relativa_pct",
 ] as const;
 
+function validarClima(mes: Objeto, ruta: string): void {
+  numeros(mes, CAMPOS_CLIMA, ruta);
+
+  validarRango(mes, "lluvia_mm_mes", 0, Infinity, ruta);
+  validarRango(mes, "humedad_raiz", 0, 1, ruta);
+  validarRango(mes, "humedad_superficial", 0, 1, ruta);
+  validarRango(mes, "humedad_relativa_pct", 0, 100, ruta);
+  validarRango(mes, "radiacion_mj_m2", 0, Infinity, ruta);
+
+  const maxima = mes.temp_max_c as number;
+  const minima = mes.temp_min_c as number;
+
+  if (minima > maxima) {
+    throw new PaqueteInvalidoError(
+      `${ruta}.temp_min_c`,
+      "la temperatura mínima supera la máxima"
+    );
+  }
+}
+
+
 function validarCanton(valor: unknown, ruta: string): void {
   const canton = objeto(valor, ruta);
   textos(canton, ["nombre", "region", "suelo_referencia"], ruta);
@@ -68,16 +112,32 @@ function validarCanton(valor: unknown, ruta: string): void {
   numeros(objeto(canton.terreno, `${ruta}.terreno`), ["elevacion_msnm", "pendiente_srtm_pct"], `${ruta}.terreno`);
 
   const escenarios = objeto(canton.escenarios_climaticos, `${ruta}.escenarios_climaticos`);
-  for (const escenario of ESCENARIOS) {
-    doceMeses(escenarios[escenario], `${ruta}.escenarios_climaticos.${escenario}`, (mes, r) =>
-      numeros(mes, CAMPOS_CLIMA, r),
-    );
-  }
-  doceMeses(canton.serie_satelital_ml, `${ruta}.serie_satelital_ml`, (mes, r) => {
+    for (const escenario of ESCENARIOS) {
+      doceMeses(
+        escenarios[escenario],
+        `${ruta}.escenarios_climaticos.${escenario}`,
+        validarClima
+      );
+    }
+  
+doceMeses(
+  canton.serie_satelital_ml,
+  `${ruta}.serie_satelital_ml`,
+  (mes, r) => {
     numeros(mes, ["lluvia_mm", "temp_c", "ndvi_modis"], r);
+
+    validarRango(mes, "lluvia_mm", 0, Infinity, r);
+    validarRango(mes, "ndvi_modis", -1, 1, r);
+
     const rutaMl = `${r}.humedad_raiz_predicha`;
-    numeros(objeto(mes.humedad_raiz_predicha, rutaMl), ["neutro", "nino", "nina"], rutaMl);
-  });
+    const prediccion = objeto(mes.humedad_raiz_predicha, rutaMl);
+
+    for (const escenario of ["neutro", "nino", "nina"]) {
+      validarRango(prediccion, escenario, 0, 1, rutaMl);
+    }
+  }
+);
+
 }
 
 function validarCultivo(valor: unknown, ruta: string): void {
