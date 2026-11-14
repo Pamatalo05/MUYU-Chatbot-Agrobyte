@@ -18,6 +18,14 @@ describe("detectarAccion", () => {
   });
 });
 
+describe("responderOffline fuera de tema", () => {
+  it("política sin internet: mismo mensaje fijo y sugerencias", () => {
+    const r = responderOffline(paquete, daule, "¿qué opinas de la política?");
+    expect(r.text).toContain("No estoy diseñado");
+    expect(r.sugerencias).toHaveLength(3);
+  });
+});
+
 describe("responderOffline", () => {
   it("rotación: recomienda soya tras arroz en Neutro, con margen y fuente", () => {
     const r = responderOffline(paquete, daule, "", "rotacion");
@@ -54,7 +62,9 @@ describe("responderOffline", () => {
     expect(r.emotion).toBe("happy");
   });
 
-  it("pregunta desconocida: ofrece los botones sin inventar", () => {
-    expect(responderOffline(paquete, daule, "cuéntame un chiste").text).toContain("botones");
+  it("pregunta desconocida: ofrece 3 sugerencias sin inventar", () => {
+    const r = responderOffline(paquete, daule, "cuéntame un chiste");
+    expect(r.text).toContain("Te sugiero");
+    expect(r.sugerencias).toHaveLength(3);
   });
 });

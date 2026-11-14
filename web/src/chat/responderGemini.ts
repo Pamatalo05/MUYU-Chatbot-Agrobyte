@@ -1,6 +1,6 @@
 import type { PeticionChat } from "../agent/peticion";
 import type { MuyuContexto } from "../knowledge/contexto";
-import type { ChatMessage, ChatReply } from "./types";
+import type { ChatMessage, ChatReply, Sugerencia } from "./types";
 
 export const RUTA_CHAT = "/api/chat";
 const TIEMPO_MAXIMO_MS = 15_000;
@@ -30,5 +30,9 @@ export async function responderGemini(
   if (!respuesta.ok || typeof datos.text !== "string") {
     throw new Error(datos.error ?? `El servidor respondió ${respuesta.status}`);
   }
-  return { text: datos.text, emotion: datos.emotion === "happy" ? "happy" : "neutral" };
+  // Solo se aceptan sugerencias con texto; la acción la recalcula el chat si hace falta.
+  const sugerencias = Array.isArray(datos.sugerencias)
+    ? datos.sugerencias.filter((s): s is Sugerencia => typeof s?.texto === "string").slice(0, 3)
+    : undefined;
+  return { text: datos.text, emotion: datos.emotion === "happy" ? "happy" : "neutral", sugerencias };
 }

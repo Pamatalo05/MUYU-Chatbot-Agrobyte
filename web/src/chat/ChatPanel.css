@@ -38,6 +38,43 @@
   align-items: flex-end;
 }
 
+/* Sugerencias bajo la respuesta: una por línea, fáciles de tocar. */
+.chat__sugerencias {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  margin-top: 0.15rem;
+}
+
+.chat__sugerencia {
+  min-height: 40px;
+  padding: 0.4rem 0.8rem;
+  border: 1.5px solid var(--verde-hoja);
+  border-radius: 14px;
+  background: #ffffff;
+  color: var(--verde-bosque);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.chat__sugerencia:hover:not(:disabled) {
+  background: #eef6e4;
+}
+
+.chat__sugerencia:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.chat__sugerencia:focus-visible {
+  outline: 3px solid var(--oro);
+  outline-offset: 2px;
+}
+
 /* Botón pequeño para oír la respuesta: discreto, pero de 32 px para el dedo. */
 .chat__oir {
   display: inline-flex;

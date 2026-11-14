@@ -1,22 +1,44 @@
+import { sugerirPreguntas } from "../chat/sugerencias";
 import type { ChatReply } from "../chat/types";
 import type { PaqueteCanton } from "../knowledge/types";
 
 /**
  * Guardrails de Muyu: solo conversa sobre el tema de Kallpa (agricultura en los
  * cantones del paquete). Tres capas:
- *  1. Antes de llamar a Gemini: corta intentos obvios de cambiarle el rol (no gasta cuota).
+ *  1. Antes de llamar a Gemini: corta intentos de cambiarle el rol y temas vetados
+ *     (política, religión) sin gastar cuota.
  *  2. Instrucciones de sistema con el alcance, la lista de cantones y una marca de rechazo.
- *  3. Después: si Gemini devuelve la marca, Muyu responde siempre con el mismo mensaje.
+ *  3. Después: si Gemini devuelve la marca, Muyu responde el mensaje fijo con 3 sugerencias.
  */
 
 export const MARCA_FUERA_DE_TEMA = "[FUERA_DE_TEMA]";
 
-export const RESPUESTA_FUERA_DE_TEMA: ChatReply = {
-  text:
-    "Solo puedo ayudarte con temas de tu cultivo en Kallpa: qué sembrar después, " +
-    "El Niño y La Niña, ahorro en urea y el clima de tu cantón. ¿Te ayudo con algo de eso?",
-  emotion: "neutral",
-};
+/**
+ * Respuesta fija cuando la pregunta no es del tema: dice con claridad que Muyu no
+ * está hecho para eso y ofrece 3 preguntas del catálogo, las más parecidas.
+ */
+export function respuestaFueraDeTema(pregunta: string): ChatReply {
+  return {
+    text:
+      "No estoy diseñado para responder ese tipo de preguntas. " +
+      "Soy Muyu y te ayudo con tu cultivo 🌱 Te sugiero estas:",
+    emotion: "neutral",
+    sugerencias: sugerirPreguntas(pregunta),
+  };
+}
+
+/**
+ * Temas que Muyu nunca opina, aunque se mezclen con el campo: política y religión.
+ * Se cortan antes de llamar a Gemini (no gasta cuota) y también sin internet.
+ */
+const TEMAS_VETADOS = [
+  // Raíces sin \b final: "católico", "evangélico" o "políticos" también deben coincidir.
+  /\bpol[ií]tic/i,
+  /\b(elecci[oó]n|elecciones|votar\b|voto\b|candidat|partido pol[ií]tico|asamble[ií]sta)/i,
+  /\b(religi|iglesia|biblia|evang[eé]li|cat[oó]lic|pastor\b|misa\b|rezar|oraci[oó]n)/i,
+];
+
+export const esTemaVetado = (pregunta: string) => TEMAS_VETADOS.some((patron) => patron.test(pregunta));
 
 const MANIPULACION = [
   /\b(ignora|olvida|omite)\b.{0,30}\b(instrucciones|reglas|indicaciones)\b/i,

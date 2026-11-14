@@ -8,7 +8,9 @@ import {
 import type { MuyuContexto } from "../knowledge/contexto";
 import { evaluarSemaforo } from "../knowledge/semaforo";
 import type { Escenario, PaqueteCanton } from "../knowledge/types";
+import { esTemaVetado, respuestaFueraDeTema } from "../agent/guardarrailes";
 import { detectarAccion, type AccionRapida } from "./preguntasRapidas";
+import { sugerirPreguntas } from "./sugerencias";
 import type { ChatReply } from "./types";
 
 /**
@@ -42,12 +44,12 @@ const BALANCE_TEXTO: Record<Balance, string> = {
   normal: "lluvias cercanas a lo normal",
 };
 
-const NO_ENTIENDO: ChatReply = {
-  text:
-    "Aún estoy aprendiendo a entender preguntas así sin internet. " +
-    "Prueba con uno de los botones de abajo: sé de rotaciones, El Niño y La Niña, urea y el clima de tu cantón.",
+/** Sin internet solo entiende ciertos temas: ofrece las preguntas más parecidas. */
+const noEntiendo = (pregunta: string): ChatReply => ({
+  text: "Sin internet todavía no entiendo preguntas así. Te sugiero estas:",
   emotion: "neutral",
-};
+  sugerencias: sugerirPreguntas(pregunta),
+});
 
 export function responderOffline(
   paquete: PaqueteCanton,
@@ -55,6 +57,7 @@ export function responderOffline(
   pregunta: string,
   accion?: AccionRapida,
 ): ChatReply {
+  if (!accion && esTemaVetado(pregunta)) return respuestaFueraDeTema(pregunta);
   const tema = accion ?? detectarAccion(pregunta);
   switch (tema) {
     case "rotacion":
@@ -66,7 +69,7 @@ export function responderOffline(
     case "resumen":
       return responderResumen(paquete, contexto);
     default:
-      return NO_ENTIENDO;
+      return noEntiendo(pregunta);
   }
 }
 

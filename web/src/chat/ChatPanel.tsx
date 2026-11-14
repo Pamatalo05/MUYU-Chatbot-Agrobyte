@@ -100,6 +100,21 @@ export default function ChatPanel({
                 </span>
                 {message.text}
               </p>
+              {message.sugerencias && message.sugerencias.length > 0 && (
+                <div className="chat__sugerencias" role="group" aria-label="Preguntas sugeridas">
+                  {message.sugerencias.map((sugerencia) => (
+                    <button
+                      key={sugerencia.texto}
+                      type="button"
+                      className="chat__sugerencia"
+                      disabled={isBusy}
+                      onClick={() => onSend(sugerencia.texto, sugerencia.accion)}
+                    >
+                      {sugerencia.texto}
+                    </button>
+                  ))}
+                </div>
+              )}
               {message.role === "muyu" && onEscuchar && (
                 <button type="button" className="chat__oir" onClick={() => onEscuchar(message.text)}>
                   <svg viewBox="0 0 24 24" aria-hidden="true">

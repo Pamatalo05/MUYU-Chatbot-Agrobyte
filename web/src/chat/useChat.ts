@@ -108,6 +108,11 @@ export function useChat(responder: Responder) {
         setMessages((current) => [...current, answer]);
         setPhase("speaking");
         await typeOut(answer.id, reply.text);
+        // Las sugerencias aparecen cuando termina de escribir, no antes.
+        if (reply.sugerencias?.length) {
+          const sugerencias = reply.sugerencias;
+          setMessages((current) => current.map((m) => (m.id === answer.id ? { ...m, sugerencias } : m)));
+        }
 
         if (reply.emotion === "happy") {
           setPhase("happy");

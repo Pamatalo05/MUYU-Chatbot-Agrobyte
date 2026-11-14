@@ -1,6 +1,6 @@
 import type { ChatReply } from "../chat/types";
 import { ESCENARIO_NOMBRE, type PaqueteCanton } from "../knowledge/types";
-import { esFueraDeTema, pareceManipulacion, reglasDeAlcance, RESPUESTA_FUERA_DE_TEMA } from "./guardarrailes";
+import { esFueraDeTema, esTemaVetado, pareceManipulacion, reglasDeAlcance, respuestaFueraDeTema } from "./guardarrailes";
 import { declararHerramientas, ejecutarHerramienta } from "./herramientas";
 import type { PeticionChat } from "./peticion";
 
@@ -82,7 +82,9 @@ async function generar(cuerpo: unknown, { apiKey, modelos = MODELOS_GEMINI, fetc
  */
 export async function conversar(peticion: PeticionChat, opciones: OpcionesAgente): Promise<ChatReply> {
   const { paquete } = opciones;
-  if (pareceManipulacion(peticion.pregunta)) return RESPUESTA_FUERA_DE_TEMA;
+  if (pareceManipulacion(peticion.pregunta) || esTemaVetado(peticion.pregunta)) {
+    return respuestaFueraDeTema(peticion.pregunta);
+  }
 
   const contents: Contenido[] = [
     ...peticion.historial.map(
@@ -108,7 +110,7 @@ export async function conversar(peticion: PeticionChat, opciones: OpcionesAgente
     if (llamadas.length === 0) {
       const text = partes.map((p) => p.text ?? "").join("").trim();
       if (!text) throw new AgenteError("Gemini no devolvió texto");
-      if (esFueraDeTema(text)) return RESPUESTA_FUERA_DE_TEMA;
+      if (esFueraDeTema(text)) return respuestaFueraDeTema(peticion.pregunta);
       return { text, emotion: recomendo ? "happy" : "neutral" };
     }
 
