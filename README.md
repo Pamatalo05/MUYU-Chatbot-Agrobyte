@@ -55,14 +55,21 @@ Abre http://localhost:5173. Debe decir "Backend conectado".
 
 ```powershell
 copy .env.example .env      # en la raíz; pega tu clave en GEMINI_API_KEY
-npx netlify-cli dev         # web + función en http://localhost:8888
+cd web; npm run dev         # http://localhost:5173 ya sirve /api/chat con Gemini
 ```
+
+Si la terminal dice "Falta GEMINI_API_KEY", revisa el `.env` de la raíz y reinicia `npm run dev`.
+`npx netlify-cli dev` (puerto 8888) también funciona y simula Netlify tal cual.
+
+**Guardrails:** Muyu solo responde sobre agricultura en Kallpa (rotación, clima, ENSO,
+urea, costos). Otras preguntas o intentos de cambiarle el rol reciben un mensaje fijo
+(`web/src/agent/guardarrailes.ts`).
 
 Prueba rápida en otra terminal:
 
 ```powershell
 $cuerpo = '{"pregunta":"¿Qué siembro después?","historial":[],"contexto":{"cantonId":"daule","cultivoPrevioId":"arroz","escenario":"neutro","mes":1}}'
-Invoke-RestMethod -Method Post -Uri http://localhost:8888/api/chat -ContentType "application/json; charset=utf-8" -Body ([Text.Encoding]::UTF8.GetBytes($cuerpo))
+Invoke-RestMethod -Method Post -Uri http://localhost:5173/api/chat -ContentType "application/json; charset=utf-8" -Body ([Text.Encoding]::UTF8.GetBytes($cuerpo))
 ```
 
 Para publicar: conecta el repo en Netlify (plan gratis) y añade `GEMINI_API_KEY`
