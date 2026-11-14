@@ -1,0 +1,254 @@
+/*
+ * Animaciones de Muyu.
+ * Puntos de giro (transform-origin) en % del lienzo de las capas:
+ *   cuello ≈ (50%, 58%) · tallo del brote ≈ (49%, 32%)
+ *   hombro derecho ≈ (64%, 62%) · hombro izquierdo ≈ (37%, 61%)
+ *   centro de los ojos ≈ (50%, 45%) · chakana ≈ (50%, 69%) · boca ≈ (51%, 50%)
+ *
+ * Regla: los bucles usan `transform` en @keyframes; los ajustes de cada estado
+ * usan las propiedades individuales `rotate`, `scale` y `translate`, que se
+ * suman al bucle sin anularlo.
+ */
+
+/* ---------- Base ---------- */
+
+.muyu {
+  --muyu-ease: 300ms ease;
+  position: relative;
+  width: min(var(--muyu-size, 320px), 100%);
+  aspect-ratio: 1;
+  user-select: none;
+}
+
+.muyu__part {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transition:
+    rotate var(--muyu-ease),
+    scale var(--muyu-ease),
+    translate var(--muyu-ease),
+    filter var(--muyu-ease),
+    opacity var(--muyu-ease);
+}
+
+.muyu__float {
+  position: absolute;
+  inset: 0;
+  animation: muyu-float 3s ease-in-out infinite;
+}
+
+.muyu__head {
+  transform-origin: 50% 58%;
+}
+
+.muyu__sprout {
+  transform-origin: 49% 32%;
+  animation: muyu-sway 4s ease-in-out infinite;
+}
+
+.muyu__arm-right {
+  transform-origin: 64% 62%;
+  animation: muyu-wave 2.4s ease-in-out infinite;
+}
+
+.muyu__arm-left {
+  transform-origin: 37% 61%;
+  animation: muyu-arm-rest 3s ease-in-out infinite;
+}
+
+.muyu__eyes {
+  transform-origin: 50% 45%;
+}
+
+.muyu__eyes--open {
+  animation: muyu-blink 4.5s infinite;
+}
+
+.muyu__chakana {
+  transform-origin: 50% 69%;
+}
+
+.muyu__mouth {
+  opacity: 0;
+  transform-origin: 51% 50%;
+}
+
+.muyu__sparkles {
+  opacity: 0;
+  transform-origin: 82% 46%;
+}
+
+/* ---------- Atento: el usuario escribe ---------- */
+
+.muyu--attentive .muyu__head {
+  rotate: 5deg;
+}
+
+.muyu--attentive .muyu__sprout {
+  scale: 1.1;
+  animation-duration: 2s;
+}
+
+.muyu--attentive .muyu__eyes {
+  translate: 1% 0;
+}
+
+/* ---------- Pensando: espera la respuesta ---------- */
+
+.muyu--thinking .muyu__head {
+  rotate: -4deg;
+}
+
+.muyu--thinking .muyu__eyes {
+  translate: 1.2% -1.2%;
+}
+
+.muyu--thinking .muyu__sprout {
+  animation-duration: 6s;
+}
+
+.muyu--thinking .muyu__arm-right {
+  animation: none;
+}
+
+.muyu--thinking .muyu__chakana {
+  animation: muyu-chakana-glow 1.4s ease-in-out infinite;
+}
+
+/* ---------- Hablando: muestra la respuesta ---------- */
+
+.muyu--speaking .muyu__mouth {
+  opacity: 1;
+  animation: muyu-talk 0.32s ease-in-out infinite;
+}
+
+.muyu--speaking .muyu__float {
+  animation-duration: 1.6s;
+}
+
+/* ---------- Feliz: saludo o algo salió bien ---------- */
+
+.muyu--happy .muyu__arm-right {
+  animation: muyu-wave-fast 0.5s ease-in-out infinite;
+}
+
+.muyu--happy .muyu__sparkles {
+  animation: muyu-sparkle 0.5s ease-in-out infinite alternate;
+}
+
+.muyu--happy .muyu__sprout {
+  animation: muyu-sprout-bounce 0.6s ease-in-out infinite;
+}
+
+.muyu--happy .muyu__float {
+  animation: muyu-hop 0.6s ease-in-out infinite;
+}
+
+/* ---------- Error: el brote se marchita ---------- */
+
+.muyu--error .muyu__float {
+  animation-duration: 5s;
+  filter: saturate(0.6);
+}
+
+.muyu--error .muyu__head {
+  rotate: 6deg;
+  translate: 0 1%;
+}
+
+.muyu--error .muyu__sprout {
+  animation: none;
+  rotate: 28deg;
+  filter: grayscale(0.7) brightness(0.9);
+}
+
+.muyu--error .muyu__eyes {
+  animation: none;
+  scale: 1 0.6;
+  translate: 0 1%;
+}
+
+.muyu--error .muyu__arm-right {
+  animation: none;
+  rotate: 5deg;
+}
+
+/* ---------- Animaciones ---------- */
+
+@keyframes muyu-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2%); }
+}
+
+@keyframes muyu-hop {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4%); }
+}
+
+@keyframes muyu-sway {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(6deg); }
+}
+
+@keyframes muyu-sprout-bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12, 0.92); }
+}
+
+@keyframes muyu-wave {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-12deg); }
+}
+
+@keyframes muyu-wave-fast {
+  0%, 100% { transform: rotate(4deg); }
+  50% { transform: rotate(-22deg); }
+}
+
+@keyframes muyu-arm-rest {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(4deg); }
+}
+
+@keyframes muyu-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+@keyframes muyu-talk {
+  0%, 100% { transform: scaleY(0.5); }
+  50% { transform: scaleY(1.4); }
+}
+
+@keyframes muyu-sparkle {
+  from { opacity: 0.2; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes muyu-chakana-glow {
+  0%, 100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
+  50% { filter: brightness(1.5) drop-shadow(0 0 6px #8fd14f); }
+}
+
+/* ---------- Accesibilidad ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .muyu *,
+  .muyu__float {
+    animation: none !important;
+    transition: none;
+  }
+
+  /* Se mantienen visibles las señales de estado, sin movimiento. */
+  .muyu--speaking .muyu__mouth,
+  .muyu--happy .muyu__sparkles {
+    opacity: 1;
+  }
+
+  .muyu--thinking .muyu__chakana {
+    filter: brightness(1.4) drop-shadow(0 0 6px #8fd14f);
+  }
+}

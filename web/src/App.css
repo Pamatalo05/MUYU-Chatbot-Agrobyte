@@ -1,0 +1,95 @@
+:root {
+  --muyu-cream: #f6f1e4;
+  --muyu-dark: #1f4a2c;
+  --muyu-lime: #8fd14f;
+  --muyu-chakana: #3c8d3a;
+  --muyu-bg: #dff2cc;
+  --muyu-yellow: #f5c518;
+  --danger: #c0392b;
+
+  font-family: "Nunito", system-ui, sans-serif;
+  color: var(--muyu-dark);
+  background: var(--muyu-bg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  height: 100vh;
+}
+
+.character-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.chat-area {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #ffffff;
+  border-left: 1px solid rgba(31, 74, 44, 0.15);
+}
+
+.chat-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.status {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+}
+
+.status--ok {
+  color: var(--muyu-chakana);
+}
+
+.status--no-key,
+.status--offline {
+  color: var(--danger);
+}
+
+/* Panel de prueba de estados (solo en desarrollo), plegado por defecto. */
+.debug-toggle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: rgba(31, 74, 44, 0.7);
+}
+
+.debug-toggle summary {
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: 40vh 1fr;
+  }
+
+  .character-area .muyu {
+    max-width: 28vh;
+  }
+
+  .chat-area {
+    border-left: none;
+    border-top: 1px solid rgba(31, 74, 44, 0.15);
+  }
+}
