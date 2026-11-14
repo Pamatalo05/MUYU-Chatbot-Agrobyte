@@ -4,6 +4,10 @@
  */
 
 const REEMPLAZOS: [RegExp, string][] = [
+  // "1.450" se lee como decimal en algunas voces: se quita el punto de miles.
+  [/(\d)\.(\d{3})(?!\d)/g, "$1$2"],
+  [/\+\s?(\d)/g, "más $1"],
+  [/(^|[\s(])[-−]\s?(\d)/g, "$1menos $2"],
   [/USD\/ha/g, "dólares por hectárea"],
   [/\bUSD\b/g, "dólares"],
   [/(\d)\s*°C/g, "$1 grados"],

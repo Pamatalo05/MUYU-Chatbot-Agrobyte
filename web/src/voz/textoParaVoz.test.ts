@@ -5,7 +5,7 @@ describe("textoParaVoz", () => {
   it("quita emojis y dice las unidades con palabras", () => {
     const texto = "⚠️ Cuidado\n🌧️ Lluvia: 152 mm (+22 %).\nMargen estimado: unos 750 USD/ha (fuente: INIAP / FAO GAEZ).";
     expect(textoParaVoz(texto)).toBe(
-      "Cuidado. Lluvia: 152 milímetros (+22 por ciento). Margen estimado: unos 750 dólares por hectárea (fuente: INIAP o FAO GAEZ).",
+      "Cuidado. Lluvia: 152 milímetros (más 22 por ciento). Margen estimado: unos 750 dólares por hectárea (fuente: INIAP o FAO GAEZ).",
     );
   });
 
@@ -14,6 +14,14 @@ describe("textoParaVoz", () => {
       "de 21 a 38 grados, a 5 metros de altura, verdor de 43.",
     );
     expect(textoParaVoz("En 5 ha la lluvia ha bajado")).toBe("En 5 hectáreas la lluvia ha bajado.");
+  });
+});
+
+describe("números en voz", () => {
+  it("lee miles sin punto y los signos con palabras", () => {
+    expect(textoParaVoz("Ganancia: unos 1.250 USD; lluvia (−34 %) y temperatura +2 °C")).toBe(
+      "Ganancia: unos 1250 dólares; lluvia (menos 34 por ciento) y temperatura más 2 grados.",
+    );
   });
 });
 

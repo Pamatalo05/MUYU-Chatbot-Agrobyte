@@ -28,6 +28,23 @@ const numero = (valor: number, decimales = 0) =>
 
 const conSigno = (valor: number, decimales = 0) => (valor > 0 ? "+" : "") + numero(valor, decimales);
 
+/**
+ * Frases de apertura cálidas. Se elige una según la pregunta (siempre la misma para
+ * la misma pregunta, así las pruebas son estables) para que Muyu no suene repetitivo.
+ */
+const APERTURAS = [
+  "¡Hey, muy buena pregunta! 🌱",
+  "¡Claro que sí, te ayudo!",
+  "¡Qué buena pregunta!",
+  "¡Con gusto te cuento!",
+  "¡Buenísima pregunta!",
+];
+
+export function apertura(pregunta: string, accion: string): string {
+  const semilla = [...`${pregunta}|${accion}`].reduce((total, letra) => total + letra.charCodeAt(0), 0);
+  return APERTURAS[semilla % APERTURAS.length];
+}
+
 /** "Fréjol caupí / tumbe" → "fréjol caupí"; "Papa (INIAP-Fripapa)" → "papa" */
 const nombreCorto = (nombre: string) => nombre.split(" (")[0].split(" / ")[0].toLowerCase();
 
@@ -46,7 +63,7 @@ const BALANCE_TEXTO: Record<Balance, string> = {
 
 /** Sin internet solo entiende ciertos temas: ofrece las preguntas más parecidas. */
 const noEntiendo = (pregunta: string): ChatReply => ({
-  text: "Sin internet todavía no entiendo preguntas así. Te sugiero estas:",
+  text: "¡Uy! Sin internet todavía no entiendo preguntas así, pero te sugiero estas:",
   emotion: "neutral",
   sugerencias: sugerirPreguntas(pregunta),
 });
@@ -59,18 +76,20 @@ export function responderOffline(
 ): ChatReply {
   if (!accion && esTemaVetado(pregunta)) return respuestaFueraDeTema(pregunta);
   const tema = accion ?? detectarAccion(pregunta);
-  switch (tema) {
-    case "rotacion":
-      return responderRotacion(paquete, contexto);
-    case "urea":
-      return responderUrea(paquete, contexto);
-    case "enso":
-      return responderEnso(paquete, contexto);
-    case "resumen":
-      return responderResumen(paquete, contexto);
-    default:
-      return noEntiendo(pregunta);
-  }
+  if (!tema) return noEntiendo(pregunta);
+
+  const RESPUESTAS = { rotacion: responderRotacion, urea: responderUrea, enso: responderEnso, resumen: responderResumen };
+  const respuesta = RESPUESTAS[tema](paquete, contexto);
+  // Ante un riesgo alto no se abre con "¡Hey!": primero va el aviso, con tono serio.
+  if (respuesta.text.startsWith("⚠️")) return respuesta;
+  return { ...respuesta, text: `${apertura(pregunta, tema)}\n${respuesta.text}` };
+}
+
+/** Solo la ganancia por vender; el ahorro en urea ya va en el "Por qué" (no es plata que te pagan). */
+function ganancia(r: { ingreso_bruto_ha: number; costo_insumos_ha: number; fuente: string }): string {
+  if (r.ingreso_bruto_ha === 0) return `No se vende: es abono verde para recuperar la tierra (fuente: ${r.fuente}).`;
+  const venta = numero(r.ingreso_bruto_ha - r.costo_insumos_ha);
+  return `Ganancia aproximada: unos ${venta} USD por hectárea, ya descontados los insumos (fuente: ${r.fuente}).`;
 }
 
 function responderRotacion(paquete: PaqueteCanton, contexto: MuyuContexto): ChatReply {
@@ -91,7 +110,7 @@ function responderRotacion(paquete: PaqueteCanton, contexto: MuyuContexto): Chat
   lineas.push(
     `Después de cosechar ${previo} en ${canton} (${CLIMA_TEXTO[escenario]}), te recomiendo ${nombreCorto(primera.nombre)}.`,
     `Por qué: ${primera.razones.slice(0, 2).join(" y ")}.`,
-    `Margen estimado: unos ${numero(primera.margen_neto_ha)} USD/ha (fuente: ${primera.fuente}).`,
+    ganancia(primera),
   );
   if (otras.length > 0) lineas.push(`Otras opciones: ${otras.map((r) => nombreCorto(r.nombre)).join(" y ")}.`);
   else if (avisos.length > 0) lineas.push(avisos[0]);
@@ -101,22 +120,24 @@ function responderRotacion(paquete: PaqueteCanton, contexto: MuyuContexto): Chat
 
 function responderUrea(paquete: PaqueteCanton, contexto: MuyuContexto): ChatReply {
   const { recomendaciones } = recomendarRotacion(paquete, contexto);
-  const mejor = [...recomendaciones].sort((a, b) => b.ahorro_urea_ha - a.ahorro_urea_ha)[0];
+  const conAhorro = recomendaciones.filter((r) => r.ahorro_urea_ha > 0);
+  // Primero un cultivo que además se vende; el abono verde solo si no hay otro.
+  const mejor =
+    [...conAhorro].filter((r) => r.ingreso_bruto_ha > 0).sort((a, b) => b.ahorro_urea_ha - a.ahorro_urea_ha)[0] ??
+    conAhorro[0];
 
-  if (!mejor || mejor.ahorro_urea_ha === 0) {
+  if (!mejor) {
     return {
-      text: "Con las opciones que hay para tu cantón y escenario, no encuentro ahorro en urea. Te conviene revisar otra rotación.",
+      text: "Con las opciones que hay para tu cantón y este clima, no encuentro ahorro en urea.\nTe conviene mirar otra rotación.",
       emotion: "neutral",
     };
   }
-  const fija = paquete.cultivos.find((c) => c.id === mejor.id)?.fija_nitrogeno;
-  return {
-    text:
-      `Si siembras ${nombreCorto(mejor.nombre)}, ahorras unos ${numero(mejor.ahorro_urea_ha)} USD por hectárea en urea` +
-      (fija ? " porque fija nitrógeno en el suelo." : ".") +
-      ` En 5 hectáreas serían ${numero(mejor.ahorro_urea_ha * 5)} USD.`,
-    emotion: "happy",
-  };
+  const lineas = [
+    `Si siembras ${nombreCorto(mejor.nombre)}, ese cultivo deja nitrógeno en la tierra.`,
+    `Así el siguiente cultivo necesita menos urea: ahorras unos ${numero(mejor.ahorro_urea_ha)} USD por hectárea.`,
+    "Es un cálculo aproximado; cuánto ahorras de verdad depende de tu suelo y de cuánta urea usas hoy.",
+  ];
+  return { text: lineas.join("\n"), emotion: "happy" };
 }
 
 function responderEnso(paquete: PaqueteCanton, contexto: MuyuContexto): ChatReply {

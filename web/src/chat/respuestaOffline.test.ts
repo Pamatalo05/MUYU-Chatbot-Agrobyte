@@ -26,19 +26,32 @@ describe("responderOffline fuera de tema", () => {
   });
 });
 
+describe("tono de Muyu", () => {
+  it("abre con una frase cálida, salvo ante un riesgo alto", () => {
+    const normal = responderOffline(paquete, daule, "¿qué siembro?", "rotacion");
+    expect(/^¡.+!/.test(normal.text)).toBe(true);
+    const riesgo = responderOffline(paquete, { ...daule, escenario: "el_nino" }, "", "rotacion");
+    expect(riesgo.text.startsWith("⚠️")).toBe(true);
+  });
+});
+
 describe("responderOffline", () => {
-  it("rotación: recomienda soya tras arroz en Neutro, con margen y fuente", () => {
+  it("rotación: recomienda soya tras arroz en Neutro, con ganancia realista y fuente", () => {
     const r = responderOffline(paquete, daule, "", "rotacion");
     expect(r.text).toContain("soya");
-    expect(r.text).toContain("750 USD/ha");
+    // Ganancia por vender (1190 − 620) separada del ahorro en urea (180).
+    expect(r.text).toContain("570 USD por hectárea");
+    expect(r.text).toContain("180 USD/ha");
     expect(r.text).toContain("INIAP");
     expect(r.emotion).toBe("happy");
   });
 
-  it("urea: calcula el ahorro por hectárea y en 5 hectáreas", () => {
+  it("urea: elige un cultivo que también se vende y no inventa el tamaño de la finca", () => {
     const r = responderOffline(paquete, daule, "", "urea");
-    expect(r.text).toContain("290 USD");
-    expect(r.text).toContain("1.450 USD");
+    expect(r.text).toContain("soya");
+    expect(r.text).toContain("180 USD por hectárea");
+    expect(r.text).toContain("aproximado");
+    expect(r.text).not.toContain("5 hectáreas");
   });
 
   it("ENSO: compara la lluvia y explica el riesgo para sembrar", () => {
@@ -64,7 +77,7 @@ describe("responderOffline", () => {
 
   it("pregunta desconocida: ofrece 3 sugerencias sin inventar", () => {
     const r = responderOffline(paquete, daule, "cuéntame un chiste");
-    expect(r.text).toContain("Te sugiero");
+    expect(r.text).toContain("te sugiero");
     expect(r.sugerencias).toHaveLength(3);
   });
 });

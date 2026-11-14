@@ -20,8 +20,8 @@ export const MARCA_FUERA_DE_TEMA = "[FUERA_DE_TEMA]";
 export function respuestaFueraDeTema(pregunta: string): ChatReply {
   return {
     text:
-      "No estoy diseñado para responder ese tipo de preguntas. " +
-      "Soy Muyu y te ayudo con tu cultivo 🌱 Te sugiero estas:",
+      "¡Uy! No estoy diseñado para responder ese tipo de preguntas. " +
+      "Soy Muyu y lo mío es ayudarte con tu cultivo 🌱 Te sugiero estas:",
     emotion: "neutral",
     sugerencias: sugerirPreguntas(pregunta),
   };
