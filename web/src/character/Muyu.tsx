@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import "./Muyu.css";
 
-export type MuyuState = "idle" | "attentive" | "thinking" | "speaking" | "happy" | "error";
+export type MuyuState = "idle" | "attentive" | "thinking" | "speaking" | "happy" | "worried" | "error";
 
 /** Expresión de los ojos. Coincide con las capas en public/muyu. */
 export type MuyuEyes = "open" | "happy" | "joy";
@@ -12,6 +12,7 @@ export const MUYU_STATES: readonly MuyuState[] = [
   "thinking",
   "speaking",
   "happy",
+  "worried",
   "error",
 ];
 
@@ -31,6 +32,7 @@ const EYES_BY_STATE: Record<MuyuState, MuyuEyes> = {
   thinking: "open",
   speaking: "happy",
   happy: "joy",
+  worried: "open",
   error: "open",
 };
 
@@ -46,12 +48,13 @@ const VIEW_BOX = `0 0 ${CANVAS} ${CANVAS}`;
 const MOUTH = { cx: 640, cy: 632, rx: 22, ry: 7 };
 const EYE_GREEN = "#b0cf2e";
 const SPARKLE_YELLOW = "#f5c518";
+const DROP_BLUE = "#6ec6ff";
 
 const layer = (name: string) => `/muyu/${name}.png`;
 
 /**
  * Muyu armado por capas PNG alineadas (mismo lienzo) más boca y destellos en SVG.
- * Grupos: cuerpo · cabeza (brote, visor, ojos, boca) · brazo derecho (con destellos).
+ * Grupos: cuerpo · cabeza (brote, visor, ojos, gota, boca) · brazo derecho (con destellos).
  */
 export default function Muyu({ state = "idle", eyes, size = 320, className = "" }: MuyuProps) {
   const eyeExpression = eyes ?? EYES_BY_STATE[state];
@@ -78,6 +81,9 @@ export default function Muyu({ state = "idle", eyes, size = 320, className = "" 
             src={layer(EYE_LAYER[eyeExpression])}
             alt=""
           />
+          <svg className="muyu__part muyu__drop" data-part="drop" viewBox={VIEW_BOX} aria-hidden="true">
+            <path d="M835 300 C 815 335, 805 355, 805 372 a 30 30 0 0 0 60 0 c 0 -17 -10 -37 -30 -72 Z" fill={DROP_BLUE} />
+          </svg>
           <svg className="muyu__part muyu__mouth" data-part="mouth" viewBox={VIEW_BOX} aria-hidden="true">
             <ellipse cx={MOUTH.cx} cy={MOUTH.cy} rx={MOUTH.rx} ry={MOUTH.ry} fill={EYE_GREEN} />
           </svg>

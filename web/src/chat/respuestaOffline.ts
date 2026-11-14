@@ -6,6 +6,7 @@ import {
   type Balance,
 } from "../knowledge/kallpaConocimiento";
 import type { MuyuContexto } from "../knowledge/contexto";
+import { evaluarSemaforo } from "../knowledge/semaforo";
 import { ESCENARIO_NOMBRE, type PaqueteCanton } from "../knowledge/types";
 import { detectarAccion, type AccionRapida } from "./preguntasRapidas";
 import type { ChatReply } from "./types";
@@ -74,7 +75,10 @@ function responderRotacion(paquete: PaqueteCanton, contexto: MuyuContexto): Chat
 
   const [primera, ...otras] = recomendaciones;
   const razones = primera.razones.slice(0, 2).join(" y ");
+  const semaforo = evaluarSemaforo(paquete, contexto);
+  const alerta = semaforo.color === "rojo" ? `Cuidado, el riesgo para sembrar es alto: ${semaforo.motivo}. ` : "";
   let texto =
+    alerta +
     `Después de cosechar ${previo} en ${canton}, con escenario ${ESCENARIO_NOMBRE[escenario]}, ` +
     `te recomiendo ${nombreCorto(primera.nombre)}: ${razones}. ` +
     `Deja un margen de unos ${numero(primera.margen_neto_ha)} USD/ha (fuente: ${primera.fuente}).`;
@@ -83,7 +87,7 @@ function responderRotacion(paquete: PaqueteCanton, contexto: MuyuContexto): Chat
   } else if (avisos.length > 0) {
     texto += ` ${avisos[0]}`;
   }
-  return { text: texto, emotion: "happy" };
+  return { text: texto, emotion: alerta ? "neutral" : "happy" };
 }
 
 function responderUrea(paquete: PaqueteCanton, contexto: MuyuContexto): ChatReply {

@@ -76,6 +76,10 @@
   transform-origin: 51% 50%;
 }
 
+.muyu__drop {
+  opacity: 0;
+}
+
 .muyu__sparkles {
   opacity: 0;
   transform-origin: 82% 46%;
@@ -145,6 +149,46 @@
 
 .muyu--happy .muyu__float {
   animation: muyu-hop 0.6s ease-in-out infinite;
+}
+
+/* ---------- Preocupado: semáforo en rojo para sembrar ---------- */
+
+.muyu--worried .muyu__float {
+  animation-duration: 4.5s;
+}
+
+.muyu--worried .muyu__head {
+  rotate: -3deg;
+  translate: 0 0.6%;
+}
+
+.muyu--worried .muyu__sprout {
+  rotate: 14deg;
+  animation-duration: 7s;
+}
+
+.muyu--worried .muyu__eyes {
+  scale: 1 0.8;
+  translate: 0 0.8%;
+}
+
+.muyu--worried .muyu__mouth {
+  opacity: 1;
+  scale: 0.8 0.45;
+}
+
+.muyu--worried .muyu__drop {
+  opacity: 1;
+  animation: muyu-drop 2.2s ease-in infinite;
+}
+
+.muyu--worried .muyu__arm-right {
+  animation: none;
+  rotate: 4deg;
+}
+
+.muyu--worried .muyu__chakana {
+  animation: muyu-chakana-alert 1.8s ease-in-out infinite;
 }
 
 /* ---------- Error: el brote se marchita ---------- */
@@ -228,6 +272,17 @@
   to { opacity: 1; transform: scale(1.05); }
 }
 
+@keyframes muyu-drop {
+  0% { transform: translateY(-1%); opacity: 0; }
+  20%, 70% { opacity: 1; }
+  100% { transform: translateY(4%); opacity: 0; }
+}
+
+@keyframes muyu-chakana-alert {
+  0%, 100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
+  50% { filter: brightness(1.2) drop-shadow(0 0 7px #f5a524); }
+}
+
 @keyframes muyu-chakana-glow {
   0%, 100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
   50% { filter: brightness(1.5) drop-shadow(0 0 6px #8fd14f); }
@@ -244,8 +299,13 @@
 
   /* Se mantienen visibles las señales de estado, sin movimiento. */
   .muyu--speaking .muyu__mouth,
-  .muyu--happy .muyu__sparkles {
+  .muyu--happy .muyu__sparkles,
+  .muyu--worried .muyu__drop {
     opacity: 1;
+  }
+
+  .muyu--worried .muyu__chakana {
+    filter: drop-shadow(0 0 7px #f5a524);
   }
 
   .muyu--thinking .muyu__chakana {

@@ -254,10 +254,10 @@ function puntuar(cultivo: Cultivo, previo: Cultivo, balance: BalanceHidrico): Re
   if (balance.balance === "deficit") {
     puntaje += PUNTOS.AGUA_DEFICIT[cultivo.demanda_agua];
     if (cultivo.demanda_agua === "baja") {
-      razones.push(`necesita poca agua y se espera ${Math.abs(balance.cambio_pct)} % menos lluvia`);
+      razones.push(`necesita poca agua (se espera ${Math.abs(balance.cambio_pct)} % menos lluvia)`);
     }
   } else if (balance.balance === "exceso") {
-    razones.push(`tolera el encharcamiento y se espera ${balance.cambio_pct} % más lluvia`);
+    razones.push(`tolera el encharcamiento (se espera ${balance.cambio_pct} % más lluvia)`);
   }
 
   if (cultivo.fija_nitrogeno) {

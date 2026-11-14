@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import Muyu, { type MuyuState } from "./character/Muyu";
 import MuyuDebugPanel from "./character/MuyuDebugPanel";
 import ChatPanel from "./chat/ChatPanel";
@@ -9,7 +9,9 @@ import type { ChatReply, Responder } from "./chat/types";
 import { useChat } from "./chat/useChat";
 import { useEnLinea } from "./chat/useEnLinea";
 import ContextoSimulado from "./kallpa/ContextoSimulado";
+import SemaforoRiesgo from "./kallpa/SemaforoRiesgo";
 import { CONTEXTO_INICIAL, type MuyuContexto } from "./knowledge/contexto";
+import { evaluarSemaforo } from "./knowledge/semaforo";
 import { usePaquete } from "./knowledge/usePaquete";
 import { deriveMuyuState } from "./state/assistant";
 
@@ -52,7 +54,11 @@ export default function App() {
   // Solo en desarrollo: permite forzar un estado desde el panel de prueba.
   const [forcedState, setForcedState] = useState<MuyuState | null>(null);
 
-  const muyuState = forcedState ?? deriveMuyuState(phase, isUserTyping);
+  const semaforo = useMemo(
+    () => (paquete.estado === "listo" ? evaluarSemaforo(paquete.paquete, contexto) : null),
+    [paquete, contexto],
+  );
+  const muyuState = forcedState ?? deriveMuyuState(phase, isUserTyping, semaforo?.color === "rojo");
 
   return (
     <main className="layout">
@@ -83,6 +89,7 @@ export default function App() {
         {paquete.estado === "listo" && (
           <ContextoSimulado paquete={paquete.paquete} contexto={contexto} onChange={setContexto} />
         )}
+        {semaforo && <SemaforoRiesgo {...semaforo} />}
 
         <ChatPanel
           messages={messages}

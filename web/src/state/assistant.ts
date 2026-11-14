@@ -3,9 +3,10 @@ import type { ChatPhase } from "../chat/types";
 
 /**
  * Traduce lo que pasa en el chat al estado de Muyu.
- * Prioridad: error > feliz > hablando > pensando > atento (escribiendo) > esperando.
+ * Prioridad: error > feliz > hablando > pensando > atento (escribiendo) > preocupado > esperando.
+ * "Preocupado" solo aparece en reposo, cuando el semáforo de siembra está en rojo.
  */
-export function deriveMuyuState(phase: ChatPhase, isUserTyping: boolean): MuyuState {
+export function deriveMuyuState(phase: ChatPhase, isUserTyping: boolean, riesgoAlto = false): MuyuState {
   switch (phase) {
     case "error":
       return "error";
@@ -16,6 +17,7 @@ export function deriveMuyuState(phase: ChatPhase, isUserTyping: boolean): MuyuSt
     case "thinking":
       return "thinking";
     case "idle":
-      return isUserTyping ? "attentive" : "idle";
+      if (isUserTyping) return "attentive";
+      return riesgoAlto ? "worried" : "idle";
   }
 }

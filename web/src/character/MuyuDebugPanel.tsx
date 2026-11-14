@@ -7,6 +7,7 @@ const LABELS: Record<MuyuState, string> = {
   thinking: "Pensando",
   speaking: "Hablando",
   happy: "Feliz",
+  worried: "Preocupado",
   error: "Error",
 };
 

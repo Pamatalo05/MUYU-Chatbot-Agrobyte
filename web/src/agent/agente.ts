@@ -42,6 +42,7 @@ function instrucciones(paquete: PaqueteCanton, { contexto }: PeticionChat): stri
     "Responde en español sencillo, en máximo 3 frases, sin markdown.",
     "Usa SOLO cifras que te devuelvan las herramientas; nunca inventes datos.",
     "Si algo no está en los datos, dilo con honestidad y sugiere qué sí puedes responder.",
+    "Si el semáforo de una herramienta está en rojo, empieza avisando ese riesgo.",
     `Contexto del agricultor: cantón ${canton} (id ${contexto.cantonId}), acaba de cosechar ${previo}` +
       ` (id ${contexto.cultivoPrevioId}), escenario ${ESCENARIO_NOMBRE[contexto.escenario]}` +
       ` (id ${contexto.escenario}), mes ${contexto.mes}. Úsalo si la pregunta no dice otra cosa.`,

@@ -1,4 +1,5 @@
 import { compararEscenarios, recomendarRotacion, resumenCanton } from "../knowledge/kallpaConocimiento";
+import { evaluarSemaforo } from "../knowledge/semaforo";
 import { ESCENARIOS, type Escenario, type PaqueteCanton } from "../knowledge/types";
 
 /** Declaración de una herramienta en el formato de Gemini (function calling). */
@@ -40,7 +41,7 @@ export function declararHerramientas(paquete: PaqueteCanton): DeclaracionHerrami
     },
     {
       name: "recomendar_rotacion",
-      description: "Mejores cultivos para sembrar después del cultivo cosechado en un mes dado, con margen neto, ahorro en urea, fuente y el balance de lluvia de los próximos 3 meses.",
+      description: "Mejores cultivos para sembrar después del cultivo cosechado en un mes dado, con margen neto, ahorro en urea, fuente, balance de lluvia de los próximos 3 meses y semáforo de riesgo.",
       parameters: {
         type: "OBJECT",
         properties: {
@@ -84,16 +85,11 @@ export function ejecutarHerramienta(
       case "resumen_canton":
         if (!esEscenario(args.escenario)) return { error: "escenario inválido" };
         return { ...resumenCanton(paquete, cantonId, args.escenario, mes) };
-      case "recomendar_rotacion":
+      case "recomendar_rotacion": {
         if (!esEscenario(args.escenario)) return { error: "escenario inválido" };
-        return {
-          ...recomendarRotacion(paquete, {
-            cantonId,
-            cultivoPrevioId: texto(args.cultivo_previo_id),
-            escenario: args.escenario,
-            mes,
-          }),
-        };
+        const consulta = { cantonId, cultivoPrevioId: texto(args.cultivo_previo_id), escenario: args.escenario, mes };
+        return { ...recomendarRotacion(paquete, consulta), semaforo: evaluarSemaforo(paquete, consulta) };
+      }
       case "comparar_escenarios":
         return { escenarios: compararEscenarios(paquete, cantonId, mes) };
       default:

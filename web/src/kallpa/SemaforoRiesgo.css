@@ -1,0 +1,51 @@
+.semaforo {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: var(--muyu-dark);
+}
+
+.semaforo__luz {
+  flex: none;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+}
+
+.semaforo strong {
+  white-space: nowrap;
+}
+
+.semaforo__motivo {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.semaforo--verde {
+  background: #e7f5dd;
+}
+
+.semaforo--verde .semaforo__luz {
+  background: #3f9a2f;
+}
+
+.semaforo--amarillo {
+  background: #fff4d6;
+}
+
+.semaforo--amarillo .semaforo__luz {
+  background: #e0a100;
+}
+
+.semaforo--rojo {
+  background: #fde3df;
+}
+
+.semaforo--rojo .semaforo__luz {
+  background: #c8372d;
+}
