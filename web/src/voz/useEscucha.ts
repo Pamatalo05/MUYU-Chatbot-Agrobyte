@@ -29,6 +29,13 @@ const ERRORES: Record<string, string> = {
   network: "Para escucharte necesito internet. Puedes escribir o usar los botones.",
 };
 
+/**
+ * "network" con internet funcionando = el navegador no tiene el servicio de voz
+ * (VS Code, Brave, Opera, Electron, o Google bloqueado por VPN/firewall).
+ */
+const SIN_SERVICIO =
+  "Este navegador no puede reconocer tu voz. Abre Muyu en Google Chrome o Microsoft Edge, o escríbeme.";
+
 export interface Escucha {
   /** El navegador sabe convertir voz en texto (Chrome, Edge, Chrome Android…). */
   disponible: boolean;
@@ -46,6 +53,8 @@ export interface Escucha {
 export function useEscucha(idioma = "es-EC"): Escucha {
   const [escuchando, setEscuchando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Si el navegador no tiene servicio de voz, se oculta el micrófono el resto de la sesión.
+  const [sinServicio, setSinServicio] = useState(false);
   const actual = useRef<Reconocimiento | null>(null);
 
   useEffect(() => () => actual.current?.abort(), []);
@@ -67,7 +76,13 @@ export function useEscucha(idioma = "es-EC"): Escucha {
         alParcial(texto);
       };
       r.onerror = (evento) => {
-        if (evento.error !== "aborted") setError(ERRORES[evento.error] ?? "No pude escucharte. Intenta de nuevo o escribe.");
+        if (evento.error === "aborted") return;
+        if (evento.error === "network" && navigator.onLine) {
+          setSinServicio(true);
+          setError(SIN_SERVICIO);
+          return;
+        }
+        setError(ERRORES[evento.error] ?? "No pude escucharte. Intenta de nuevo o escribe.");
       };
       r.onend = () => {
         actual.current = null;
@@ -83,5 +98,5 @@ export function useEscucha(idioma = "es-EC"): Escucha {
     [idioma],
   );
 
-  return { disponible: constructor() !== null, escuchando, error, iniciar, detener };
+  return { disponible: constructor() !== null && !sinServicio, escuchando, error, iniciar, detener };
 }
