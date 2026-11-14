@@ -1,0 +1,2471 @@
+{
+  "version": "1.0.0",
+  "proyecto": "KallpaSuelo - NASA Space Apps Challenge",
+  "cantones": {
+    "daule": {
+      "nombre": "Daule",
+      "suelo_referencia": "Aluvial fértil (Vertisol)",
+      "altitud_m": 8,
+      "escenarios_climaticos": {
+        "la_nina": [
+          {
+            "mes": 1,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 70.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 85.7
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 73.7,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 85.2
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 84.7,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 84.8
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 32.3,
+            "lluvia_mm_mes": 102.2,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 84.6
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 125.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 88.4
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 151.5,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 90.6
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 92.8
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 28.6,
+            "lluvia_mm_mes": 151.5,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 91.4
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 27.6,
+            "lluvia_mm_mes": 125.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 88.9
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 27.3,
+            "lluvia_mm_mes": 102.2,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.1
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 27.6,
+            "lluvia_mm_mes": 84.7,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 28.6,
+            "lluvia_mm_mes": 73.7,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.0
+          }
+        ],
+        "neutro": [
+          {
+            "mes": 1,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 32.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 33.5,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 32.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 28.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 28.5,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 28.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          }
+        ],
+        "el_nino": [
+          {
+            "mes": 1,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 340.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 34.4,
+            "lluvia_mm_mes": 334.5,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 35.4,
+            "lluvia_mm_mes": 318.6,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 35.7,
+            "lluvia_mm_mes": 293.1,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.8
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 35.4,
+            "lluvia_mm_mes": 260.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 34.4,
+            "lluvia_mm_mes": 221.4,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 221.4,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 260.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 30.7,
+            "lluvia_mm_mes": 293.1,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 318.6,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 334.5,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          }
+        ]
+      }
+    },
+    "quevedo": {
+      "nombre": "Quevedo",
+      "suelo_referencia": "Franco-limoso volcánico",
+      "altitud_m": 74,
+      "escenarios_climaticos": {
+        "la_nina": [
+          {
+            "mes": 1,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 70.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 85.7
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 73.7,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 85.2
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 84.7,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 84.8
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 32.3,
+            "lluvia_mm_mes": 102.2,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 84.6
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 125.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 88.4
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 151.5,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 90.6
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 92.8
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 28.6,
+            "lluvia_mm_mes": 151.5,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 91.4
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 27.6,
+            "lluvia_mm_mes": 125.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 88.9
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 27.3,
+            "lluvia_mm_mes": 102.2,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.1
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 27.6,
+            "lluvia_mm_mes": 84.7,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 28.6,
+            "lluvia_mm_mes": 73.7,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.0
+          }
+        ],
+        "neutro": [
+          {
+            "mes": 1,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 32.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 33.5,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 32.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 28.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 28.5,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 28.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          }
+        ],
+        "el_nino": [
+          {
+            "mes": 1,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 340.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 34.4,
+            "lluvia_mm_mes": 334.5,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 35.4,
+            "lluvia_mm_mes": 318.6,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 35.7,
+            "lluvia_mm_mes": 293.1,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.8
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 35.4,
+            "lluvia_mm_mes": 260.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 34.4,
+            "lluvia_mm_mes": 221.4,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 221.4,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 260.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 30.7,
+            "lluvia_mm_mes": 293.1,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 318.6,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 334.5,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          }
+        ]
+      }
+    },
+    "samborondon": {
+      "nombre": "Samborondón",
+      "suelo_referencia": "Arcilloso pesado de plano aluvial",
+      "altitud_m": 5,
+      "escenarios_climaticos": {
+        "la_nina": [
+          {
+            "mes": 1,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 70.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 85.7
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 73.7,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 85.2
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 84.7,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 84.8
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 32.3,
+            "lluvia_mm_mes": 102.2,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 84.6
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 125.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 88.4
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 151.5,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 90.6
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 92.8
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 28.6,
+            "lluvia_mm_mes": 151.5,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 91.4
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 27.6,
+            "lluvia_mm_mes": 125.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 88.9
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 27.3,
+            "lluvia_mm_mes": 102.2,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.1
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 27.6,
+            "lluvia_mm_mes": 84.7,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 28.6,
+            "lluvia_mm_mes": 73.7,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.0
+          }
+        ],
+        "neutro": [
+          {
+            "mes": 1,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 32.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 33.5,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 32.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 28.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 28.5,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 28.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          }
+        ],
+        "el_nino": [
+          {
+            "mes": 1,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 340.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 34.4,
+            "lluvia_mm_mes": 334.5,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 35.4,
+            "lluvia_mm_mes": 318.6,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 35.7,
+            "lluvia_mm_mes": 293.1,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.8
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 35.4,
+            "lluvia_mm_mes": 260.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 34.4,
+            "lluvia_mm_mes": 221.4,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 221.4,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 260.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 30.7,
+            "lluvia_mm_mes": 293.1,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 318.6,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 334.5,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          }
+        ]
+      }
+    },
+    "babahoyo": {
+      "nombre": "Babahoyo",
+      "suelo_referencia": "Hidromórfico aluvial",
+      "altitud_m": 8,
+      "escenarios_climaticos": {
+        "la_nina": [
+          {
+            "mes": 1,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 70.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 85.7
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 73.7,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 85.2
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 84.7,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 84.8
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 32.3,
+            "lluvia_mm_mes": 102.2,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 84.6
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 125.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 88.4
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 151.5,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 90.6
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 92.8
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 28.6,
+            "lluvia_mm_mes": 151.5,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 91.4
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 27.6,
+            "lluvia_mm_mes": 125.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 88.9
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 27.3,
+            "lluvia_mm_mes": 102.2,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.1
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 27.6,
+            "lluvia_mm_mes": 84.7,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 28.6,
+            "lluvia_mm_mes": 73.7,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.0
+          }
+        ],
+        "neutro": [
+          {
+            "mes": 1,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 32.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 33.5,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 32.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 28.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 28.5,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 28.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          }
+        ],
+        "el_nino": [
+          {
+            "mes": 1,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 340.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 34.4,
+            "lluvia_mm_mes": 334.5,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 35.4,
+            "lluvia_mm_mes": 318.6,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 35.7,
+            "lluvia_mm_mes": 293.1,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.8
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 35.4,
+            "lluvia_mm_mes": 260.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 34.4,
+            "lluvia_mm_mes": 221.4,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 221.4,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 260.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 30.7,
+            "lluvia_mm_mes": 293.1,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 318.6,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 334.5,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          }
+        ]
+      }
+    },
+    "chone": {
+      "nombre": "Chone",
+      "suelo_referencia": "Vertisol arcilloso",
+      "altitud_m": 20,
+      "escenarios_climaticos": {
+        "la_nina": [
+          {
+            "mes": 1,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 70.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 85.7
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 73.7,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 85.2
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 84.7,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 84.8
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 32.3,
+            "lluvia_mm_mes": 102.2,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 84.6
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 125.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 88.4
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 151.5,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 90.6
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 92.8
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 28.6,
+            "lluvia_mm_mes": 151.5,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 91.4
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 27.6,
+            "lluvia_mm_mes": 125.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 88.9
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 27.3,
+            "lluvia_mm_mes": 102.2,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.1
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 27.6,
+            "lluvia_mm_mes": 84.7,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 28.6,
+            "lluvia_mm_mes": 73.7,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.0
+          }
+        ],
+        "neutro": [
+          {
+            "mes": 1,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 32.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 33.5,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 32.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 28.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 28.5,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 28.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          }
+        ],
+        "el_nino": [
+          {
+            "mes": 1,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 340.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 34.4,
+            "lluvia_mm_mes": 334.5,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 35.4,
+            "lluvia_mm_mes": 318.6,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 35.7,
+            "lluvia_mm_mes": 293.1,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.8
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 35.4,
+            "lluvia_mm_mes": 260.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 34.4,
+            "lluvia_mm_mes": 221.4,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 221.4,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 260.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 30.7,
+            "lluvia_mm_mes": 293.1,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 318.6,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 334.5,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          }
+        ]
+      }
+    },
+    "rocafuerte": {
+      "nombre": "Rocafuerte",
+      "suelo_referencia": "Franco-arenoso aluvial",
+      "altitud_m": 15,
+      "escenarios_climaticos": {
+        "la_nina": [
+          {
+            "mes": 1,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 70.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 85.7
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 73.7,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 85.2
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 84.7,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 84.8
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 32.3,
+            "lluvia_mm_mes": 102.2,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 84.6
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 125.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 88.4
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 151.5,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 90.6
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 92.8
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 28.6,
+            "lluvia_mm_mes": 151.5,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 91.4
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 27.6,
+            "lluvia_mm_mes": 125.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 88.9
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 27.3,
+            "lluvia_mm_mes": 102.2,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.1
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 27.6,
+            "lluvia_mm_mes": 84.7,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 28.6,
+            "lluvia_mm_mes": 73.7,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.0
+          }
+        ],
+        "neutro": [
+          {
+            "mes": 1,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 32.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 33.5,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 32.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 28.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 28.5,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 28.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          }
+        ],
+        "el_nino": [
+          {
+            "mes": 1,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 340.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 34.4,
+            "lluvia_mm_mes": 334.5,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 35.4,
+            "lluvia_mm_mes": 318.6,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 35.7,
+            "lluvia_mm_mes": 293.1,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.8
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 35.4,
+            "lluvia_mm_mes": 260.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 34.4,
+            "lluvia_mm_mes": 221.4,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 221.4,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 260.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 30.7,
+            "lluvia_mm_mes": 293.1,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 318.6,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 334.5,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          }
+        ]
+      }
+    },
+    "latacunga": {
+      "nombre": "Latacunga",
+      "suelo_referencia": "Andosol volcánico andino",
+      "altitud_m": 2750,
+      "escenarios_climaticos": {
+        "la_nina": [
+          {
+            "mes": 1,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 70.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 85.7
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 73.7,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 85.2
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 84.7,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 84.8
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 32.3,
+            "lluvia_mm_mes": 102.2,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 84.6
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 125.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 88.4
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 151.5,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 90.6
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 92.8
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 28.6,
+            "lluvia_mm_mes": 151.5,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 91.4
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 27.6,
+            "lluvia_mm_mes": 125.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 88.9
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 27.3,
+            "lluvia_mm_mes": 102.2,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.1
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 27.6,
+            "lluvia_mm_mes": 84.7,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 28.6,
+            "lluvia_mm_mes": 73.7,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.0
+          }
+        ],
+        "neutro": [
+          {
+            "mes": 1,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 32.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 33.5,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 32.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 28.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 28.5,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 28.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          }
+        ],
+        "el_nino": [
+          {
+            "mes": 1,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 340.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 34.4,
+            "lluvia_mm_mes": 334.5,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 35.4,
+            "lluvia_mm_mes": 318.6,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 35.7,
+            "lluvia_mm_mes": 293.1,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.8
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 35.4,
+            "lluvia_mm_mes": 260.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 34.4,
+            "lluvia_mm_mes": 221.4,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 221.4,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 260.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 30.7,
+            "lluvia_mm_mes": 293.1,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 318.6,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 334.5,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          }
+        ]
+      }
+    },
+    "riobamba": {
+      "nombre": "Riobamba",
+      "suelo_referencia": "Regosol semiárido interandino",
+      "altitud_m": 2754,
+      "escenarios_climaticos": {
+        "la_nina": [
+          {
+            "mes": 1,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 70.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 85.7
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 73.7,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 85.2
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 84.7,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 84.8
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 32.3,
+            "lluvia_mm_mes": 102.2,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 84.6
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 125.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 88.4
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 151.5,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 90.6
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 92.8
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 28.6,
+            "lluvia_mm_mes": 151.5,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 91.4
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 27.6,
+            "lluvia_mm_mes": 125.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 88.9
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 27.3,
+            "lluvia_mm_mes": 102.2,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.1
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 27.6,
+            "lluvia_mm_mes": 84.7,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 28.6,
+            "lluvia_mm_mes": 73.7,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.17,
+            "rendimiento_predicho_rf": 86.0
+          }
+        ],
+        "neutro": [
+          {
+            "mes": 1,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 32.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 33.5,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 32.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 28.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 28.5,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 28.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 29.8,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.35,
+            "rendimiento_predicho_rf": 100.0
+          }
+        ],
+        "el_nino": [
+          {
+            "mes": 1,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 340.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 2,
+            "temp_max_c": 34.4,
+            "lluvia_mm_mes": 334.5,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 3,
+            "temp_max_c": 35.4,
+            "lluvia_mm_mes": 318.6,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 4,
+            "temp_max_c": 35.7,
+            "lluvia_mm_mes": 293.1,
+            "ndvi": 0.77,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.8
+          },
+          {
+            "mes": 5,
+            "temp_max_c": 35.4,
+            "lluvia_mm_mes": 260.0,
+            "ndvi": 0.75,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 6,
+            "temp_max_c": 34.4,
+            "lluvia_mm_mes": 221.4,
+            "ndvi": 0.71,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 7,
+            "temp_max_c": 33.2,
+            "lluvia_mm_mes": 180.0,
+            "ndvi": 0.65,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 8,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 221.4,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 9,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 260.0,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 99.9
+          },
+          {
+            "mes": 10,
+            "temp_max_c": 30.7,
+            "lluvia_mm_mes": 293.1,
+            "ndvi": 0.53,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 11,
+            "temp_max_c": 31.0,
+            "lluvia_mm_mes": 318.6,
+            "ndvi": 0.55,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          },
+          {
+            "mes": 12,
+            "temp_max_c": 32.0,
+            "lluvia_mm_mes": 334.5,
+            "ndvi": 0.59,
+            "humedad_raiz": 0.53,
+            "rendimiento_predicho_rf": 100.0
+          }
+        ]
+      }
+    }
+  },
+  "cultivos": [
+    {
+      "id": "arroz",
+      "nombre": "Arroz (Oryza sativa)",
+      "tipo": "cereal",
+      "dias_ciclo": 120,
+      "ahorro_urea_ha": 0,
+      "ingreso_bruto_ha": 1250.0,
+      "fija_nitrogeno": false,
+      "demanda_agua": "alta",
+      "tolera_encharcamiento": true
+    },
+    {
+      "id": "maiz_duro",
+      "nombre": "Maíz Duro (Zea mays)",
+      "tipo": "cereal",
+      "dias_ciclo": 135,
+      "ahorro_urea_ha": 25,
+      "ingreso_bruto_ha": 1100.0,
+      "fija_nitrogeno": false,
+      "demanda_agua": "media",
+      "tolera_encharcamiento": false
+    },
+    {
+      "id": "soya",
+      "nombre": "Soya (Glycine max)",
+      "tipo": "leguminosa",
+      "dias_ciclo": 110,
+      "ahorro_urea_ha": 85,
+      "ingreso_bruto_ha": 980.0,
+      "fija_nitrogeno": true,
+      "demanda_agua": "media",
+      "tolera_encharcamiento": false
+    },
+    {
+      "id": "sorgo",
+      "nombre": "Sorgo Forrajero (Sorghum bicolor)",
+      "tipo": "cereal_resiliente",
+      "dias_ciclo": 100,
+      "ahorro_urea_ha": 40,
+      "ingreso_bruto_ha": 850.0,
+      "fija_nitrogeno": false,
+      "demanda_agua": "baja",
+      "tolera_encharcamiento": true
+    },
+    {
+      "id": "frejol_caupi",
+      "nombre": "Fréjol Caupí (Vigna unguiculata)",
+      "tipo": "leguminosa",
+      "dias_ciclo": 85,
+      "ahorro_urea_ha": 65,
+      "ingreso_bruto_ha": 920.0,
+      "fija_nitrogeno": true,
+      "demanda_agua": "baja",
+      "tolera_encharcamiento": false
+    }
+  ]
+}
