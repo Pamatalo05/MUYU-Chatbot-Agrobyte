@@ -1,4 +1,6 @@
-import Muyu from "./character/Muyu";
+import { useState } from "react";
+import Muyu, { type MuyuState } from "./character/Muyu";
+import MuyuDebugPanel from "./character/MuyuDebugPanel";
 import ChatPanel from "./chat/ChatPanel";
 import { useChat } from "./chat/useChat";
 import { useBackendHealth, type BackendStatus } from "./useBackendHealth";
@@ -13,12 +15,20 @@ const STATUS_TEXT: Record<BackendStatus, string> = {
 export default function App() {
   const status = useBackendHealth();
   const { messages, isThinking, send } = useChat();
+  // Solo en desarrollo: permite forzar un estado desde el panel de prueba.
+  const [forcedState, setForcedState] = useState<MuyuState | null>(null);
+
+  // Bloque 8 conectará el resto de estados (attentive, speaking, happy, error).
+  const chatState: MuyuState = isThinking ? "thinking" : "idle";
+  const muyuState = forcedState ?? chatState;
 
   return (
     <main className="layout">
       <section className="character-area" aria-label="Personaje Muyu">
-        {/* Bloques 7 y 8: los estados de Muyu se conectarán al chat */}
-        <Muyu state={isThinking ? "thinking" : "idle"} size={340} />
+        <Muyu state={muyuState} size={340} />
+        {import.meta.env.DEV && (
+          <MuyuDebugPanel value={forcedState} onChange={setForcedState} />
+        )}
       </section>
 
       <section className="chat-area" aria-label="Conversación">

@@ -1,0 +1,28 @@
+.muyu-debug {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  max-width: 360px;
+}
+
+.muyu-debug button {
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--muyu-dark);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--muyu-dark);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.muyu-debug button[aria-pressed="true"] {
+  background: var(--muyu-dark);
+  color: #ffffff;
+}
+
+.muyu-debug button:focus-visible {
+  outline: 3px solid var(--muyu-lime);
+  outline-offset: 1px;
+}

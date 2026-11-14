@@ -1,11 +1,19 @@
 import type { CSSProperties } from "react";
 import "./Muyu.css";
 
-/** Estados de Muyu. Las animaciones de cada uno se completan en el Bloque 7. */
 export type MuyuState = "idle" | "attentive" | "thinking" | "speaking" | "happy" | "error";
 
 /** Expresión de los ojos. Coincide con las capas en public/muyu. */
 export type MuyuEyes = "open" | "happy" | "joy";
+
+export const MUYU_STATES: readonly MuyuState[] = [
+  "idle",
+  "attentive",
+  "thinking",
+  "speaking",
+  "happy",
+  "error",
+];
 
 interface MuyuProps {
   /** Estado actual; agrega la clase muyu--<estado>. */
@@ -32,17 +40,18 @@ const EYE_LAYER: Record<MuyuEyes, string> = {
   joy: "eyes-closed-happy",
 };
 
-/** Lienzo original de las capas: 1254 × 1254 px. */
+/** Lienzo original de las capas: 1254 × 1254 px. Coordenadas SVG en ese lienzo. */
 const CANVAS = 1254;
-/** Boca: centrada bajo los ojos, dentro del visor (coordenadas del lienzo). */
+const VIEW_BOX = `0 0 ${CANVAS} ${CANVAS}`;
 const MOUTH = { cx: 640, cy: 632, rx: 22, ry: 7 };
 const EYE_GREEN = "#b0cf2e";
+const SPARKLE_YELLOW = "#f5c518";
 
 const layer = (name: string) => `/muyu/${name}.png`;
 
 /**
- * Muyu armado por capas PNG alineadas (mismo lienzo) más una boca en SVG.
- * Cada parte tiene data-part para animarla con CSS.
+ * Muyu armado por capas PNG alineadas (mismo lienzo) más boca y destellos en SVG.
+ * Grupos: cuerpo · cabeza (brote, visor, ojos, boca) · brazo derecho (con destellos).
  */
 export default function Muyu({ state = "idle", eyes, size = 320, className = "" }: MuyuProps) {
   const eyeExpression = eyes ?? EYES_BY_STATE[state];
@@ -56,26 +65,34 @@ export default function Muyu({ state = "idle", eyes, size = 320, className = "" 
     >
       <div className="muyu__float">
         <img className="muyu__part muyu__arm-left" data-part="arm-left" src={layer("arm-left")} alt="" />
-        <img className="muyu__part muyu__sprout" data-part="sprout" src={layer("sprout")} alt="" />
         <img className="muyu__part" data-part="body" src={layer("body")} alt="" />
         <img className="muyu__part muyu__chakana" data-part="chakana" src={layer("chakana")} alt="" />
-        <img className="muyu__part" data-part="head" src={layer("head")} alt="" />
-        <img className="muyu__part" data-part="visor" src={layer("visor")} alt="" />
-        <img
-          className={`muyu__part muyu__eyes muyu__eyes--${eyeExpression}`}
-          data-part="eyes"
-          src={layer(EYE_LAYER[eyeExpression])}
-          alt=""
-        />
-        <svg
-          className="muyu__part muyu__mouth"
-          data-part="mouth"
-          viewBox={`0 0 ${CANVAS} ${CANVAS}`}
-          aria-hidden="true"
-        >
-          <ellipse cx={MOUTH.cx} cy={MOUTH.cy} rx={MOUTH.rx} ry={MOUTH.ry} fill={EYE_GREEN} />
-        </svg>
-        <img className="muyu__part muyu__arm-right" data-part="arm-right" src={layer("arm-right")} alt="" />
+
+        <div className="muyu__part muyu__head" data-part="head-group">
+          <img className="muyu__part muyu__sprout" data-part="sprout" src={layer("sprout")} alt="" />
+          <img className="muyu__part" data-part="head" src={layer("head")} alt="" />
+          <img className="muyu__part" data-part="visor" src={layer("visor")} alt="" />
+          <img
+            className={`muyu__part muyu__eyes muyu__eyes--${eyeExpression}`}
+            data-part="eyes"
+            src={layer(EYE_LAYER[eyeExpression])}
+            alt=""
+          />
+          <svg className="muyu__part muyu__mouth" data-part="mouth" viewBox={VIEW_BOX} aria-hidden="true">
+            <ellipse cx={MOUTH.cx} cy={MOUTH.cy} rx={MOUTH.rx} ry={MOUTH.ry} fill={EYE_GREEN} />
+          </svg>
+        </div>
+
+        <div className="muyu__part muyu__arm-right" data-part="arm-right-group">
+          <img className="muyu__part" data-part="arm-right" src={layer("arm-right")} alt="" />
+          <svg className="muyu__part muyu__sparkles" data-part="sparkles" viewBox={VIEW_BOX} aria-hidden="true">
+            <g stroke={SPARKLE_YELLOW} strokeWidth="16" strokeLinecap="round">
+              <line x1="985" y1="545" x2="995" y2="500" />
+              <line x1="1015" y1="575" x2="1050" y2="545" />
+              <line x1="1025" y1="618" x2="1068" y2="612" />
+            </g>
+          </svg>
+        </div>
       </div>
     </div>
   );
