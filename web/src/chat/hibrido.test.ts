@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { AVISO_RESPALDO, elegirModo, PAUSA_TRAS_FALLO_MS, responderHibrido } from "./hibrido";
+import { elegirModo, PAUSA_TRAS_FALLO_MS, responderHibrido } from "./hibrido";
 import type { ChatReply } from "./types";
 
 const base = { enLinea: true, ultimoFalloMs: null, ahoraMs: 1_000_000 };
@@ -28,11 +28,11 @@ describe("responderHibrido", () => {
     expect(r).toEqual({ reply: { text: "Gemini", emotion: "neutral" }, modo: "en_vivo", fallo: false });
   });
 
-  it("cae al modo campo si Gemini falla, avisando al usuario", async () => {
+  it("cae al modo campo si Gemini falla, sin ensuciar la respuesta", async () => {
     const r = await responderHibrido("en_vivo", async () => { throw new Error("503"); }, campo);
     expect(r.modo).toBe("campo");
     expect(r.fallo).toBe(true);
-    expect(r.reply.text).toBe(AVISO_RESPALDO + "Siembra soya.");
+    expect(r.reply.text).toBe("Siembra soya.");
   });
 
   it("en modo campo no llama a Gemini", async () => {

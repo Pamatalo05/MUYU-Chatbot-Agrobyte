@@ -1,51 +1,56 @@
 .semaforo {
   display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin: 0;
-  padding: 0.35rem 0.6rem;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  color: var(--muyu-dark);
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 14px;
+  border-left: 6px solid var(--semaforo-color);
+  background: var(--semaforo-fondo);
 }
 
 .semaforo__luz {
   flex: none;
-  width: 0.7rem;
-  height: 0.7rem;
+  width: 0.85rem;
+  height: 0.85rem;
+  margin-top: 0.2rem;
   border-radius: 50%;
+  background: var(--semaforo-color);
 }
 
-.semaforo strong {
-  white-space: nowrap;
+.semaforo__texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.35;
 }
 
-.semaforo__motivo {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+.semaforo__texto strong {
+  font-size: 0.95rem;
 }
 
 .semaforo--verde {
-  background: #e7f5dd;
-}
-
-.semaforo--verde .semaforo__luz {
-  background: #3f9a2f;
+  --semaforo-color: var(--verde-hoja);
+  --semaforo-fondo: #eef6e4;
 }
 
 .semaforo--amarillo {
-  background: #fff4d6;
-}
-
-.semaforo--amarillo .semaforo__luz {
-  background: #e0a100;
+  --semaforo-color: var(--oro);
+  --semaforo-fondo: #fdf3d7;
 }
 
 .semaforo--rojo {
-  background: #fde3df;
+  --semaforo-color: #c8372d;
+  --semaforo-fondo: #fbe4df;
 }
 
-.semaforo--rojo .semaforo__luz {
-  background: #c8372d;
+@media (max-width: 768px) {
+  .semaforo {
+    padding: 0.45rem 0.6rem;
+  }
+
+  .semaforo__texto {
+    font-size: 0.8rem;
+  }
 }

@@ -25,7 +25,7 @@ export function evaluarSemaforo(paquete: PaqueteCanton, contexto: MuyuContexto):
   const { balance, recomendaciones } = recomendarRotacion(paquete, contexto);
   const escenario = ESCENARIO_NOMBRE[contexto.escenario];
   const cambio = Math.abs(balance.cambio_pct);
-  const lluvia = `${balance.cambio_pct > 0 ? "+" : ""}${balance.cambio_pct} % frente a un año Neutro`;
+  const lluvia = `${balance.cambio_pct > 0 ? "+" : ""}${balance.cambio_pct} % frente a un año normal`;
 
   if (recomendaciones.length === 0) {
     const zona = nombreRegion(paquete.cantones[contexto.cantonId].region);

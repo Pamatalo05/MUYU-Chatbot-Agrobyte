@@ -1,5 +1,6 @@
 import type { ChatReply } from "../chat/types";
 import { ESCENARIO_NOMBRE, type PaqueteCanton } from "../knowledge/types";
+import { esFueraDeTema, pareceManipulacion, reglasDeAlcance, RESPUESTA_FUERA_DE_TEMA } from "./guardarrailes";
 import { declararHerramientas, ejecutarHerramienta } from "./herramientas";
 import type { PeticionChat } from "./peticion";
 
@@ -39,10 +40,12 @@ function instrucciones(paquete: PaqueteCanton, { contexto }: PeticionChat): stri
   const previo = paquete.cultivos.find((c) => c.id === contexto.cultivoPrevioId)?.nombre ?? contexto.cultivoPrevioId;
   return [
     "Eres Muyu, asistente agronómico de Kallpa para agricultores de Ecuador.",
-    "Responde en español sencillo, en máximo 3 frases, sin markdown.",
+    "Responde en español sencillo, cálido y respetuoso, en máximo 3 frases cortas, sin markdown; " +
+      "pon cada idea en su propia línea y la cifra clave primero.",
     "Usa SOLO cifras que te devuelvan las herramientas; nunca inventes datos.",
     "Si algo no está en los datos, dilo con honestidad y sugiere qué sí puedes responder.",
     "Si el semáforo de una herramienta está en rojo, empieza avisando ese riesgo.",
+    ...reglasDeAlcance(paquete),
     `Contexto del agricultor: cantón ${canton} (id ${contexto.cantonId}), acaba de cosechar ${previo}` +
       ` (id ${contexto.cultivoPrevioId}), escenario ${ESCENARIO_NOMBRE[contexto.escenario]}` +
       ` (id ${contexto.escenario}), mes ${contexto.mes}. Úsalo si la pregunta no dice otra cosa.`,
@@ -71,6 +74,8 @@ async function generar(cuerpo: unknown, { apiKey, modelos = MODELOS_GEMINI, fetc
  */
 export async function conversar(peticion: PeticionChat, opciones: OpcionesAgente): Promise<ChatReply> {
   const { paquete } = opciones;
+  if (pareceManipulacion(peticion.pregunta)) return RESPUESTA_FUERA_DE_TEMA;
+
   const contents: Contenido[] = [
     ...peticion.historial.map(
       (m): Contenido => ({ role: m.role === "user" ? "user" : "model", parts: [{ text: m.text }] }),
@@ -93,6 +98,7 @@ export async function conversar(peticion: PeticionChat, opciones: OpcionesAgente
     if (llamadas.length === 0) {
       const text = partes.map((p) => p.text ?? "").join("").trim();
       if (!text) throw new AgenteError("Gemini no devolvió texto");
+      if (esFueraDeTema(text)) return RESPUESTA_FUERA_DE_TEMA;
       return { text, emotion: recomendo ? "happy" : "neutral" };
     }
 

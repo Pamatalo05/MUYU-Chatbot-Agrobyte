@@ -7,7 +7,7 @@ import {
 } from "../knowledge/kallpaConocimiento";
 import type { MuyuContexto } from "../knowledge/contexto";
 import { evaluarSemaforo } from "../knowledge/semaforo";
-import { ESCENARIO_NOMBRE, type PaqueteCanton } from "../knowledge/types";
+import type { Escenario, PaqueteCanton } from "../knowledge/types";
 import { detectarAccion, type AccionRapida } from "./preguntasRapidas";
 import type { ChatReply } from "./types";
 
@@ -28,6 +28,13 @@ const conSigno = (valor: number, decimales = 0) => (valor > 0 ? "+" : "") + nume
 
 /** "Fréjol caupí / tumbe" → "fréjol caupí"; "Papa (INIAP-Fripapa)" → "papa" */
 const nombreCorto = (nombre: string) => nombre.split(" (")[0].split(" / ")[0].toLowerCase();
+
+/** Como lo dice el agricultor (la UI usa los mismos términos). */
+const CLIMA_TEXTO: Record<Escenario, string> = {
+  neutro: "año normal",
+  el_nino: "año de El Niño",
+  la_nina: "año de La Niña",
+};
 
 const BALANCE_TEXTO: Record<Balance, string> = {
   exceso: "riesgo de exceso de lluvia",
@@ -64,30 +71,29 @@ export function responderOffline(
 }
 
 function responderRotacion(paquete: PaqueteCanton, contexto: MuyuContexto): ChatReply {
-  const { cantonId, cultivoPrevioId, escenario, mes } = contexto;
-  const { recomendaciones, avisos } = recomendarRotacion(paquete, { cantonId, cultivoPrevioId, escenario, mes });
-  const canton = paquete.cantones[cantonId].nombre;
+  const { cantonId, cultivoPrevioId, escenario } = contexto;
+  const { recomendaciones, avisos } = recomendarRotacion(paquete, contexto);
+  const canton = paquete.cantones[cantonId].nombre.split(",")[0];
   const previo = nombreCorto(paquete.cultivos.find((c) => c.id === cultivoPrevioId)?.nombre ?? cultivoPrevioId);
 
   if (recomendaciones.length === 0) {
-    return { text: `${avisos.join(" ")} Prueba con otro escenario o consulta a un técnico de tu zona.`, emotion: "neutral" };
+    return { text: `${avisos.join(" ")}\nPrueba con otro clima o consulta a un técnico de tu zona.`, emotion: "neutral" };
   }
 
+  // Una idea por línea: se lee rápido en el celular y en voz alta.
   const [primera, ...otras] = recomendaciones;
-  const razones = primera.razones.slice(0, 2).join(" y ");
   const semaforo = evaluarSemaforo(paquete, contexto);
-  const alerta = semaforo.color === "rojo" ? `Cuidado, el riesgo para sembrar es alto: ${semaforo.motivo}. ` : "";
-  let texto =
-    alerta +
-    `Después de cosechar ${previo} en ${canton}, con escenario ${ESCENARIO_NOMBRE[escenario]}, ` +
-    `te recomiendo ${nombreCorto(primera.nombre)}: ${razones}. ` +
-    `Deja un margen de unos ${numero(primera.margen_neto_ha)} USD/ha (fuente: ${primera.fuente}).`;
-  if (otras.length > 0) {
-    texto += ` Otras opciones: ${otras.map((r) => nombreCorto(r.nombre)).join(" y ")}.`;
-  } else if (avisos.length > 0) {
-    texto += ` ${avisos[0]}`;
-  }
-  return { text: texto, emotion: alerta ? "neutral" : "happy" };
+  const lineas: string[] = [];
+  if (semaforo.color === "rojo") lineas.push(`⚠️ Cuidado, el riesgo para sembrar es alto: ${semaforo.motivo}.`);
+  lineas.push(
+    `Después de cosechar ${previo} en ${canton} (${CLIMA_TEXTO[escenario]}), te recomiendo ${nombreCorto(primera.nombre)}.`,
+    `Por qué: ${primera.razones.slice(0, 2).join(" y ")}.`,
+    `Margen estimado: unos ${numero(primera.margen_neto_ha)} USD/ha (fuente: ${primera.fuente}).`,
+  );
+  if (otras.length > 0) lineas.push(`Otras opciones: ${otras.map((r) => nombreCorto(r.nombre)).join(" y ")}.`);
+  else if (avisos.length > 0) lineas.push(avisos[0]);
+
+  return { text: lineas.join("\n"), emotion: semaforo.color === "rojo" ? "neutral" : "happy" };
 }
 
 function responderUrea(paquete: PaqueteCanton, contexto: MuyuContexto): ChatReply {
@@ -115,12 +121,14 @@ function responderEnso(paquete: PaqueteCanton, contexto: MuyuContexto): ChatRepl
   const [, nino, nina] = compararEscenarios(paquete, cantonId, mes);
   const balance = (escenario: "el_nino" | "la_nina") =>
     BALANCE_TEXTO[balanceHidrico(paquete, cantonId, escenario, mes).balance];
+  const canton = nino.canton.split(",")[0];
   return {
-    text:
-      `En ${MESES[mes - 1]}, en ${nino.canton}: con El Niño llueven ${numero(nino.lluvia_mm_mes)} mm ` +
-      `(${conSigno(nino.diferencia.lluvia_mm_mes)} frente a Neutro) y con La Niña ${numero(nina.lluvia_mm_mes)} mm ` +
-      `(${conSigno(nina.diferencia.lluvia_mm_mes)}). ` +
-      `Para sembrar ahora, El Niño trae ${balance("el_nino")} y La Niña, ${balance("la_nina")}.`,
+    text: [
+      `En ${MESES[mes - 1]}, en ${canton}:`,
+      `🌧️ Con El Niño: ${numero(nino.lluvia_mm_mes)} mm de lluvia (${conSigno(nino.diferencia.lluvia_mm_mes)} frente a un año normal).`,
+      `☀️ Con La Niña: ${numero(nina.lluvia_mm_mes)} mm (${conSigno(nina.diferencia.lluvia_mm_mes)}).`,
+      `Si siembras ahora, El Niño trae ${balance("el_nino")} y La Niña, ${balance("la_nina")}.`,
+    ].join("\n"),
     emotion: "neutral",
   };
 }
@@ -128,10 +136,14 @@ function responderEnso(paquete: PaqueteCanton, contexto: MuyuContexto): ChatRepl
 function responderResumen(paquete: PaqueteCanton, contexto: MuyuContexto): ChatReply {
   const r = resumenCanton(paquete, contexto.cantonId, contexto.escenario, contexto.mes);
   return {
-    text:
-      `${r.canton} (suelo ${r.suelo.split(" (")[0].toLowerCase()}, ${numero(r.elevacion_msnm)} m) en ${MESES[r.mes - 1]} con escenario ${r.escenarioNombre}: ` +
-      `máxima de ${numero(r.temp_max_c, 1)} °C y mínima de ${numero(r.temp_min_c, 1)} °C, ${numero(r.lluvia_mm_mes)} mm de lluvia, ` +
-      `humedad en raíz de ${numero(r.humedad_raiz, 2)} y verdor (NDVI) de ${numero(r.ndvi_modis, 2)}.`,
+    text: [
+      `${r.canton.split(",")[0]} en ${MESES[r.mes - 1]} (${CLIMA_TEXTO[r.escenario]}):`,
+      `🌡️ Temperatura: de ${numero(r.temp_min_c)} a ${numero(r.temp_max_c)} °C.`,
+      `🌧️ Lluvia: ${numero(r.lluvia_mm_mes)} mm en el mes.`,
+      `💧 Humedad del suelo en la raíz: ${numero(r.humedad_raiz * 100)} %.`,
+      `🌿 Verdor de los cultivos (NDVI): ${numero(r.ndvi_modis * 100)} de 100.`,
+      `Suelo ${r.suelo.split(" (")[0].toLowerCase()}, a ${numero(r.elevacion_msnm)} m de altura.`,
+    ].join("\n"),
     emotion: "neutral",
   };
 }

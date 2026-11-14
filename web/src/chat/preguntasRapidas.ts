@@ -3,14 +3,18 @@ export type AccionRapida = "rotacion" | "enso" | "urea" | "resumen";
 
 export interface PreguntaRapida {
   accion: AccionRapida;
+  /** Lo que se envía y aparece en el chat. */
   texto: string;
+  /** Texto corto del botón; el icono es decorativo. */
+  etiqueta: string;
+  icono: string;
 }
 
 export const PREGUNTAS_RAPIDAS: readonly PreguntaRapida[] = [
-  { accion: "rotacion", texto: "¿Qué siembro después?" },
-  { accion: "enso", texto: "¿Cómo afecta El Niño o La Niña?" },
-  { accion: "urea", texto: "¿Cuánto ahorro en urea?" },
-  { accion: "resumen", texto: "Resumen de mi cantón" },
+  { accion: "rotacion", texto: "¿Qué siembro después?", etiqueta: "¿Qué siembro?", icono: "🌱" },
+  { accion: "enso", texto: "¿Cómo afecta El Niño o La Niña?", etiqueta: "El Niño y La Niña", icono: "🌦️" },
+  { accion: "urea", texto: "¿Cuánto ahorro en urea?", etiqueta: "Ahorro en urea", icono: "💰" },
+  { accion: "resumen", texto: "Resumen de mi cantón", etiqueta: "Clima de mi cantón", icono: "📍" },
 ];
 
 /** Palabras clave para entender preguntas escritas, en orden de prioridad. */

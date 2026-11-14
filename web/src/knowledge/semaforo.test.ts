@@ -43,7 +43,7 @@ describe("Muyu preocupado", () => {
 
   it("la respuesta de rotación avisa primero el riesgo alto", () => {
     const r = responderOffline(paquete, { ...daule, escenario: "el_nino" }, "", "rotacion");
-    expect(r.text.startsWith("Cuidado, el riesgo para sembrar es alto: exceso de lluvia")).toBe(true);
+    expect(r.text.startsWith("⚠️ Cuidado, el riesgo para sembrar es alto: exceso de lluvia")).toBe(true);
     expect(r.emotion).toBe("neutral");
   });
 });

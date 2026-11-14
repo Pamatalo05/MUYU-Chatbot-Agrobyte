@@ -22,6 +22,7 @@ export default function App() {
   const enLinea = useEnLinea();
   const [modo, setModo] = useState<ModoConexion>("en_vivo");
   const ultimoFallo = useRef<number | null>(null);
+  const [falloReciente, setFalloReciente] = useState(false);
 
   // K4: Gemini si hay internet; si no hay o falla, el modo campo responde con los mismos datos.
   const responder = useCallback<Responder>(
@@ -41,6 +42,7 @@ export default function App() {
       );
       if (resultado.fallo) ultimoFallo.current = Date.now();
       else if (resultado.modo === "en_vivo") ultimoFallo.current = null;
+      if (resultado.fallo || resultado.modo === "en_vivo") setFalloReciente(resultado.fallo);
       // Los botones siempre van a campo: no cambian la etiqueta de conexión.
       if (!accion) setModo(resultado.modo);
       return resultado.reply;
@@ -48,6 +50,11 @@ export default function App() {
     [paquete, contexto, enLinea],
   );
   const modoVisible: ModoConexion = enLinea ? modo : "campo";
+  const aviso = !enLinea
+    ? "Estás sin internet. Te respondo con los datos guardados de tu cantón."
+    : falloReciente
+      ? "No pude conectarme con Muyu en línea. Te respondo con los datos guardados y lo intento de nuevo en un minuto."
+      : null;
 
   const { messages, phase, isBusy, send } = useChat(responder);
   const [isUserTyping, setIsUserTyping] = useState(false);
@@ -62,8 +69,14 @@ export default function App() {
 
   return (
     <main className="layout">
-      <section className="character-area" aria-label="Personaje Muyu">
-        <Muyu state={muyuState} size={340} />
+      <section className="character-area" aria-label="Muyu y tu parcela">
+        <Muyu state={muyuState} size={300} />
+        <div className="finca">
+          {paquete.estado === "listo" && (
+            <ContextoSimulado paquete={paquete.paquete} contexto={contexto} onChange={setContexto} />
+          )}
+          {semaforo && <SemaforoRiesgo {...semaforo} />}
+        </div>
         {import.meta.env.DEV && (
           <details className="debug-toggle">
             <summary>Probar estados</summary>
@@ -74,22 +87,20 @@ export default function App() {
 
       <section className="chat-area" aria-label="Conversación">
         <header className="chat-header">
-          <h1>Muyu</h1>
-          {paquete.estado === "error" ? (
-            <p className="status status--offline" role="status">
-              No se pudo cargar paquete_canton.json: {paquete.mensaje}
-            </p>
-          ) : (
-            <p className={`badge badge--${modoVisible}`} role="status">
-              {modoVisible === "en_vivo" ? "En vivo · Gemini" : "Modo campo · Paquete NASA/NOAA"}
-            </p>
-          )}
+          <div>
+            <h1>Muyu</h1>
+            <p className="chat-header__sub">Tu asistente de siembra</p>
+          </div>
+          <p className={`conexion conexion--${modoVisible}`} role="status">
+            <span className="conexion__punto" aria-hidden="true" />
+            {modoVisible === "en_vivo" ? "En línea" : "Datos guardados"}
+          </p>
         </header>
-
-        {paquete.estado === "listo" && (
-          <ContextoSimulado paquete={paquete.paquete} contexto={contexto} onChange={setContexto} />
+        {paquete.estado === "error" && (
+          <p className="chat__error" role="alert">
+            No pude cargar los datos de los cantones. Recarga la página; si sigue, avisa al equipo.
+          </p>
         )}
-        {semaforo && <SemaforoRiesgo {...semaforo} />}
 
         <ChatPanel
           messages={messages}
@@ -97,6 +108,7 @@ export default function App() {
           isBusy={isBusy}
           onSend={send}
           onTypingChange={setIsUserTyping}
+          aviso={aviso}
         />
       </section>
     </main>

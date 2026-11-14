@@ -3,46 +3,55 @@
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  gap: 0.75rem;
+  gap: 0.7rem;
 }
 
 .chat__messages {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.75rem;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding-right: 0.25rem;
+  padding: 0.25rem 0.25rem 0.25rem 0;
+}
+
+.chat__row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.chat__row--user {
+  justify-content: flex-end;
 }
 
 .bubble {
   max-width: 85%;
   margin: 0;
-  padding: 0.65rem 0.9rem;
-  border-radius: 16px;
-  line-height: 1.4;
-  white-space: pre-wrap;
+  padding: 0.7rem 0.95rem;
+  border-radius: 18px;
+  font-size: 1rem;
+  line-height: 1.5;
+  /* Respeta los saltos de línea: una idea por línea. */
+  white-space: pre-line;
   overflow-wrap: anywhere;
 }
 
 .bubble--muyu {
-  align-self: flex-start;
-  background: var(--muyu-cream);
-  border: 1px solid rgba(31, 74, 44, 0.2);
-  border-bottom-left-radius: 4px;
+  background: var(--crema);
+  border: 1px solid var(--borde);
+  border-bottom-left-radius: 6px;
 }
 
 .bubble--user {
-  align-self: flex-end;
-  background: var(--muyu-dark);
+  background: var(--verde-bosque);
   color: #ffffff;
-  border-bottom-right-radius: 4px;
+  border-bottom-right-radius: 6px;
 }
 
 .bubble--thinking {
-  font-style: italic;
-  color: rgba(31, 74, 44, 0.75);
+  color: var(--tierra);
 }
 
 .dots span {
@@ -62,36 +71,46 @@
   30% { opacity: 1; }
 }
 
-/* Preguntas rápidas: funcionan sin internet (modo campo). */
+/* Aviso de conexión: discreto, no alarma ni ensucia las respuestas. */
+.chat__aviso {
+  margin: 0;
+  padding: 0.45rem 0.75rem;
+  border-radius: 10px;
+  background: #fdf3d7;
+  color: #6b5332;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+/* Preguntas rápidas: 2 × 2, botones grandes para el dedo (≥ 44 px). */
 .chat__quick {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
 }
 
 .chat__quick-button {
-  padding: 0.4rem 0.75rem;
-  border: 1px solid var(--muyu-chakana);
-  border-radius: 999px;
+  min-height: 44px;
+  padding: 0.35rem 0.6rem;
+  border: 1.5px solid var(--verde-hoja);
+  border-radius: 14px;
   background: #ffffff;
-  color: var(--muyu-dark);
+  color: var(--verde-bosque);
   font: inherit;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: left;
   cursor: pointer;
+  transition: background 150ms ease;
 }
 
 .chat__quick-button:hover:not(:disabled) {
-  background: var(--muyu-bg);
+  background: #eef6e4;
 }
 
 .chat__quick-button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-}
-
-.chat__quick-button:focus-visible {
-  outline: 3px solid var(--muyu-lime);
-  outline-offset: 1px;
 }
 
 .chat__form {
@@ -103,36 +122,56 @@
 .chat__input {
   flex: 1;
   resize: none;
-  min-height: 44px;
+  min-height: 48px;
   max-height: 120px;
-  padding: 0.65rem 0.8rem;
-  border: 1px solid rgba(31, 74, 44, 0.3);
-  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+  border: 1.5px solid var(--borde);
+  border-radius: 14px;
+  background: #ffffff;
   font: inherit;
+  font-size: 1rem;
   color: inherit;
 }
 
-.chat__input:focus-visible,
-.chat__send:focus-visible {
-  outline: 3px solid var(--muyu-lime);
-  outline-offset: 1px;
+.chat__input::placeholder {
+  color: #9a8a78;
 }
 
 .chat__send {
-  min-height: 44px;
-  padding: 0 1.1rem;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 48px;
+  height: 48px;
   border: none;
-  border-radius: 12px;
-  background: var(--muyu-chakana);
+  border-radius: 50%;
+  background: var(--verde-bosque);
   color: #ffffff;
-  font: inherit;
-  font-weight: 700;
   cursor: pointer;
 }
 
+.chat__send svg {
+  width: 22px;
+  height: 22px;
+}
+
 .chat__send:disabled {
-  opacity: 0.45;
+  background: #c9d8c0;
   cursor: not-allowed;
+}
+
+.chat__restantes {
+  margin: -0.3rem 0 0;
+  font-size: 0.8rem;
+  color: var(--tierra);
+  text-align: right;
+}
+
+.chat__quick-button:focus-visible,
+.chat__input:focus-visible,
+.chat__send:focus-visible {
+  outline: 3px solid var(--oro);
+  outline-offset: 2px;
 }
 
 .visually-hidden {

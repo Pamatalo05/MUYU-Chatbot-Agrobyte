@@ -1,19 +1,24 @@
 import type { ColorSemaforo, Semaforo } from "../knowledge/semaforo";
 import "./SemaforoRiesgo.css";
 
-const ETIQUETA: Record<ColorSemaforo, string> = {
-  verde: "Riesgo bajo",
-  amarillo: "Riesgo medio",
-  rojo: "Riesgo alto",
+/** Titular en lenguaje del agricultor; el detalle técnico va debajo, sin cortarse. */
+const TITULAR: Record<ColorSemaforo, string> = {
+  verde: "Buen momento para sembrar",
+  amarillo: "Siembra con precaución",
+  rojo: "Momento riesgoso para sembrar",
 };
 
-/** Semáforo de siembra para el contexto actual. El texto no depende solo del color (accesible). */
+const primeraMayuscula = (texto: string) => texto.charAt(0).toUpperCase() + texto.slice(1);
+
+/** Semáforo de siembra. El texto no depende solo del color (accesible para daltonismo). */
 export default function SemaforoRiesgo({ color, motivo }: Semaforo) {
   return (
-    <p className={`semaforo semaforo--${color}`} role="status">
+    <div className={`semaforo semaforo--${color}`} role="status">
       <span className="semaforo__luz" aria-hidden="true" />
-      <strong>{ETIQUETA[color]}</strong>
-      <span className="semaforo__motivo">· {motivo}</span>
-    </p>
+      <p className="semaforo__texto">
+        <strong>{TITULAR[color]}</strong>
+        <span>{primeraMayuscula(motivo)}</span>
+      </p>
+    </div>
   );
 }

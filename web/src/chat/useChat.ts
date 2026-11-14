@@ -5,7 +5,9 @@ import type { ChatMessage, ChatPhase, ChatRole, Responder } from "./types";
 const GREETING: ChatMessage = {
   id: "greeting",
   role: "muyu",
-  text: "¡Hola! Soy Muyu, una semilla curiosa. ¿En qué te ayudo hoy?",
+  text:
+    "¡Hola! Soy Muyu 🌱 Te ayudo a decidir qué sembrar después de tu cosecha, con datos de la NASA para tu cantón.\n" +
+    "Toca una pregunta de abajo o escríbeme con tus palabras.",
 };
 
 const ERROR_TEXT = "Ups, mis raíces perdieron la conexión. ¿Lo intentamos de nuevo?";

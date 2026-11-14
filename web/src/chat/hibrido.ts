@@ -7,8 +7,6 @@ export type ModoConexion = "en_vivo" | "campo";
 /** Tras un fallo de Gemini, cuánto tiempo responder en modo campo antes de reintentar. */
 export const PAUSA_TRAS_FALLO_MS = 60_000;
 
-export const AVISO_RESPALDO = "No pude conectarme, así que te respondo en modo campo: ";
-
 interface Situacion {
   enLinea: boolean;
   /** Los botones siempre van al modo campo: son instantáneos y no gastan cuota. */
@@ -40,8 +38,10 @@ export async function responderHibrido(
   if (modo === "campo") return { reply: campo(), modo, fallo: false };
   try {
     return { reply: await enVivo(), modo, fallo: false };
-  } catch {
-    const reply = campo();
-    return { reply: { ...reply, text: AVISO_RESPALDO + reply.text }, modo: "campo", fallo: true };
+  } catch (error) {
+    // Visible en la consola del navegador (F12) para saber por qué falló el modo en vivo.
+    console.warn("[Muyu] Gemini no respondió, uso modo campo:", error);
+    // El aviso de conexión se muestra aparte (App), no dentro de la respuesta.
+    return { reply: campo(), modo: "campo", fallo: true };
   }
 }
