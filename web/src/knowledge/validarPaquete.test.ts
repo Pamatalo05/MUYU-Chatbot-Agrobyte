@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import datos from "../../public/data/paquete_canton.json";
+import datos from "../../public/datos/paquete_canton.json";
 import { validarPaquete } from "./validarPaquete";
 
 describe("Validaciones climáticas de Muyu", () => {

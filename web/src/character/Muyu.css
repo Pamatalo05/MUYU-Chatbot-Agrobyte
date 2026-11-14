@@ -312,3 +312,10 @@
     filter: brightness(1.4) drop-shadow(0 0 6px #8fd14f);
   }
 }
+
+/* Copia quieta (mensajes anteriores del chat): sin movimiento para no distraer. */
+.muyu--quieto .muyu__float,
+.muyu--quieto .muyu__part {
+  animation: none;
+  transition: none;
+}

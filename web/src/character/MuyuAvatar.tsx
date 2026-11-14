@@ -1,15 +1,16 @@
+import Muyu, { type MuyuState } from "./Muyu";
 import "./MuyuAvatar.css";
 
-/** Cara de Muyu (mismas capas del personaje, recortadas) para las burbujas del chat. */
-export default function MuyuAvatar() {
+interface MuyuAvatarProps {
+  /** Estado en vivo (último mensaje). Sin estado, Muyu queda quieto (mensajes anteriores). */
+  estado?: MuyuState;
+}
+
+/** Mini Muyu junto a sus mensajes: el del mensaje actual se mueve igual que el grande. */
+export default function MuyuAvatar({ estado }: MuyuAvatarProps) {
   return (
-    <span className="muyu-avatar" aria-hidden="true">
-      <span className="muyu-avatar__capas">
-        <img src="/muyu/sprout.png" alt="" />
-        <img src="/muyu/head.png" alt="" />
-        <img src="/muyu/visor.png" alt="" />
-        <img src="/muyu/eyes-open.png" alt="" />
-      </span>
+    <span className={`muyu-avatar${estado ? " muyu-avatar--vivo" : ""}`}>
+      <Muyu state={estado ?? "idle"} size={56} decorativo className={estado ? "" : "muyu--quieto"} />
     </span>
   );
 }

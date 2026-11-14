@@ -59,7 +59,7 @@ export default function App() {
       : null;
 
   const { messages, phase, isBusy, send } = useChat(responder);
-  const voz = useVoz();
+  const voz = useVoz(enLinea);
   const [lecturaAutomatica, setLecturaAutomatica] = useLecturaAutomatica();
   const fasePrevia = useRef(phase);
 
@@ -122,8 +122,11 @@ export default function App() {
                 type="button"
                 className="voz-toggle"
                 aria-pressed={lecturaAutomatica}
+                title={voz.nombreVoz ? `Voz: ${voz.nombreVoz}` : undefined}
                 onClick={() => {
                   if (lecturaAutomatica) voz.callar();
+                  // Al activarla, Muyu saluda: así se comprueba al instante que suena.
+                  else voz.hablar("¡Hola! Soy Muyu. ¡Así suena mi voz!");
                   setLecturaAutomatica(!lecturaAutomatica);
                 }}
               >
@@ -153,6 +156,7 @@ export default function App() {
           puedeEscuchar={enLinea}
           onEscuchar={voz.disponible ? voz.hablar : undefined}
           onAntesDeEscuchar={voz.callar}
+          estadoMuyu={muyuState}
         />
       </section>
     </main>

@@ -48,27 +48,66 @@ export function partirEnFrases(texto: string, maximo = 180): string[] {
   const resultado: string[] = [];
   for (const frase of frases) {
     const ultima = resultado[resultado.length - 1];
-    if (ultima && ultima.length + frase.length + 1 <= maximo) resultado[resultado.length - 1] = `${ultima} ${frase}`;
+    // Una exclamación va sola: así conserva su entonación alegre.
+    const unir = ultima && !/!$/.test(ultima) && !/!$/.test(frase) && ultima.length + frase.length + 1 <= maximo;
+    if (unir) resultado[resultado.length - 1] = `${ultima} ${frase}`;
     else resultado.push(frase);
   }
   return resultado;
 }
 
-interface VozDisponible {
+export interface VozDisponible {
   lang: string;
   localService: boolean;
+  name?: string;
 }
 
-/** Orden de preferencia: español de Ecuador, luego latinoamericano, luego cualquier español. */
-const PREFERENCIA = ["es-EC", "es-419", "es-US", "es-MX", "es-CO", "es-PE"];
+/** Español de Ecuador primero, luego latinoamericano; el de España al final. */
+const LATINO = ["es-419", "es-us", "es-mx", "es-co", "es-pe", "es-cl", "es-ar", "es-ve"];
+/** Voces femeninas conocidas (Edge, Windows, macOS, Google): suenan más tiernas para Muyu. */
+const FEMENINAS = /\b(andrea|dalia|elena|paloma|paulina|sabina|helena|laura|m[oó]nica|camila|valentina|ximena|marisol|elvira|larissa|salom[eé]|lupe|catalina|renata|soledad|elsa|sof[ií]a|beatriz|luc[ií]a)\b/i;
+const MASCULINAS = /\b(luis|jorge|pablo|ra[uú]l|[aá]lvaro|gonzalo|diego|jos[eé]|carlos|emilio|tom[aá]s|juan|andr[eé]s|gerardo|alonso)\b/i;
+/** Voces neuronales de Edge ("... Online (Natural)"): las más naturales, pero necesitan internet. */
+const NEURONAL = /(natural|neural|online)/i;
 
-export function elegirVoz<V extends VozDisponible>(voces: readonly V[]): V | null {
-  const espanol = voces.filter((v) => v.lang.toLowerCase().startsWith("es"));
-  if (espanol.length === 0) return null;
+/**
+ * Ordena las voces en español de la mejor a la peor para Muyu (menor puntaje = mejor):
+ * idioma latino, calidad natural, voz femenina y que funcione con o sin internet.
+ */
+export function ordenarVoces<V extends VozDisponible>(voces: readonly V[], enLinea = true): V[] {
   const puntaje = (v: V) => {
-    const indice = PREFERENCIA.findIndex((p) => p.toLowerCase() === v.lang.replace("_", "-").toLowerCase());
-    // Las voces locales funcionan sin internet: se prefieren a igual idioma.
-    return (indice === -1 ? PREFERENCIA.length : indice) * 2 + (v.localService ? 0 : 1);
+    const lang = v.lang.replace("_", "-").toLowerCase();
+    const nombre = v.name ?? "";
+    let p = lang === "es-ec" ? 0 : LATINO.includes(lang) ? 1 : 3;
+    if (NEURONAL.test(nombre)) p += enLinea ? -2 : 10; // sin internet no sirven
+    else if (/google/i.test(nombre)) p += enLinea ? -1 : 10;
+    if (FEMENINAS.test(nombre)) p -= 1.5;
+    if (MASCULINAS.test(nombre)) p += 1;
+    if (!v.localService) p += enLinea ? 0.1 : 10;
+    return p;
   };
-  return [...espanol].sort((a, b) => puntaje(a) - puntaje(b))[0];
+  return voces
+    .filter((v) => v.lang.toLowerCase().startsWith("es"))
+    .map((v) => ({ v, p: puntaje(v) }))
+    .sort((a, b) => a.p - b.p)
+    .map(({ v }) => v);
 }
+
+export function elegirVoz<V extends VozDisponible>(voces: readonly V[], enLinea = true): V | null {
+  return ordenarVoces(voces, enLinea)[0] ?? null;
+}
+
+/**
+ * Entonación de Muyu: tono algo más agudo y dulce, alegre en las exclamaciones,
+ * curioso en las preguntas y calmado cuando avisa un riesgo.
+ */
+export function prosodia(frase: string, neuronal: boolean): { pitch: number; rate: number } {
+  // Las voces neuronales ya son expresivas: se sube menos el tono para que no suene forzado.
+  const base = neuronal ? 1.15 : 1.3;
+  if (/^cuidado/i.test(frase)) return { pitch: base - 0.2, rate: 0.9 };
+  if (/!\s*$/.test(frase)) return { pitch: base + 0.12, rate: 1.02 };
+  if (/\?\s*$/.test(frase)) return { pitch: base + 0.06, rate: 0.97 };
+  return { pitch: base, rate: 0.96 };
+}
+
+export const esNeuronal = (v: VozDisponible) => NEURONAL.test(v.name ?? "") || /google/i.test(v.name ?? "");

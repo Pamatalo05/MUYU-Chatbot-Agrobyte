@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import type { MuyuState } from "../character/Muyu";
 import MuyuAvatar from "../character/MuyuAvatar";
 import { useEscucha } from "../voz/useEscucha";
 import { PREGUNTAS_RAPIDAS, type AccionRapida } from "./preguntasRapidas";
@@ -22,6 +23,8 @@ interface ChatPanelProps {
   onEscuchar?: (texto: string) => void;
   /** Se llama antes de abrir el micrófono (p. ej. para que Muyu deje de hablar). */
   onAntesDeEscuchar?: () => void;
+  /** Estado de Muyu en vivo: lo replica el mini Muyu del mensaje actual. */
+  estadoMuyu?: MuyuState;
 }
 
 const MAX_LENGTH = 500;
@@ -38,10 +41,13 @@ export default function ChatPanel({
   puedeEscuchar = false,
   onEscuchar,
   onAntesDeEscuchar,
+  estadoMuyu = "idle",
 }: ChatPanelProps) {
   const [draft, setDraft] = useState("");
   const escucha = useEscucha();
   const microfono = escucha.disponible && puedeEscuchar;
+  // Solo el mini Muyu del último mensaje se mueve (o el de "pensando", si aparece).
+  const ultimoDeMuyu = messages.map((m) => m.role).lastIndexOf("muyu");
   const listEndRef = useRef<HTMLDivElement>(null);
   const hasText = draft.trim().length > 0;
   const canSend = hasText && !isBusy;
@@ -90,9 +96,11 @@ export default function ChatPanel({
     <div className="chat">
       {/* aria-busy evita que el lector de pantalla lea la respuesta a medias. */}
       <div className="chat__messages" aria-live="polite" aria-busy={isBusy}>
-        {messages.map((message) => (
+        {messages.map((message, indice) => (
           <div key={message.id} className={`chat__row chat__row--${message.role}`}>
-            {message.role === "muyu" && <MuyuAvatar />}
+            {message.role === "muyu" && (
+              <MuyuAvatar estado={!isThinking && indice === ultimoDeMuyu ? estadoMuyu : undefined} />
+            )}
             <div className="chat__burbuja">
               <p className={`bubble bubble--${message.role}`}>
                 <span className="visually-hidden">
@@ -129,7 +137,7 @@ export default function ChatPanel({
 
         {isThinking && (
           <div className="chat__row chat__row--muyu">
-            <MuyuAvatar />
+            <MuyuAvatar estado={estadoMuyu} />
             <p className="bubble bubble--muyu bubble--thinking" role="status">
               Muyu está pensando
               <span className="dots" aria-hidden="true">

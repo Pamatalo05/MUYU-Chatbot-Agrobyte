@@ -24,6 +24,8 @@ interface MuyuProps {
   /** Tamaño máximo en píxeles; se achica solo si no hay espacio. */
   size?: number;
   className?: string;
+  /** Copia decorativa (p. ej. en el chat): se oculta a lectores de pantalla para no repetir. */
+  decorativo?: boolean;
 }
 
 const EYES_BY_STATE: Record<MuyuState, MuyuEyes> = {
@@ -56,15 +58,16 @@ const layer = (name: string) => `/muyu/${name}.png`;
  * Muyu armado por capas PNG alineadas (mismo lienzo) más boca y destellos en SVG.
  * Grupos: cuerpo · cabeza (brote, visor, ojos, gota, boca) · brazo derecho (con destellos).
  */
-export default function Muyu({ state = "idle", eyes, size = 320, className = "" }: MuyuProps) {
+export default function Muyu({ state = "idle", eyes, size = 320, className = "", decorativo = false }: MuyuProps) {
   const eyeExpression = eyes ?? EYES_BY_STATE[state];
 
   return (
     <div
       className={`muyu muyu--${state} ${className}`.trim()}
       style={{ "--muyu-size": `${size}px` } as CSSProperties}
-      role="img"
-      aria-label="Muyu, un robot-semilla con un brote en la cabeza y una chakana en el pecho"
+      {...(decorativo
+        ? { "aria-hidden": true }
+        : { role: "img", "aria-label": "Muyu, un robot-semilla con un brote en la cabeza y una chakana en el pecho" })}
     >
       <div className="muyu__float">
         <img className="muyu__part muyu__arm-left" data-part="arm-left" src={layer("arm-left")} alt="" />

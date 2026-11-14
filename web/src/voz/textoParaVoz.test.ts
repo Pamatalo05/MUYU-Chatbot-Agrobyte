@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { elegirVoz, partirEnFrases, textoParaVoz } from "./textoParaVoz";
+import { elegirVoz, partirEnFrases, prosodia, textoParaVoz } from "./textoParaVoz";
 
 describe("textoParaVoz", () => {
   it("quita emojis y dice las unidades con palabras", () => {
@@ -26,6 +26,13 @@ describe("números en voz", () => {
 });
 
 describe("partirEnFrases", () => {
+  it("deja sola la exclamación para que conserve su entonación", () => {
+    expect(partirEnFrases("¡Hey, muy buena pregunta! Te recomiendo soya. Gana bien.")).toEqual([
+      "¡Hey, muy buena pregunta!",
+      "Te recomiendo soya. Gana bien.",
+    ]);
+  });
+
   it("agrupa frases cortas sin pasar el máximo", () => {
     expect(partirEnFrases("Hola. Soy Muyu. ¿Qué siembro?", 20)).toEqual(["Hola. Soy Muyu.", "¿Qué siembro?"]);
   });
@@ -40,7 +47,27 @@ describe("elegirVoz", () => {
     expect(elegirVoz([voz("es-ES"), voz("es-EC")])?.lang).toBe("es-EC");
   });
 
+  it("prefiere una voz natural y femenina latina con internet, y solo locales sin internet", () => {
+    const voces = [
+      { lang: "es-MX", localService: true, name: "Microsoft Raul - Spanish (Mexico)" },
+      { lang: "es-MX", localService: false, name: "Microsoft Dalia Online (Natural) - Spanish (Mexico)" },
+      { lang: "es-ES", localService: false, name: "Microsoft Elvira Online (Natural) - Spanish (Spain)" },
+      { lang: "es-MX", localService: true, name: "Microsoft Sabina - Spanish (Mexico)" },
+    ];
+    expect(elegirVoz(voces, true)?.name).toContain("Dalia");
+    expect(elegirVoz(voces, false)?.name).toContain("Sabina");
+  });
+
   it("devuelve null si no hay voces en español", () => {
     expect(elegirVoz([voz("en-US")])).toBe(null);
+  });
+});
+
+describe("prosodia", () => {
+  it("más alegre en exclamaciones y calmada en avisos de riesgo", () => {
+    const normal = prosodia("Te recomiendo soya.", false);
+    expect(prosodia("¡Hey, muy buena pregunta!", false).pitch).toBeGreaterThan(normal.pitch);
+    expect(prosodia("Cuidado, el riesgo es alto.", false).pitch).toBeLessThan(normal.pitch);
+    expect(prosodia("Te recomiendo soya.", true).pitch).toBeLessThan(normal.pitch);
   });
 });
