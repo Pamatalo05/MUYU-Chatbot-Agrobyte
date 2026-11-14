@@ -1,0 +1,80 @@
+/*
+ * Animaciones base de Muyu (estado "esperando").
+ * Los puntos de giro (transform-origin) están en % del lienzo de las capas:
+ *   tallo del brote ≈ (49%, 32%) · hombro derecho ≈ (64%, 62%)
+ *   hombro izquierdo ≈ (37%, 61%) · centro de los ojos ≈ (50%, 45%)
+ */
+
+.muyu {
+  position: relative;
+  user-select: none;
+}
+
+.muyu__float {
+  position: absolute;
+  inset: 0;
+  animation: muyu-float 3s ease-in-out infinite;
+}
+
+.muyu__part {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.muyu__sprout {
+  transform-origin: 49% 32%;
+  animation: muyu-sway 4s ease-in-out infinite;
+}
+
+.muyu__arm-right {
+  transform-origin: 64% 62%;
+  animation: muyu-wave 2.4s ease-in-out infinite;
+}
+
+.muyu__arm-left {
+  transform-origin: 37% 61%;
+  animation: muyu-arm-rest 3s ease-in-out infinite;
+}
+
+.muyu__eyes--open {
+  transform-origin: 50% 45%;
+  animation: muyu-blink 4.5s infinite;
+}
+
+@keyframes muyu-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2%); }
+}
+
+@keyframes muyu-sway {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(6deg); }
+}
+
+@keyframes muyu-wave {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-12deg); }
+}
+
+@keyframes muyu-arm-rest {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(4deg); }
+}
+
+@keyframes muyu-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .muyu__float,
+  .muyu__sprout,
+  .muyu__arm-right,
+  .muyu__arm-left,
+  .muyu__eyes--open {
+    animation: none;
+  }
+}

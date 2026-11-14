@@ -1,0 +1,76 @@
+:root {
+  --muyu-cream: #f6f1e4;
+  --muyu-dark: #1f4a2c;
+  --muyu-lime: #8fd14f;
+  --muyu-chakana: #3c8d3a;
+  --muyu-bg: #dff2cc;
+  --muyu-yellow: #f5c518;
+  --danger: #c0392b;
+
+  font-family: "Nunito", system-ui, sans-serif;
+  color: var(--muyu-dark);
+  background: var(--muyu-bg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  min-height: 100vh;
+}
+
+.character-area {
+  display: grid;
+  place-items: center;
+}
+
+.chat-area {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #ffffff;
+  border-left: 1px solid rgba(31, 74, 44, 0.15);
+}
+
+.chat-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.status {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+}
+
+.status--ok {
+  color: var(--muyu-chakana);
+}
+
+.status--no-key,
+.status--offline {
+  color: var(--danger);
+}
+
+.chat-placeholder {
+  color: rgba(31, 74, 44, 0.6);
+}
+
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .chat-area {
+    border-left: none;
+    border-top: 1px solid rgba(31, 74, 44, 0.15);
+  }
+}
