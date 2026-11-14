@@ -44,6 +44,31 @@ describe("ejecutarHerramienta", () => {
 });
 
 describe("conversar", () => {
+    it("rechaza recomendaciones sin consultar herramientas", async () => {
+    const { fetchImpl } = geminiFalso([
+      { parts: [{ text: "Te recomiendo sembrar maíz y ganarás 500 USD." }] },
+    ]);
+
+    await expect(
+      conversar(peticion, { apiKey: "k", paquete, fetchImpl })
+    ).rejects.toThrow(
+      "Gemini intentó responder sin consultar los datos agrícolas"
+    );
+  });
+
+  it("permite responder saludos sin consultar herramientas", async () => {
+    const { fetchImpl, recibido } = geminiFalso([
+      { parts: [{ text: "¡Hola! Soy Muyu 🌱" }] },
+    ]);
+
+    const resultado = await conversar(
+      { ...peticion, pregunta: "Hola" },
+      { apiKey: "k", paquete, fetchImpl }
+    );
+
+    expect(resultado.text).toContain("Hola");
+    expect(recibido).toHaveLength(1);
+  });
   it("ejecuta la herramienta que pide Gemini y devuelve su respuesta final", async () => {
     const { fetchImpl, recibido } = geminiFalso([
       { parts: [{ functionCall: { name: "recomendar_rotacion", args: { canton_id: "daule", cultivo_previo_id: "arroz", escenario: "neutro", mes: 1 } } }] },
@@ -57,18 +82,38 @@ describe("conversar", () => {
   });
 
   it("si un modelo está saturado prueba el siguiente", async () => {
-    const { fetchImpl, recibido } = geminiFalso([{ status: 429 }, { parts: [{ text: "Hola" }] }]);
-    const r = await conversar(peticion, { apiKey: "k", paquete, fetchImpl });
+    const { fetchImpl, recibido } = geminiFalso([
+      { status: 429 },
+      { parts: [{ text: "Hola" }] },
+    ]);
+
+    const r = await conversar(
+      { ...peticion, pregunta: "Hola" },
+      { apiKey: "k", paquete, fetchImpl }
+    );
+
     expect(r.text).toBe("Hola");
     expect(recibido[0].url).toContain("gemini-flash-latest:");
     expect(recibido[1].url).toContain("gemini-3.8-flash:");
   });
 
   it("si un modelo fue retirado (404) prueba el siguiente", async () => {
-    const { fetchImpl, recibido } = geminiFalso([{ status: 404 }, { parts: [{ text: "Hola" }] }]);
-    expect((await conversar(peticion, { apiKey: "k", paquete, fetchImpl })).text).toBe("Hola");
-    expect(recibido).toHaveLength(2);
-  });
+  const { fetchImpl, recibido } = geminiFalso([
+    { status: 404 },
+    { parts: [{ text: "Hola" }] },
+  ]);
+
+  const resultado = await conversar(
+    { ...peticion, pregunta: "Hola" },
+    { apiKey: "k", paquete, fetchImpl }
+  );
+
+  expect(resultado.text).toBe("Hola");
+  expect(recibido).toHaveLength(2);
+  expect(recibido[0].url).toContain("gemini-flash-latest:");
+  expect(recibido[1].url).toContain("gemini-3.8-flash:");
+});
+  
 
   it("no reintenta ante una clave inválida", async () => {
     const { fetchImpl, recibido } = geminiFalso([{ status: 400 }, { parts: [{ text: "x" }] }]);
@@ -130,10 +175,32 @@ describe("manejarChat", () => {
     expect(recibido).toHaveLength(0);
   });
 
-  it("con clave devuelve la respuesta del agente; JSON roto da 400", async () => {
-    const { fetchImpl } = geminiFalso([{ parts: [{ text: "Hola, soy Muyu." }] }]);
-    const ok = await manejarChat(cuerpo, { GEMINI_API_KEY: "k" }, fetchImpl);
-    expect(ok).toEqual({ status: 200, cuerpo: { text: "Hola, soy Muyu.", emotion: "neutral" } });
-    expect((await manejarChat("{", { GEMINI_API_KEY: "k" }, fetchImpl)).status).toBe(400);
+      it("con clave devuelve la respuesta del agente; JSON roto da 400", async () => {
+    const { fetchImpl } = geminiFalso([
+      { parts: [{ text: "Hola, soy Muyu." }] },
+    ]);
+
+    const cuerpoSaludo = JSON.stringify({
+      ...peticion,
+      pregunta: "Hola",
+    });
+
+    const ok = await manejarChat(
+      cuerpoSaludo,
+      { GEMINI_API_KEY: "k" },
+      fetchImpl
+    );
+
+    expect(ok).toEqual({
+      status: 200,
+      cuerpo: {
+        text: "Hola, soy Muyu.",
+        emotion: "neutral",
+      },
+    });
+
+    expect(
+      (await manejarChat("{", { GEMINI_API_KEY: "k" }, fetchImpl)).status
+    ).toBe(400);
   });
 });

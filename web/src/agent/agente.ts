@@ -49,6 +49,8 @@ function instrucciones(paquete: PaqueteCanton, { contexto }: PeticionChat): stri
     "Responde en español sencillo, cálido y respetuoso, en máximo 3 frases cortas, sin markdown; " +
       "pon cada idea en su propia línea y la cifra clave primero.",
     "Usa SOLO cifras que te devuelvan las herramientas; nunca inventes datos.",
+    "Antes de responder preguntas agrícolas, consulta al menos una herramienta. " +
+    "No proporciones cifras ni recomendaciones sin datos de las herramientas.",
     "Si algo no está en los datos, dilo con honestidad y sugiere qué sí puedes responder.",
     "Si el semáforo de una herramienta está en rojo, empieza avisando ese riesgo.",
     ...reglasDeAlcance(paquete),
@@ -100,6 +102,7 @@ export async function conversar(peticion: PeticionChat, opciones: OpcionesAgente
     generationConfig: { temperature: 0.3, maxOutputTokens: 1024 },
   };
   let recomendo = false;
+  let consultoDatos = false;
 
   for (let turno = 0; turno < MAX_TURNOS; turno++) {
     const datos = await generar({ ...base, contents }, opciones);
@@ -110,7 +113,21 @@ export async function conversar(peticion: PeticionChat, opciones: OpcionesAgente
     if (llamadas.length === 0) {
       const text = partes.map((p) => p.text ?? "").join("").trim();
       if (!text) throw new AgenteError("Gemini no devolvió texto");
-      if (esFueraDeTema(text)) return respuestaFueraDeTema(peticion.pregunta);
+      if (esFueraDeTema(text)) {
+        return respuestaFueraDeTema(peticion.pregunta);
+      }
+
+      if (!consultoDatos) {
+        const saludo = /^(hola|buenos días|buenas tardes|buenas noches|gracias|adiós)[!¡.\s]*$/i
+          .test(peticion.pregunta.trim());
+
+        if (!saludo) {
+          throw new AgenteError(
+            "Gemini intentó responder sin consultar los datos agrícolas"
+          );
+        }
+      }
+
       return { text, emotion: recomendo ? "happy" : "neutral" };
     }
 
@@ -119,6 +136,9 @@ export async function conversar(peticion: PeticionChat, opciones: OpcionesAgente
       role: "user",
       parts: llamadas.map(({ name, args = {} }) => {
         const response = ejecutarHerramienta(paquete, name, args);
+        if (!("error" in response)) {
+          consultoDatos = true;
+        }
         const recomendaciones = response.recomendaciones;
         if (name === "recomendar_rotacion" && Array.isArray(recomendaciones) && recomendaciones.length > 0) {
           recomendo = true;
