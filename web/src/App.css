@@ -55,6 +55,17 @@ body {
   font-size: 0.9rem;
 }
 
+.badge {
+  display: inline-block;
+  margin: 0.35rem 0 0;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: var(--muyu-bg);
+  color: var(--muyu-dark);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
 .status--ok {
   color: var(--muyu-chakana);
 }

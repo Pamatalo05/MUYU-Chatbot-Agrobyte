@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { PREGUNTAS_RAPIDAS, type AccionRapida } from "./preguntasRapidas";
 import type { ChatMessage } from "./types";
 import "./ChatPanel.css";
 
@@ -8,7 +9,7 @@ interface ChatPanelProps {
   isThinking: boolean;
   /** Muyu está pensando o escribiendo: no se puede enviar. */
   isBusy: boolean;
-  onSend: (text: string) => void;
+  onSend: (text: string, accion?: AccionRapida) => void;
   /** Avisa si el usuario tiene texto escrito (Muyu se pone atento). */
   onTypingChange?: (isTyping: boolean) => void;
 }
@@ -79,6 +80,20 @@ export default function ChatPanel({
           </p>
         )}
         <div ref={listEndRef} />
+      </div>
+
+      <div className="chat__quick" role="group" aria-label="Preguntas rápidas">
+        {PREGUNTAS_RAPIDAS.map(({ accion, texto }) => (
+          <button
+            key={accion}
+            type="button"
+            className="chat__quick-button"
+            disabled={isBusy}
+            onClick={() => onSend(texto, accion)}
+          >
+            {texto}
+          </button>
+        ))}
       </div>
 
       <form className="chat__form" onSubmit={handleSubmit}>

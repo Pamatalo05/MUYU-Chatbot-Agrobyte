@@ -62,6 +62,38 @@
   30% { opacity: 1; }
 }
 
+/* Preguntas rápidas: funcionan sin internet (modo campo). */
+.chat__quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chat__quick-button {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--muyu-chakana);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--muyu-dark);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.chat__quick-button:hover:not(:disabled) {
+  background: var(--muyu-bg);
+}
+
+.chat__quick-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.chat__quick-button:focus-visible {
+  outline: 3px solid var(--muyu-lime);
+  outline-offset: 1px;
+}
+
 .chat__form {
   display: flex;
   gap: 0.5rem;

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { mockReply } from "./mockReply";
-import type { ChatMessage, ChatPhase, ChatRole } from "./types";
+import type { AccionRapida } from "./preguntasRapidas";
+import type { ChatMessage, ChatPhase, ChatRole, Responder } from "./types";
 
 const GREETING: ChatMessage = {
   id: "greeting",
@@ -15,6 +15,8 @@ const TYPE_INTERVAL_MS = 30;
 const MAX_TYPE_MS = 3000;
 const REDUCED_MOTION_SPEAK_MS = 800;
 const HAPPY_MS = 2000;
+/** Las respuestas offline son instantáneas; Muyu "piensa" un instante para que se note. */
+const MIN_THINKING_MS = 400;
 const ERROR_MS = 3000;
 /** Mensajes que se envían como contexto (Bloque 6). */
 const HISTORY_LIMIT = 10;
@@ -25,6 +27,8 @@ const createMessage = (role: ChatRole, text: string): ChatMessage => ({
   text,
 });
 
+const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
+
 const prefersReducedMotion = () =>
   window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
 
@@ -33,7 +37,7 @@ const prefersReducedMotion = () =>
  * thinking (espera) → speaking (la respuesta aparece letra a letra)
  * → happy 2 s si la emoción es feliz → idle. Si algo falla: error 3 s → idle.
  */
-export function useChat() {
+export function useChat(responder: Responder) {
   const [messages, setMessages] = useState<ChatMessage[]>([GREETING]);
   const [phase, setPhase] = useState<ChatPhase>("idle");
   const messagesRef = useRef(messages);
@@ -87,7 +91,7 @@ export function useChat() {
   const isBusy = phase === "thinking" || phase === "speaking";
 
   const send = useCallback(
-    async (text: string) => {
+    async (text: string, accion?: AccionRapida) => {
       const clean = text.trim();
       if (!clean || isBusy) return;
 
@@ -97,7 +101,7 @@ export function useChat() {
       setPhase("thinking");
 
       try {
-        const reply = await mockReply(clean, history);
+        const [reply] = await Promise.all([responder(clean, history, accion), wait(MIN_THINKING_MS)]);
         const answer = createMessage("muyu", "");
         setMessages((current) => [...current, answer]);
         setPhase("speaking");
@@ -115,7 +119,7 @@ export function useChat() {
         schedule(() => setPhase("idle"), ERROR_MS);
       }
     },
-    [isBusy, clearTimers, schedule, typeOut],
+    [isBusy, responder, clearTimers, schedule, typeOut],
   );
 
   return { messages, phase, isBusy, send };

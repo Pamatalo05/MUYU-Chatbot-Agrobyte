@@ -1,0 +1,38 @@
+.contexto {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.contexto label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.75rem;
+  color: rgba(31, 74, 44, 0.75);
+}
+
+.contexto select {
+  min-width: 0;
+  padding: 0.35rem 0.4rem;
+  border: 1px solid rgba(31, 74, 44, 0.3);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--muyu-dark);
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.contexto select:focus-visible {
+  outline: 3px solid var(--muyu-lime);
+  outline-offset: 1px;
+}
+
+@media (max-width: 420px) {
+  .contexto {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
