@@ -7,6 +7,8 @@
 
 .muyu {
   position: relative;
+  width: min(var(--muyu-size, 320px), 100%);
+  aspect-ratio: 1;
   user-select: none;
 }
 

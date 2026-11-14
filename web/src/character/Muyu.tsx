@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import "./Muyu.css";
 
 /** Expresión de los ojos. Coincide con las capas en public/muyu. */
@@ -6,7 +7,7 @@ export type MuyuEyes = "open" | "happy" | "joy";
 interface MuyuProps {
   /** Ojos a mostrar. Por defecto: abiertos. */
   eyes?: MuyuEyes;
-  /** Ancho y alto en píxeles. */
+  /** Tamaño máximo en píxeles; se achica solo si no hay espacio. */
   size?: number;
   /** Clases extra para los estados de animación de los próximos bloques. */
   className?: string;
@@ -28,7 +29,7 @@ export default function Muyu({ eyes = "open", size = 320, className = "" }: Muyu
   return (
     <div
       className={`muyu ${className}`.trim()}
-      style={{ width: size, height: size }}
+      style={{ "--muyu-size": `${size}px` } as CSSProperties}
       role="img"
       aria-label="Muyu, un robot-semilla con un brote en la cabeza y una chakana en el pecho"
     >

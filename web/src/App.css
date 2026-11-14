@@ -22,8 +22,8 @@ body {
 
 .layout {
   display: grid;
-  grid-template-columns: 1fr 380px;
-  min-height: 100vh;
+  grid-template-columns: 1fr 400px;
+  height: 100vh;
 }
 
 .character-area {
@@ -34,6 +34,7 @@ body {
 .chat-area {
   display: flex;
   flex-direction: column;
+  min-height: 0;
   gap: 1rem;
   padding: 1.5rem;
   background: #ffffff;
@@ -59,14 +60,14 @@ body {
   color: var(--danger);
 }
 
-.chat-placeholder {
-  color: rgba(31, 74, 44, 0.6);
-}
-
 @media (max-width: 768px) {
   .layout {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: 40vh 1fr;
+  }
+
+  .character-area .muyu {
+    max-width: 34vh;
   }
 
   .chat-area {

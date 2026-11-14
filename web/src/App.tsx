@@ -1,4 +1,6 @@
 import Muyu from "./character/Muyu";
+import ChatPanel from "./chat/ChatPanel";
+import { useChat } from "./chat/useChat";
 import { useBackendHealth, type BackendStatus } from "./useBackendHealth";
 
 const STATUS_TEXT: Record<BackendStatus, string> = {
@@ -10,12 +12,13 @@ const STATUS_TEXT: Record<BackendStatus, string> = {
 
 export default function App() {
   const status = useBackendHealth();
+  const { messages, isThinking, send } = useChat();
 
   return (
     <main className="layout">
       <section className="character-area" aria-label="Personaje Muyu">
-        {/* Bloques 7 y 8: los ojos y animaciones cambiarán según el chat */}
-        <Muyu eyes={status === "ok" ? "happy" : "open"} size={340} />
+        {/* Bloques 7 y 8: los estados de Muyu se conectarán al chat */}
+        <Muyu eyes={isThinking ? "open" : "happy"} size={340} />
       </section>
 
       <section className="chat-area" aria-label="Conversación">
@@ -25,8 +28,7 @@ export default function App() {
             {STATUS_TEXT[status]}
           </p>
         </header>
-        {/* Bloque 3: aquí irá el panel del chat */}
-        <p className="chat-placeholder">El chat aparecerá aquí.</p>
+        <ChatPanel messages={messages} isThinking={isThinking} onSend={send} />
       </section>
     </main>
   );
