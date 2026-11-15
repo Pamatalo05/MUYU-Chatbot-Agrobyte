@@ -6,9 +6,11 @@ import type { PeticionChat } from "../agent/peticion";
 import type { MuyuContexto } from "../knowledge/contexto";
 import type { ChatMessage, ChatReply, Sugerencia } from "./types";
 
-export const RUTA_CHAT = "/api/chat";
-
-// Un solo intento; el modo campo toma el relevo si el servicio no responde.
+/**
+ * En la web, /api/chat es del mismo sitio. Dentro de Kallpa la página vive en el teléfono,
+ * así que se usa la dirección completa del sitio en Netlify (VITE_MUYU_API_BASE en web/.env.kallpa).
+ */
+export const RUTA_CHAT = `${import.meta.env.VITE_MUYU_API_BASE ?? ""}/api/chat`;
 const TIEMPO_MAXIMO_MS = 25_000;
 
 /**

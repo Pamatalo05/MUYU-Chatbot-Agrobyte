@@ -1,8 +1,12 @@
 import type { PaqueteCanton } from "./types";
 import { validarPaquete } from "./validarPaquete";
 
-/** Ruta pública del paquete (la PWA lo deja en caché para uso sin internet). */
-export const RUTA_PAQUETE = "/datos/paquete_canton.json";
+/**
+ * Ruta del paquete. En la web va en /datos/; dentro de Kallpa se lee el MISMO archivo
+ * que usa la app Android (assets/datos/), así hay una sola fuente de datos.
+ */
+export const RUTA_PAQUETE =
+  import.meta.env.MODE === "kallpa" ? "../datos/paquete_canton.json" : `${import.meta.env.BASE_URL}datos/paquete_canton.json`;
 
 let enCache: Promise<PaqueteCanton> | null = null;
 

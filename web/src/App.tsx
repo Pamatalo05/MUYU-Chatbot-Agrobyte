@@ -12,6 +12,7 @@ import { useChat } from "./chat/useChat";
 import { useEnLinea } from "./chat/useEnLinea";
 import ContextoSimulado from "./kallpa/ContextoSimulado";
 import SemaforoRiesgo from "./kallpa/SemaforoRiesgo";
+import { contextoDesdeKallpa, estaEnKallpa, leerParcelaKallpa, volverAKallpa } from "./kallpa/puente";
 import { CONTEXTO_INICIAL, type MuyuContexto } from "./knowledge/contexto";
 import { evaluarSemaforo } from "./knowledge/semaforo";
 import {
@@ -21,6 +22,7 @@ import {
 import { deriveMuyuState } from "./state/assistant";
 import { useLecturaAutomatica } from "./voz/useLecturaAutomatica";
 import { useVoz } from "./voz/useVoz";
+import { useVozKallpa } from "./voz/useVozKallpa";
 
 export default function App() {
   const [preferencias, setPreferencias] = useState<Preferencias>(leerPreferencias);
@@ -34,6 +36,15 @@ export default function App() {
     memoria.current.reiniciar();
     setContexto(nuevo);
   }, []);
+  // Dentro de la app Kallpa, Muyu arranca con la parcela que el agricultor tiene activa.
+  const enKallpa = useMemo(() => estaEnKallpa(), []);
+  const parcelaKallpa = useMemo(() => leerParcelaKallpa(), []);
+  useEffect(() => {
+    if (paquete.estado !== "listo" || !parcelaKallpa) return;
+    const cantones = Object.keys(paquete.paquete.cantones);
+    setContexto((actual) => contextoDesdeKallpa(actual, parcelaKallpa, cantones));
+  }, [paquete, parcelaKallpa]);
+
   const enLinea = useEnLinea();
   const [modo, setModo] = useState<ModoConexion>("en_vivo");
   const ultimoFallo = useRef<number | null>(null);
@@ -93,7 +104,7 @@ export default function App() {
       : null;
 
   const { messages, phase, isBusy, send, retry, canRetry } = useChat(responder);
-  const voz = useVoz();
+  const voz = useVozKallpa(useVoz(enLinea));
   const [lecturaAutomatica, setLecturaAutomatica] = useLecturaAutomatica();
   const fasePrevia = useRef(phase);
 
@@ -127,16 +138,16 @@ const enviar = useCallback<typeof send>(
     forcedState ?? (hablaConVoz ? "speaking" : deriveMuyuState(phase, isUserTyping, semaforo?.color === "rojo"));
 
   return (
-    <main className="layout">
+    <main className={enKallpa ? "layout layout--kallpa" : "layout"}>
       <section className="character-area" aria-label="Muyu y tu parcela">
-        <Muyu state={muyuState} size={300} />
+        <Muyu state={muyuState} size={enKallpa ? 170 : 300} />
         <div className="finca">
           {paquete.estado === "listo" && (
             <ContextoSimulado paquete={paquete.paquete} contexto={contexto} onChange={cambiarParcela} />
           )}
           {semaforo && <SemaforoRiesgo {...semaforo} onConsultar={() => { if (!isBusy) void enviar("¿Qué significa el semáforo de mi parcela y qué puedo revisar?"); }} />}
         </div>
-        {import.meta.env.DEV && (
+        {import.meta.env.DEV && !enKallpa && (
           <details className="debug-toggle">
             <summary>Probar estados</summary>
             <MuyuDebugPanel value={forcedState} onChange={setForcedState} />
@@ -146,7 +157,12 @@ const enviar = useCallback<typeof send>(
 
       <section className="chat-area" aria-label="Conversación">
         <header className="chat-header">
-          <div>
+          {enKallpa && (
+            <button type="button" className="volver-kallpa" onClick={() => volverAKallpa()} aria-label="Volver a Kallpa">
+              ‹
+            </button>
+          )}
+          <div className="chat-header__titulo">
             <h1>Muyu</h1>
             <p className="chat-header__sub">Tu asistente de siembra</p>
           </div>

@@ -34,7 +34,11 @@ function apiChatLocal(entorno: EntornoServidor): Plugin {
 export default defineConfig(({ mode }) => {
   // "" = carga todas las variables del .env de la raíz, no solo las VITE_*.
   const env = loadEnv(mode, "..", "");
+  const paraKallpa = mode === "kallpa";
   return {
+    // Dentro de Kallpa los archivos se abren desde el teléfono: rutas relativas.
+    base: paraKallpa ? "./" : "/",
+    build: paraKallpa ? { outDir: "dist-kallpa", emptyOutDir: true } : undefined,
     plugins: [react(), apiChatLocal({ GEMINI_API_KEY: env.GEMINI_API_KEY, GEMINI_MODEL: env.GEMINI_MODEL })],
     server: {
       port: 5173,
