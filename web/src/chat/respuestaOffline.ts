@@ -3,11 +3,9 @@ import { resolverConsulta, type TemaConsulta } from "../knowledge/contextoConver
 import { respuestaAgricola } from "../knowledge/consultaAgricola";
 
 import {
-  balanceHidrico,
   compararEscenarios,
   recomendarRotacion,
   resumenCanton,
-  type Balance,
 } from "../knowledge/kallpaConocimiento";
 
 import {
@@ -18,8 +16,8 @@ import {
   type PaqueteKallpa,
 } from "../knowledge/adaptadorKallpa";
 
-import type { MuyuContexto } from "../knowledge/contexto";
-import { evaluarSemaforo } from "../knowledge/semaforo";
+import { nombrePrevio, type MuyuContexto } from "../knowledge/contexto";
+import { evaluarSemaforo, type ColorSemaforo } from "../knowledge/semaforo";
 import type { Escenario, PaqueteCanton } from "../knowledge/types";
 import {
   esTemaVetado,
@@ -58,6 +56,24 @@ const numero = (valor: number, decimales = 0): string =>
 const conSigno = (valor: number, decimales = 0): string =>
   (valor > 0 ? "+" : "") + numero(valor, decimales);
 
+const APERTURAS = [
+  "¡Hey, muy buena pregunta! 🌱",
+  "¡Claro que sí, te ayudo!",
+  "¡Qué buena pregunta!",
+  "¡Con gusto te cuento!",
+  "¡Buenísima pregunta!",
+];
+
+export function apertura(pregunta: string, accion: string): string {
+  const semilla = [...`${pregunta}|${accion}`].reduce((total, letra) => total + letra.charCodeAt(0), 0);
+  return APERTURAS[semilla % APERTURAS.length];
+}
+
+
+const conApertura = (respuesta: ChatReply, pregunta: string, tema: AccionRapida): ChatReply => respuesta.text.startsWith("⚠️") ? respuesta : { ...respuesta, text: `${apertura(pregunta, tema)}\n${respuesta.text}` };
+
+const variedad = (nombre: string) => nombre.match(/\((INIAP[^)]*)\)/)?.[1];
+
 const nombreCorto = (nombre: string): string =>
   nombre.split(" (")[0].split(" / ")[0].toLowerCase();
 
@@ -67,11 +83,13 @@ const CLIMA_TEXTO: Record<Escenario, string> = {
   la_nina: "año de La Niña",
 };
 
-const BALANCE_TEXTO: Record<Balance, string> = {
-  exceso: "riesgo de exceso de lluvia",
-  deficit: "riesgo de sequía",
-  normal: "lluvias cercanas a lo normal",
+const RIESGO_TEXTO: Record<ColorSemaforo, string> = {
+  verde: "buen momento para sembrar",
+  amarillo: "siembra con precaución",
+  rojo: "momento riesgoso para sembrar",
 };
+
+const pct = (valor: number) => `${numero(valor * 100)} %`;
 
 function convertirEscenario(
   escenario: MuyuContexto["escenario"],
@@ -90,7 +108,7 @@ function noEntiendo(pregunta: string): ChatReply {
   return {
     text:
       "Sin internet todavía no entiendo preguntas así. " +
-      "Te sugiero estas:",
+      "te sugiero estas:",
     emotion: "neutral",
     sugerencias: sugerirPreguntas(pregunta),
   };
@@ -293,7 +311,7 @@ export function responderOffline(
         if (respuesta) return respuesta;
       }
 
-      return responderRotacion(paquete, contexto);
+      return conApertura(responderRotacion(paquete, contexto), pregunta, "rotacion");
     }
 
     case "urea": {
@@ -306,7 +324,7 @@ export function responderOffline(
         if (respuesta) return respuesta;
       }
 
-      return responderUrea(paquete, contexto);
+      return conApertura(responderUrea(paquete, contexto), pregunta, "urea");
     }
 
     case "enso": {
@@ -319,7 +337,7 @@ export function responderOffline(
         if (respuesta) return respuesta;
       }
 
-      return responderEnso(paquete, contexto);
+      return conApertura(responderEnso(paquete, contexto), pregunta, "enso");
     }
 
     case "resumen": {
@@ -332,7 +350,7 @@ export function responderOffline(
         if (respuesta) return respuesta;
       }
 
-      return responderResumen(paquete, contexto);
+      return conApertura(responderResumen(paquete, contexto), pregunta, "resumen");
     }
 
     default:
@@ -340,161 +358,80 @@ export function responderOffline(
   }
 }
 
-// --------------------------------------------------
-// RESPUESTAS ORIGINALES COMO RESPALDO
-// --------------------------------------------------
+// Respaldo adaptado al esquema vigente, con las mismas fórmulas del motor compartido.
 
-function responderRotacion(
-  paquete: PaqueteCanton,
-  contexto: MuyuContexto,
-): ChatReply {
+function responderRotacion(paquete: PaqueteCanton, contexto: MuyuContexto): ChatReply {
   const { cantonId, cultivoPrevioId, escenario } = contexto;
-
-  const { recomendaciones, avisos } = recomendarRotacion(
-    paquete,
-    contexto,
-  );
-
-  const canton =
-    paquete.cantones[cantonId].nombre.split(",")[0];
-
-  const previo = nombreCorto(
-    paquete.cultivos.find(
-      (c) => c.id === cultivoPrevioId,
-    )?.nombre ?? cultivoPrevioId,
-  );
-
-  if (recomendaciones.length === 0) {
-    return {
-      text:
-        `${avisos.join(" ")}\n` +
-        "Prueba con otro clima o consulta a un técnico de tu zona.",
-      emotion: "neutral",
-    };
-  }
-
+  const { recomendaciones } = recomendarRotacion(paquete, contexto);
+  const canton = paquete.cantones[cantonId].nombre.split(",")[0];
   const [primera, ...otras] = recomendaciones;
+  if (!primera) return { text: "No hay rotaciones documentadas para este contexto.", emotion: "neutral" };
+
+  // Una idea por línea: se lee rápido en el celular y en voz alta.
   const semaforo = evaluarSemaforo(paquete, contexto);
   const lineas: string[] = [];
-
-  if (semaforo.color === "rojo") {
-    lineas.push(
-      `Cuidado, el riesgo para sembrar es alto: ${semaforo.motivo}.`,
-    );
-  }
-
+  if (semaforo.color === "rojo") lineas.push(`⚠️ Cuidado, el riesgo para sembrar es alto: ${semaforo.motivo}.`);
+  const tipo = variedad(primera.nombre);
   lineas.push(
-    `Después de cosechar ${previo} en ${canton} (${CLIMA_TEXTO[escenario]}), te recomiendo ${nombreCorto(primera.nombre)}.`,
-    `Por qué: ${primera.razones.slice(0, 2).join(" y ")}.`,
-    `Margen estimado: unos ${numero(primera.margen_neto_ha)} USD/ha (fuente: ${primera.fuente}).`,
+    `Después de cosechar ${nombrePrevio(cultivoPrevioId)} en ${canton} (${CLIMA_TEXTO[escenario]}), ` +
+      `te recomiendo ${nombreCorto(primera.nombre)}${tipo ? ` ${tipo}` : ""}.`,
+    `Por qué: es la primera opción de Kallpa para un ${CLIMA_TEXTO[escenario]} y en ${primera.ciclo_dias} días ` +
+      `deja unos ${numero(primera.fijacion_n_kg_ha)} kg de nitrógeno por hectárea en la tierra.`,
+    `Margen parcial aproximado: unos ${numero(primera.ganancia_ha)} USD por hectárea, ya descontados los insumos (fuente: ${primera.fuente}).`,
   );
+  if (otras.length > 0) lineas.push(`Otras opciones: ${otras.map((r) => nombreCorto(r.nombre)).join(" y ")}.`);
 
-  if (otras.length > 0) {
-    lineas.push(
-      `Otras opciones: ${otras.map((r) => nombreCorto(r.nombre)).join(" y ")}.`,
-    );
-  } else if (avisos.length > 0) {
-    lineas.push(avisos[0]);
-  }
-
-  return {
-    text: lineas.join("\n"),
-    emotion: semaforo.color === "rojo" ? "neutral" : "happy",
-  };
+  return { text: lineas.join("\n"), emotion: semaforo.color === "rojo" ? "neutral" : "happy" };
 }
 
-function responderUrea(
-  paquete: PaqueteCanton,
-  contexto: MuyuContexto,
-): ChatReply {
-  const { recomendaciones } = recomendarRotacion(
-    paquete,
-    contexto,
-  );
+function responderUrea(paquete: PaqueteCanton, contexto: MuyuContexto): ChatReply {
+  // Se elige la opción que más urea ahorra y la cifra va por hectárea:
+  // no asumimos el tamaño de la parcela, se lo preguntamos al agricultor.
+  const { recomendaciones } = recomendarRotacion(paquete, contexto);
+  const mejor = [...recomendaciones].sort((a, b) => b.ahorro_urea_kg_ha - a.ahorro_urea_kg_ha)[0];
 
-  const mejor = [...recomendaciones].sort(
-    (a, b) => b.ahorro_urea_ha - a.ahorro_urea_ha,
-  )[0];
-
-  if (!mejor || mejor.ahorro_urea_ha === 0) {
+  if (!mejor || mejor.ahorro_urea_kg_ha <= 0) {
     return {
-      text:
-        "Con las opciones que hay para tu cantón y escenario, " +
-        "no encuentro ahorro en urea. " +
-        "Te conviene revisar otra rotación.",
+      text: "Con las opciones que hay para tu cantón y escenario, no encuentro ahorro en urea. Te conviene revisar otra rotación.",
       emotion: "neutral",
     };
   }
-
-  const fija = paquete.cultivos.find(
-    (c) => c.id === mejor.id,
-  )?.fija_nitrogeno;
-
-  return {
-    text:
-      `Si siembras ${nombreCorto(mejor.nombre)}, ` +
-      `el ahorro estimado en urea es de ${numero(mejor.ahorro_urea_ha)} USD por hectárea` +
-      (fija ? " porque fija nitrógeno en el suelo." : ".") +
-      " Para calcular el ahorro total, necesito saber cuántas hectáreas tienes.",
-    emotion: "happy",
-  };
+  const lineas = [
+    `Si siembras ${nombreCorto(mejor.nombre)}, ese cultivo deja nitrógeno en la tierra.`,
+    `Así el siguiente cultivo necesita unos ${numero(mejor.ahorro_urea_kg_ha)} kg menos de urea por hectárea: ` +
+      `son unos ${numero(mejor.ahorro_urea_sacos, 1)} sacos de 50 kg, más o menos ${numero(mejor.ahorro_urea_usd)} USD por hectárea.`,
+    "Es un cálculo aproximado, con el precio de referencia del MAG; depende de tu suelo y de cuánta urea usas hoy.",
+    "Para calcular el ahorro total, necesito saber cuántas hectáreas tienes.",
+  ];
+  return { text: lineas.join("\n"), emotion: "happy" };
 }
 
-function responderEnso(
-  paquete: PaqueteCanton,
-  contexto: MuyuContexto,
-): ChatReply {
+function responderEnso(paquete: PaqueteCanton, contexto: MuyuContexto): ChatReply {
   const { cantonId, mes } = contexto;
-
-  const [, nino, nina] = compararEscenarios(
-    paquete,
-    cantonId,
-    mes,
-  );
-
-  const balance = (
-    escenario: "el_nino" | "la_nina",
-  ) =>
-    BALANCE_TEXTO[
-      balanceHidrico(
-        paquete,
-        cantonId,
-        escenario,
-        mes,
-      ).balance
-    ];
-
-  const canton = nino.canton.split(",")[0];
-
+  const [neutro, nino, nina] = compararEscenarios(paquete, cantonId, mes);
+  const riesgo = (escenario: Escenario) => RIESGO_TEXTO[evaluarSemaforo(paquete, { ...contexto, escenario }).color];
+  const puntos = (d: number) => `${conSigno(d * 100)} puntos`;
   return {
     text: [
-      `En ${MESES[mes - 1]}, en ${canton}:`,
-      `Con El Niño: ${numero(nino.lluvia_mm_mes)} mm de lluvia (${conSigno(nino.diferencia.lluvia_mm_mes)} frente a un año normal).`,
-      `Con La Niña: ${numero(nina.lluvia_mm_mes)} mm (${conSigno(nina.diferencia.lluvia_mm_mes)}).`,
-      `Si siembras ahora, El Niño trae ${balance("el_nino")} y La Niña, ${balance("la_nina")}.`,
+      `En ${MESES[mes - 1]}, en ${neutro.canton.split(",")[0]}, la humedad del suelo en la raíz sería:`,
+      `🌱 Año normal: ${pct(neutro.humedad_raiz)}.`,
+      `🌧️ Con El Niño: ${pct(nino.humedad_raiz)} (${puntos(nino.diferencia_humedad)}).`,
+      `☀️ Con La Niña: ${pct(nina.humedad_raiz)} (${puntos(nina.diferencia_humedad)}).`,
+      `Para sembrar ahora: con El Niño, ${riesgo("el_nino")}; con La Niña, ${riesgo("la_nina")}.`,
     ].join("\n"),
     emotion: "neutral",
   };
 }
 
-function responderResumen(
-  paquete: PaqueteCanton,
-  contexto: MuyuContexto,
-): ChatReply {
-  const r = resumenCanton(
-    paquete,
-    contexto.cantonId,
-    contexto.escenario,
-    contexto.mes,
-  );
-
+function responderResumen(paquete: PaqueteCanton, contexto: MuyuContexto): ChatReply {
+  const r = resumenCanton(paquete, contexto.cantonId, contexto.escenario, contexto.mes);
   return {
     text: [
       `${r.canton.split(",")[0]} en ${MESES[r.mes - 1]} (${CLIMA_TEXTO[r.escenario]}):`,
-      `Temperatura: de ${numero(r.temp_min_c)} a ${numero(r.temp_max_c)} °C.`,
-      `Lluvia: ${numero(r.lluvia_mm_mes)} mm en el mes.`,
-      `Humedad del suelo en la raíz: ${numero(r.humedad_raiz * 100)} %.`,
-      `Verdor de los cultivos (NDVI): ${numero(r.ndvi_modis * 100)} de 100.`,
+      `🌧️ Lluvia típica: ${numero(r.lluvia_mm)} mm en el mes.`,
+      `🌡️ Temperatura máxima típica: ${numero(r.temp_max_c, 1)} °C.`,
+      `💧 Humedad del suelo en la raíz: ${pct(r.humedad_raiz)} (predicción del modelo).`,
+      `🌿 Verdor de los cultivos (NDVI): ${numero(r.ndvi_modis * 100)} de 100.`,
       `Suelo ${r.suelo.split(" (")[0].toLowerCase()}, a ${numero(r.elevacion_msnm)} m de altura.`,
     ].join("\n"),
     emotion: "neutral",

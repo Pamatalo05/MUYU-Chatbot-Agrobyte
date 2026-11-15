@@ -1,3 +1,4 @@
+import { CULTIVOS_PREVIOS } from "../knowledge/contexto";
 import {
   compararEscenarios,
   recomendarRotacion,
@@ -136,7 +137,7 @@ export function declararHerramientas(
           cultivo_previo_id: {
             type: "STRING",
             description: "Id del cultivo recién cosechado",
-            enum: paquete.cultivos.map(
+            enum: CULTIVOS_PREVIOS.map(
               (cultivo) => cultivo.id
             ),
           },

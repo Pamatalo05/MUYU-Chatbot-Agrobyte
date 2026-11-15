@@ -115,7 +115,8 @@ describe("respuestas científicas y trazabilidad", () => {
   it("un indicador calculado se presenta como regla orientativa y no como probabilidad", () => {
     const c = resolverConsulta("¿Qué riesgo hay?", consulta.contexto);
     const r = respuestaAgricola(c, paquete, "riesgo", previo)!;
-    expect(r.text).toContain("solo considera lluvia y opciones de rotación");
+    expect(r.text).toContain("solo considera humedad de raíz estimada");
+    expect(r.evidencia?.fuentesDocumentadas).toEqual(Object.values(original.fuentes_metodologia));
     expect(r.text).not.toMatch(/probabilidad de|% de riesgo/);
     expect(r.evidencia?.fuente).toContain("original");
   });

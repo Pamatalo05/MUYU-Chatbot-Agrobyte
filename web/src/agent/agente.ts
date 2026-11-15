@@ -1,3 +1,4 @@
+import { nombrePrevio } from "../knowledge/contexto";
 import { resolverSeguimiento, validarPreferencias } from "../chat/estilo";
 import { conLimite } from "../chat/limite";
 import { resolverConsulta } from "../knowledge/contextoConversacion";
@@ -98,10 +99,7 @@ function instrucciones(
     paquete.cantones[contexto.cantonId]?.nombre ??
     contexto.cantonId;
 
-  const previo =
-    paquete.cultivos.find(
-      (c) => c.id === contexto.cultivoPrevioId
-    )?.nombre ?? contexto.cultivoPrevioId;
+  const previo = nombrePrevio(contexto.cultivoPrevioId);
 
   const hayDatosNuevos =
     paqueteNuevo?.cantones[contexto.cantonId] !== undefined;

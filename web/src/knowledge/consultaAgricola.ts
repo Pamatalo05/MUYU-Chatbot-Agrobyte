@@ -76,8 +76,8 @@ export function respuestaAgricola(consulta: Consulta, paquete: PaqueteKallpa | u
       const semaforo = evaluarSemaforo(original, contexto);
       evidencia.fuente = "Kallpa · reglas del paquete original";
       evidencia.periodo = original.meta.periodo_analizado;
-      evidencia.tipo = "Indicador calculado por reglas; sin calibración probabilística";
-      evidencia.fuentesDocumentadas = [...original.meta.fuentes_datos];
+      evidencia.tipo = "Indicador calculado con humedad de raíz estimada; sin calibración probabilística";
+      evidencia.fuentesDocumentadas = Object.values(original.fuentes_metodologia);
       const detalle = explicarSemaforo(semaforo);
       lineas.push(`${detalle.estado}. ${detalle.explicacion}`, detalle.limite);
       if (/hacer|revisar|acciones/.test(normalizar(pregunta))) lineas.push(...detalle.acciones);
