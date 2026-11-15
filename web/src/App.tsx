@@ -12,13 +12,17 @@ import ContextoSimulado from "./kallpa/ContextoSimulado";
 import SemaforoRiesgo from "./kallpa/SemaforoRiesgo";
 import { CONTEXTO_INICIAL, type MuyuContexto } from "./knowledge/contexto";
 import { evaluarSemaforo } from "./knowledge/semaforo";
-import { usePaquete } from "./knowledge/usePaquete";
+import {
+  usePaquete,
+  usePaqueteNuevo,
+} from "./knowledge/usePaquete";
 import { deriveMuyuState } from "./state/assistant";
 import { useLecturaAutomatica } from "./voz/useLecturaAutomatica";
 import { useVoz } from "./voz/useVoz";
 
 export default function App() {
   const paquete = usePaquete();
+  const paqueteNuevo = usePaqueteNuevo();
   const [contexto, setContexto] = useState<MuyuContexto>(CONTEXTO_INICIAL);
 
   const enLinea = useEnLinea();
@@ -34,7 +38,13 @@ export default function App() {
           return { text: "Estoy cargando los datos de tu cantón, pregúntame en un momento.", emotion: "neutral" };
         }
         if (paquete.estado === "error") throw new Error(paquete.mensaje);
-        return responderOffline(paquete.paquete, contexto, pregunta, accion);
+        return responderOffline(
+          paquete.paquete,
+          contexto,
+          pregunta,
+          accion,
+          paqueteNuevo ?? undefined
+        );
       };
       const elegido = elegirModo({ enLinea, accion, ultimoFalloMs: ultimoFallo.current, ahoraMs: Date.now() });
       const resultado = await responderHibrido(
@@ -49,7 +59,7 @@ export default function App() {
       if (!accion) setModo(resultado.modo);
       return resultado.reply;
     },
-    [paquete, contexto, enLinea],
+[paquete, paqueteNuevo, contexto, enLinea],
   );
   const modoVisible: ModoConexion = enLinea ? modo : "campo";
   const aviso = !enLinea

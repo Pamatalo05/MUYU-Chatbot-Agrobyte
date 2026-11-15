@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { cargarPaquete } from "./cargarPaquete";
 import type { PaqueteCanton } from "./types";
-
+import {
+  cargarKallpaNuevo,
+  type PaqueteKallpa,
+} from "./adaptadorKallpa";
 export type EstadoPaquete =
   | { estado: "cargando" }
   | { estado: "listo"; paquete: PaqueteCanton }
@@ -28,4 +31,29 @@ export function usePaquete(): EstadoPaquete {
   }, []);
 
   return resultado;
+}
+export function usePaqueteNuevo(): PaqueteKallpa | null {
+  const [paqueteNuevo, setPaqueteNuevo] =
+    useState<PaqueteKallpa | null>(null);
+
+  useEffect(() => {
+    let activo = true;
+
+    cargarKallpaNuevo()
+      .then((datos) => {
+        if (activo) setPaqueteNuevo(datos);
+      })
+      .catch((error) => {
+        console.warn(
+          "[Muyu] No se pudieron cargar los datos nuevos:",
+          error
+        );
+      });
+
+    return () => {
+      activo = false;
+    };
+  }, []);
+
+  return paqueteNuevo;
 }

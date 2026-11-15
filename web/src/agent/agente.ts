@@ -27,9 +27,7 @@ import type { PeticionChat } from "./peticion";
  * Modelos de Gemini disponibles como alternativas.
  */
 export const MODELOS_GEMINI = [
-  "gemini-flash-latest",
-  "gemini-3.8-flash",
-  "gemini-flash-lite-latest",
+    "gemini-3.5-flash-lite",
 ];
 
 const PROBAR_OTRO_MODELO = new Set([404, 429, 503]);
@@ -235,7 +233,7 @@ async function generar(
             "x-goog-api-key": apiKey,
           },
           body: JSON.stringify(cuerpo),
-          signal: AbortSignal.timeout(12_000),
+          signal: AbortSignal.timeout(10_000),
         }
       );
     } catch (error) {

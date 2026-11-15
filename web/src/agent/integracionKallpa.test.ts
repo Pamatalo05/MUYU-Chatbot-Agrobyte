@@ -1,8 +1,7 @@
-import { declararHerramientas } from "./herramientas";
 import { describe, expect, it } from "vitest";
+import { declararHerramientas } from "./herramientas";
 import datosOriginales from "../../public/datos/paquete_canton.json";
 import datosNuevos from "../../public/datos/nuevo/paquete_canton.json";
-
 import { validarPaquete } from "../knowledge/validarPaquete";
 import type { PaqueteKallpa } from "../knowledge/adaptadorKallpa";
 import { conversar } from "./agente";
@@ -12,8 +11,7 @@ const paquete = validarPaquete(structuredClone(datosOriginales));
 const paqueteNuevo = datosNuevos as PaqueteKallpa;
 
 const peticion: PeticionChat = {
-  pregunta:
-    "¿Cuál es la humedad de raíz en Daule durante enero bajo El Niño?",
+  pregunta: "¿Cuál es la humedad de raíz en Daule durante enero bajo El Niño?",
   historial: [],
   contexto: {
     cantonId: "daule",
@@ -29,7 +27,7 @@ describe("Integración Gemini + Kallpa ML", () => {
 
     const fetchFalso = (async (
       _url: string,
-      opciones: RequestInit
+      opciones: RequestInit,
     ) => {
       const cuerpo = JSON.parse(String(opciones.body));
       solicitudes.push(cuerpo);
@@ -57,7 +55,7 @@ describe("Integración Gemini + Kallpa ML", () => {
               },
             ],
           }),
-          { status: 200 }
+          { status: 200 },
         );
       }
 
@@ -71,14 +69,14 @@ describe("Integración Gemini + Kallpa ML", () => {
                   {
                     text:
                       "La humedad de raíz predicha en Daule " +
-                      "para enero bajo El Niño es 70.1%.",
+                      "para enero bajo El Niño es 70,1 %.",
                   },
                 ],
               },
             },
           ],
         }),
-        { status: 200 }
+        { status: 200 },
       );
     }) as typeof fetch;
 
@@ -97,41 +95,35 @@ describe("Integración Gemini + Kallpa ML", () => {
     expect(
       herramientas.some(
         (h: { name: string }) =>
-          h.name === "consultar_kallpa_ml"
-      )
+          h.name === "consultar_kallpa_ml",
+      ),
     ).toBe(true);
 
-    const partes =
-      solicitudes[1].contents.at(-1).parts;
-
-    const resultado =
-      partes[0].functionResponse.response;
+    const partes = solicitudes[1].contents.at(-1).parts;
+    const resultado = partes[0].functionResponse.response;
 
     expect(resultado.canton).toBe(
-      paqueteNuevo.cantones.daule.nombre
+      paqueteNuevo.cantones.daule.nombre,
     );
 
     expect(
-      resultado.clima.humedad_raiz_predicha
+      resultado.clima.humedad_raiz_predicha,
     ).toBeCloseTo(0.701);
 
     expect(resultado.modelo).toBe("Ridge");
-
-    expect(respuesta.text).toContain("70.1%");
+    expect(respuesta.text).toContain("70,1 %");
   });
 
-  
-it("usa exclusivamente Kallpa ML cuando hay datos actualizados", () => {
-  const herramientas = declararHerramientas(
-    paquete,
-    paqueteNuevo
-  );
+  it("usa exclusivamente Kallpa ML cuando hay datos actualizados", () => {
+    const herramientas = declararHerramientas(
+      paquete,
+      paqueteNuevo,
+    );
 
-  const nombres = herramientas.map(
-    (herramienta) => herramienta.name
-  );
+    const nombres = herramientas.map(
+      (herramienta) => herramienta.name,
+    );
 
-  expect(nombres).toEqual(["consultar_kallpa_ml"]);
-});
-
+    expect(nombres).toEqual(["consultar_kallpa_ml"]);
+  });
 });

@@ -93,8 +93,7 @@ describe("conversar", () => {
     );
 
     expect(r.text).toBe("Hola");
-    expect(recibido[0].url).toContain("gemini-flash-latest:");
-    expect(recibido[1].url).toContain("gemini-3.8-flash:");
+    expect(recibido[0].url).toContain("gemini-3.5-flash-lite:");
   });
 
   it("si un modelo fue retirado (404) prueba el siguiente", async () => {
@@ -110,8 +109,8 @@ describe("conversar", () => {
 
   expect(resultado.text).toBe("Hola");
   expect(recibido).toHaveLength(2);
-  expect(recibido[0].url).toContain("gemini-flash-latest:");
-  expect(recibido[1].url).toContain("gemini-3.8-flash:");
+  expect(recibido[0].url).toContain("gemini-3.5-flash-lite:");
+
 });
   
 
