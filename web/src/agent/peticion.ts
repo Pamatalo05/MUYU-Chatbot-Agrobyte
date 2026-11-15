@@ -1,3 +1,4 @@
+import { validarPreferencias, type Preferencias } from "../chat/estilo";
 import { TEMAS, type TemaConsulta } from "../knowledge/contextoConversacion";
 import type { MuyuContexto } from "../knowledge/contexto";
 import { ESCENARIOS } from "../knowledge/types";
@@ -8,6 +9,7 @@ export interface PeticionChat {
   historial: { role: "user" | "muyu"; text: string }[];
   contexto: MuyuContexto;
   tema?: TemaConsulta;
+  preferencias?: Preferencias;
 }
 
 export const LIMITES = { PREGUNTA: 500, MENSAJES_HISTORIAL: 6, TEXTO_HISTORIAL: 1000 } as const;
@@ -54,5 +56,5 @@ export function validarPeticion(datos: unknown): PeticionChat {
   }
 
   if (datos.tema !== undefined && !(TEMAS as readonly unknown[]).includes(datos.tema)) throw new PeticionInvalidaError("Tema de consulta inválido");
-  return { pregunta, historial, contexto: c as unknown as MuyuContexto, tema: datos.tema as TemaConsulta | undefined };
+  return { pregunta, historial, contexto: c as unknown as MuyuContexto, tema: datos.tema as TemaConsulta | undefined, preferencias: validarPreferencias(datos.preferencias) };
 }

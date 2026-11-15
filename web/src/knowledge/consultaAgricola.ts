@@ -1,3 +1,5 @@
+import type { Preferencias } from "../chat/estilo";
+import { explicarSemaforo } from "../kallpa/explicarSemaforo";
 import type { ChatReply, DatoVerificado, EvidenciaConsulta } from "../chat/types";
 import type { MuyuContexto } from "./contexto";
 import type { PaqueteKallpa } from "./adaptadorKallpa";
@@ -9,11 +11,11 @@ import { evaluarSemaforo } from "./semaforo";
 
 const numero = (n: number, decimales = 1) => n.toLocaleString("es-EC", { maximumFractionDigits: decimales });
 export function etiquetaContexto(e: EvidenciaConsulta): string {
-  return `${e.canton} · ${MESES[e.contexto.mes - 1]} · ${e.escenarios?.join(" / ") ?? ESCENARIO_NOMBRE[e.contexto.escenario]} · ${e.fuente} · ${e.tipo} · ${e.periodo}`;
+  return `${e.canton} · ${MESES[e.contexto.mes - 1]} · ${e.escenarios?.join(" / ") ?? ESCENARIO_NOMBRE[e.contexto.escenario]}`;
 }
 
 /** Every displayed number comes from the same local tool used by the REST agent. */
-export function respuestaAgricola(consulta: Consulta, paquete: PaqueteKallpa | undefined, pregunta: string, original?: PaqueteCanton): ChatReply | undefined {
+export function respuestaAgricola(consulta: Consulta, paquete: PaqueteKallpa | undefined, pregunta: string, original?: PaqueteCanton, preferencias?: Preferencias): ChatReply | undefined {
   if (consulta.error) return { text: consulta.error, emotion: "neutral" };
   if (!consulta.tema) return;
   if (!paquete) return { text: "No están disponibles los datos actualizados de Kallpa. No puedo verificar esta consulta; vuelve a intentarlo cuando estén cargados.", emotion: "neutral" };
@@ -51,7 +53,8 @@ export function respuestaAgricola(consulta: Consulta, paquete: PaqueteKallpa | u
   }
   for (const dato of datos) {
     const fraccion = dato.unidad === "m³/m³";
-    lineas.push(`${dato.etiqueta}: ${numero(fraccion ? dato.valor * 100 : dato.valor, dato.campo === "ndvi" ? 3 : 1)} ${fraccion ? "% volumétrico" : dato.unidad} (${dato.tipo}).`);
+    const etiquetaVisible = dato.campo === "humedad_raiz_predicha" ? "Humedad de raíz estimada" : dato.campo === "humedad_superficial_smap" ? "Humedad en la superficie del suelo" : dato.etiqueta;
+    lineas.push(`${etiquetaVisible}: ${numero(fraccion ? dato.valor * 100 : dato.valor, dato.campo === "ndvi" ? 3 : 1)} ${fraccion ? "% volumétrico" : dato.unidad}.`);
   }
   if (["rotacion", "urea"].includes(tema)) {
     const rotaciones = resultado.recomendaciones as Record<string, unknown>[];
@@ -66,7 +69,7 @@ export function respuestaAgricola(consulta: Consulta, paquete: PaqueteKallpa | u
       lineas.push(`${etiqueta}: ${numero(valor)} ${tema === "urea" ? "kg de urea por hectárea" : unidad}.`);
     }
     evidencia.fuentesDocumentadas.push(String(mejor.fuente));
-    lineas.push(`Fuente técnica: ${mejor.fuente}.`, "No equivale a ganancia neta ni garantiza viabilidad; requiere evaluación agronómica local y del cultivo previo.");
+    lineas.push("Es una estimación: no equivale a ganancia neta. Hace falta revisar las condiciones del terreno y el cultivo anterior antes de decidir.");
   }
   if (tema === "riesgo") {
     if (original?.cantones[contexto.cantonId]) {
@@ -75,16 +78,26 @@ export function respuestaAgricola(consulta: Consulta, paquete: PaqueteKallpa | u
       evidencia.periodo = original.meta.periodo_analizado;
       evidencia.tipo = "Indicador calculado por reglas; sin calibración probabilística";
       evidencia.fuentesDocumentadas = [...original.meta.fuentes_datos];
-      lineas.push(`Indicador orientativo de Kallpa: ${semaforo.color}; ${semaforo.motivo}.`, "Se calcula con reglas de lluvia y rotaciones del paquete original; no es una probabilidad ni una predicción validada de pérdidas o germinación.");
+      const detalle = explicarSemaforo(semaforo);
+      lineas.push(`${detalle.estado}. ${detalle.explicacion}`, detalle.limite);
+      if (/hacer|revisar|acciones/.test(normalizar(pregunta))) lineas.push(...detalle.acciones);
     } else lineas.push("No hay un indicador de riesgo calculado para este contexto.");
   }
   if (datos.length === 0 && tema !== "riesgo") return { text: "No hay valores válidos documentados para la variable solicitada. ¿Qué variable y contexto necesitas consultar?", emotion: "neutral" };
   if (/capacidad de campo|germinacion|probabilidad/.test(normalizar(pregunta))) lineas.push("La humedad volumétrica no equivale a capacidad de campo ni a probabilidad de germinación; faltan datos de suelo y criterios agronómicos para calcularlas.");
   if (/sembr|siembr|seguro|conviene/.test(normalizar(pregunta)) && !["rotacion", "riesgo"].includes(tema)) lineas.push("Estas variables por sí solas no permiten recomendar una siembra: faltan criterios agronómicos de suelo, cultivo y parcela.");
   const esperados: Record<string, number> = { humedad_raiz: 1, humedad_superficial: 1, lluvia: 1, temperatura: 1, ndvi: 1, resumen: 5 };
-  if (datos.length < (esperados[tema] ?? 0)) lineas.push("Algunas variables solicitadas no tienen valores válidos en el paquete; no se han sustituido por cero.");
-  lineas.push("Son referencias y estimaciones, no mediciones actuales ni garantías para tu parcela.");
-  if (datos.some(d => d.campo.startsWith("humedad_raiz"))) lineas.push(`La humedad de raíz es una estimación de Kallpa (${resultado.modelo}), no una observación directa de NASA.`);
+  if (datos.length < (esperados[tema] ?? 0)) lineas.push("No hay datos válidos para algunas de las variables que pediste; no las he supuesto iguales a cero.");
+  if (tema === "humedad_raiz" || tema === "humedad_superficial") lineas.push("El porcentaje indica cuánto del volumen del suelo está ocupado por agua.");
+  lineas.push("Son cálculos de referencia, no mediciones actuales de tu parcela.");
+  if (/fuentes?|de donde/.test(normalizar(pregunta)) || preferencias?.nivel === "tecnico") {
+    lineas.push(`Fuente: ${evidencia.fuente}. Tipo: ${evidencia.tipo}. Período: ${evidencia.periodo}.`, ...evidencia.fuentesDocumentadas);
+  }
+  if (preferencias?.longitud === "detallada" || /explicame mas|mas facil|por que|ejemplo/.test(normalizar(pregunta))) {
+    if (tema === "humedad_raiz") lineas.push("Este porcentaje describe cuánta agua ocupa el volumen del suelo cerca de las raíces. Por sí solo no indica si debes sembrar o regar; para eso hacen falta las características del suelo y del cultivo.");
+    if (tema === "ndvi") lineas.push("El NDVI ayuda a observar qué tan verde está la vegetación en imágenes satelitales. No confirma por sí solo que el cultivo esté sano.");
+    if (tema === "lluvia") lineas.push("Los milímetros expresan la cantidad de lluvia. Esta referencia mensual no indica cuándo lloverá en tu parcela.");
+  }
   return { text: lineas.join("\n"), emotion: ["rotacion", "urea"].includes(tema) ? "happy" : "neutral", evidencia };
 }
 

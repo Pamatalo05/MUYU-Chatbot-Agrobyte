@@ -42,7 +42,8 @@ describe("respuestas científicas y trazabilidad", () => {
     expect(factual.evidencia?.periodo).toBe(datos.meta.periodo_analizado);
     expect(factual.evidencia?.fuentesDocumentadas).toEqual(Object.values(datos.fuentes_metodologia));
     expect(factual.evidencia?.datos[0]).toMatchObject({ valor: 0.701, unidad: "m³/m³", tipo: "estimación de Ridge" });
-    expect(factual.text).toContain("no una observación directa de NASA");
+    expect(factual.text).toContain("no mediciones actuales");
+    expect(factual.text).not.toMatch(/Ridge|NASA|paquete|JSON/);
     const herramienta = consultarKallpaML(paquete, { canton_id: "daule", mes: 1, escenario: "nino" });
     expect(herramienta.trazabilidad).toMatchObject({ periodo: "2005-2025", unidad_humedad: "m³/m³ (fracción volumétrica)", fuentes_documentadas: datos.fuentes_metodologia });
   });
@@ -97,8 +98,9 @@ describe("respuestas científicas y trazabilidad", () => {
   });
   it("el semáforo visible identifica sus reglas sin prometer una siembra segura", () => {
     const html = renderToStaticMarkup(createElement(SemaforoRiesgo, { color: "verde", motivo: "lluvia cercana a lo normal" }));
-    expect(html).toContain("Indicador orientativo: verde");
-    expect(html).toContain("paquete original");
+    expect(html).toContain("Condiciones favorables");
+    expect(html).toContain("solo considera lluvia y opciones de rotación");
+    expect(html).not.toMatch(/Indicador orientativo|paquete original/);
     expect(html).not.toContain("Buen momento para sembrar");
   });
   it("no convierte datos ausentes o de relleno en observaciones", () => {
@@ -113,8 +115,8 @@ describe("respuestas científicas y trazabilidad", () => {
   it("un indicador calculado se presenta como regla orientativa y no como probabilidad", () => {
     const c = resolverConsulta("¿Qué riesgo hay?", consulta.contexto);
     const r = respuestaAgricola(c, paquete, "riesgo", previo)!;
-    expect(r.text).toContain("Indicador orientativo");
-    expect(r.text).toContain("no es una probabilidad");
+    expect(r.text).toContain("solo considera lluvia y opciones de rotación");
+    expect(r.text).not.toMatch(/probabilidad de|% de riesgo/);
     expect(r.evidencia?.fuente).toContain("original");
   });
   it("valida argumentos de la herramienta y conserva el mismo contexto en ambos modos", async () => {

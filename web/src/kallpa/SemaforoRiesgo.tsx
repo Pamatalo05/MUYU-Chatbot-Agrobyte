@@ -1,25 +1,18 @@
-import type { ColorSemaforo, Semaforo } from "../knowledge/semaforo";
+import type { Semaforo } from "../knowledge/semaforo";
+import { explicarSemaforo } from "./explicarSemaforo";
 import "./SemaforoRiesgo.css";
-
-/** Titular en lenguaje del agricultor; el detalle técnico va debajo, sin cortarse. */
-const TITULAR: Record<ColorSemaforo, string> = {
-  verde: "Indicador orientativo: verde",
-  amarillo: "Indicador orientativo: amarillo",
-  rojo: "Indicador orientativo: rojo",
-};
-
-const primeraMayuscula = (texto: string) => texto.charAt(0).toUpperCase() + texto.slice(1);
-
-/** Semáforo de siembra. El texto no depende solo del color (accesible para daltonismo). */
-export default function SemaforoRiesgo({ color, motivo }: Semaforo) {
-  return (
-    <div className={`semaforo semaforo--${color}`} role="status">
-      <span className="semaforo__luz" aria-hidden="true" />
-      <p className="semaforo__texto">
-        <strong>{TITULAR[color]}</strong>
-        <span>{primeraMayuscula(motivo)}</span>
-        <small>Reglas de Kallpa del paquete original; no garantiza resultados de siembra.</small>
-      </p>
+export default function SemaforoRiesgo({ color, motivo, onConsultar }: Semaforo & { onConsultar?: () => void }) {
+  const detalle = explicarSemaforo({ color, motivo });
+  return <div className={`semaforo semaforo--${color}`} role="status">
+    <span className="semaforo__luz" aria-hidden="true" />
+    <div className="semaforo__texto">
+      <strong>{detalle.estado}</strong>
+      <span>{detalle.explicacion}</span>
+      <details><summary>Qué puedo revisar</summary>
+        <ul>{detalle.acciones.map(a => <li key={a}>{a}</li>)}</ul>
+        <small>{detalle.limite}</small>
+      </details>
+      {onConsultar && <button type="button" onClick={onConsultar}>Preguntar a Muyu</button>}
     </div>
-  );
+  </div>;
 }

@@ -307,3 +307,10 @@
 .chat__evidencia { max-width: 42rem; margin-top: .35rem; font-size: .75rem; color: var(--tierra); }
 .chat__evidencia summary { cursor: pointer; }
 .chat__evidencia p, .chat__evidencia ul { margin: .3rem 0; }
+
+.chat__preferencias { color: var(--tierra); font-size: .85rem; }
+.chat__preferencias summary { cursor: pointer; padding: .4rem 0; }
+.chat__preferencias label { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin: .3rem .8rem .3rem 0; }
+.chat__preferencias select { font: inherit; padding: .4rem; max-width: 100%; }
+.bubble { overflow-wrap: anywhere; line-height: 1.6; }
+.chat__evidencia { overflow-wrap: anywhere; }

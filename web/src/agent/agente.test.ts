@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { resolverConsulta } from "../knowledge/contextoConversacion";
 import datosJson from "../../public/datos/paquete_canton.json";
 import { validarPaquete } from "../knowledge/validarPaquete";
 import { AgenteError, conversar } from "./agente";
@@ -112,12 +113,7 @@ describe("conversar", () => {
     );
 
     expect(resultado.text).toContain("Hola");
-    expect(recibido).toHaveLength(1);
-    const instrucciones = recibido[0].body.systemInstruction.parts[0].text;
-    expect(instrucciones).toContain("sin asumir conocimientos técnicos");
-    expect(instrucciones).toContain("Conserva exactamente las cifras verificadas, sus unidades y el contexto");
-    expect(instrucciones).toContain("no inventes causas ni consejos de siembra");
-    expect(instrucciones).toContain("una sola pregunta concreta de aclaración");
+    expect(recibido).toHaveLength(0);
   });
   it("ejecuta la herramienta que pide Gemini y devuelve su respuesta final", async () => {
     const { fetchImpl, recibido } = geminiFalso([
@@ -138,7 +134,7 @@ describe("conversar", () => {
     ]);
 
     const r = await conversar(
-      { ...peticion, pregunta: "Hola" },
+      { ...peticion, pregunta: "Describe tu función" },
       {
         apiKey: "k",
         paquete,
@@ -158,7 +154,7 @@ describe("conversar", () => {
   ]);
 
   const resultado = await conversar(
-    { ...peticion, pregunta: "Hola" },
+    { ...peticion, pregunta: "Describe tu función" },
     {
         apiKey: "k",
         paquete,
@@ -241,7 +237,7 @@ describe("manejarChat", () => {
 
     const cuerpoSaludo = JSON.stringify({
       ...peticion,
-      pregunta: "Hola",
+      pregunta: "Describe tu función",
     });
 
     const ok = await manejarChat(
@@ -261,5 +257,58 @@ describe("manejarChat", () => {
     expect(
       (await manejarChat("{", { GEMINI_API_KEY: "k" }, fetchImpl)).status
     ).toBe(400);
+  });
+});
+
+
+describe("preguntas sencillas sin recomendaciones innecesarias", () => {
+  it.each([
+    ["¿Qué es la urea?", "nitrógeno"],
+    ["PERO QUÉ ES UREA", "nitrógeno"],
+    ["¿Qué es la humedad del suelo?", "cantidad de agua"],
+    ["¿Qué significa NDVI?", "imágenes satelitales"],
+    ["¿Qué es la mucuna?", "abono verde"],
+  ])("responde directamente %s sin datos locales ni fuentes extensas", async (pregunta, esperado) => {
+    const { fetchImpl, recibido } = geminiFalso([]);
+    const r = await manejarChat(JSON.stringify({ ...peticion, pregunta, tema: "urea", historial: [{ role: "muyu", text: "Opción orientativa: mucuna." }] }), { GEMINI_API_KEY: "fake" }, fetchImpl);
+    expect(r.status).toBe(200);
+    const reply = r.cuerpo as { text: string; evidencia?: unknown };
+    expect(reply.text).toContain(esperado);
+    expect(reply.text).not.toMatch(/USD|kg\/ha|Fuente:|Opción orientativa/);
+    expect(reply.evidencia).toBeUndefined();
+    expect(recibido).toHaveLength(0);
+    expect(resolverConsulta(pregunta, peticion.contexto, null, undefined, "urea").tema).toBeUndefined();
+  });
+  it("permite conceptos generales con Gemini sin habilitar herramientas", async () => {
+    const { fetchImpl, recibido } = geminiFalso([{ parts: [{ text: "Un fertilizante aporta nutrientes que ayudan a las plantas a crecer." }] }]);
+    const r = await conversar({ ...peticion, pregunta: "¿Qué es un fertilizante?" }, { apiKey: "fake", paquete, fetchImpl });
+    expect(r.text).toContain("aporta nutrientes");
+    expect(recibido).toHaveLength(1);
+    expect(recibido[0].body.toolConfig.functionCallingConfig.mode).toBe("NONE");
+    const instrucciones = recibido[0].body.systemInstruction.parts[0].text;
+    expect(instrucciones).toContain("sin asumir conocimientos técnicos");
+    expect(instrucciones).toContain("Conserva exactamente las cifras verificadas, sus unidades y el contexto");
+    expect(instrucciones).toContain("no inventes causas ni consejos de siembra");
+    expect(instrucciones).toContain("una sola pregunta concreta de aclaración");
+  });
+  it("usa la fecha real del reloj en Ecuador sin consultar Gemini ni rechazarla en la interfaz", async () => {
+    vi.useFakeTimers();
+    try {
+      vi.setSystemTime(new Date("2026-11-15T03:00:00Z"));
+      const { fetchImpl, recibido } = geminiFalso([]);
+      const pregunta = "¿Qué día es hoy?";
+      expect(resolverConsulta(pregunta, peticion.contexto).error).toBeUndefined();
+      const r = await conversar({ ...peticion, pregunta }, { apiKey: "fake", paquete, fetchImpl });
+      expect(r.text).toBe("Hoy es sábado, 14 de noviembre de 2026, en Ecuador.");
+      expect(recibido).toHaveLength(0);
+    } finally { vi.useRealTimers(); }
+  });
+  it("no convierte solicitudes de cantidades o datos actuales en definiciones", () => {
+    expect(resolverConsulta("¿Qué es la urea y cuánto ahorro en Daule?", peticion.contexto).tema).toBe("urea");
+    expect(resolverConsulta("¿Qué humedad hay hoy en Daule?", peticion.contexto).error).toContain("no observaciones actuales");
+  });
+  it("mantiene el rechazo de recomendaciones cuantitativas sin respaldo, incluso ante una definición", async () => {
+    const { fetchImpl } = geminiFalso([{ parts: [{ text: "Te recomiendo sembrar maíz y ganarás 500 USD." }] }]);
+    await expect(conversar({ ...peticion, pregunta: "¿Qué es un fertilizante?" }, { apiKey: "fake", paquete, fetchImpl })).rejects.toBeInstanceOf(AgenteError);
   });
 });

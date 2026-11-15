@@ -1,3 +1,4 @@
+import { conSugerencias, leerPreferencias, resolverSeguimiento, type Preferencias } from "./chat/estilo";
 import { MemoriaConversacional, resolverConsulta } from "./knowledge/contextoConversacion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Muyu, { type MuyuState } from "./character/Muyu";
@@ -22,6 +23,8 @@ import { useLecturaAutomatica } from "./voz/useLecturaAutomatica";
 import { useVoz } from "./voz/useVoz";
 
 export default function App() {
+  const [preferencias, setPreferencias] = useState<Preferencias>(leerPreferencias);
+  useEffect(() => { try { localStorage.setItem("muyu-estilo", JSON.stringify(preferencias)); } catch { /* Navegación privada: se conserva en sesión. */ } }, [preferencias]);
   const paquete = usePaquete();
   const paqueteNuevo = usePaqueteNuevo();
   const [contexto, setContexto] = useState<MuyuContexto>(CONTEXTO_INICIAL);
@@ -38,7 +41,8 @@ export default function App() {
 
   // K4: Gemini si hay internet; si no hay o falla, el modo campo responde con los mismos datos.
   const responder = useCallback<Responder>(
-    async (pregunta, historial, accion) => {
+    async (pregunta, historial, accion, signal) => {
+      pregunta = resolverSeguimiento(pregunta, historial);
       const version = memoria.current.version();
       const consulta = resolverConsulta(pregunta, contexto, memoria.current.leer(), paquete.estado === "listo" ? Object.keys(paquete.paquete.cantones) : undefined);
       if (accion) consulta.tema = accion;
@@ -56,14 +60,16 @@ export default function App() {
           accion,
           paqueteNuevo ?? undefined,
           consulta.tema,
+          preferencias,
         );
       };
       const elegido = elegirModo({ enLinea, accion, ultimoFalloMs: ultimoFallo.current, ahoraMs: Date.now() });
       const resultado = await responderHibrido(
         elegido,
-        () => responderGemini(pregunta, historial, efectivo, undefined, consulta.tema),
+        () => responderGemini(pregunta, historial, efectivo, undefined, consulta.tema, signal, preferencias),
         campo,
       );
+      if (signal?.aborted) throw new DOMException("Cancelada", "AbortError");
       if (resultado.reply.evidencia) memoria.current.aceptar(version, {
         contexto: resultado.reply.evidencia.contexto,
         tema: resultado.reply.evidencia.tema,
@@ -73,18 +79,18 @@ export default function App() {
       if (resultado.fallo || resultado.modo === "en_vivo") setFalloReciente(resultado.fallo);
       // Los botones siempre van a campo: no cambian la etiqueta de conexión.
       if (!accion) setModo(resultado.modo);
-      return resultado.reply;
+      return conSugerencias(resultado.reply);
     },
-[paquete, paqueteNuevo, contexto, enLinea],
+[paquete, paqueteNuevo, contexto, enLinea, preferencias],
   );
   const modoVisible: ModoConexion = enLinea ? modo : "campo";
   const aviso = !enLinea
     ? "Estás sin internet. Te respondo con los datos guardados de tu cantón."
     : falloReciente
-      ? "No pude conectarme con Muyu en línea. Te respondo con los datos guardados y lo intento de nuevo en un minuto."
+      ? "No pude conectarme con Muyu en línea. Te respondo con los datos guardados. Puedes volver a consultar en línea dentro de un minuto."
       : null;
 
-  const { messages, phase, isBusy, send } = useChat(responder);
+  const { messages, phase, isBusy, send, retry, canRetry } = useChat(responder);
   const voz = useVoz();
   const [lecturaAutomatica, setLecturaAutomatica] = useLecturaAutomatica();
   const fasePrevia = useRef(phase);
@@ -126,7 +132,7 @@ const enviar = useCallback<typeof send>(
           {paquete.estado === "listo" && (
             <ContextoSimulado paquete={paquete.paquete} contexto={contexto} onChange={cambiarParcela} />
           )}
-          {semaforo && <SemaforoRiesgo {...semaforo} />}
+          {semaforo && <SemaforoRiesgo {...semaforo} onConsultar={() => { if (!isBusy) void enviar("¿Qué significa el semáforo de mi parcela y qué puedo revisar?"); }} />}
         </div>
         {import.meta.env.DEV && (
           <details className="debug-toggle">
@@ -171,6 +177,10 @@ const enviar = useCallback<typeof send>(
 
         <ChatPanel
           messages={messages}
+          preferencias={preferencias}
+          onPreferencias={setPreferencias}
+          onRetry={retry}
+          canRetry={canRetry}
           isThinking={phase === "thinking"}
           isBusy={isBusy}
           onSend={enviar}

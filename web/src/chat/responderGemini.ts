@@ -1,3 +1,5 @@
+import type { Preferencias } from "./estilo";
+import { conLimite } from "./limite";
 import type { TemaConsulta } from "../knowledge/contextoConversacion";
 
 import type { PeticionChat } from "../agent/peticion";
@@ -6,8 +8,8 @@ import type { ChatMessage, ChatReply, Sugerencia } from "./types";
 
 export const RUTA_CHAT = "/api/chat";
 
-// Temporalmente esperamos hasta 60 segundos para diagnosticar Gemini.
-const TIEMPO_MAXIMO_MS = 60_000;
+// Un solo intento; el modo campo toma el relevo si el servicio no responde.
+const TIEMPO_MAXIMO_MS = 25_000;
 
 /**
  * Consulta al agente Gemini mediante el backend de Muyu.
@@ -19,76 +21,54 @@ export async function responderGemini(
   contexto: MuyuContexto,
   fetchImpl: typeof fetch = fetch,
   tema?: TemaConsulta,
+  signal?: AbortSignal,
+  preferencias?: Preferencias,
 ): Promise<ChatReply> {
   const cuerpo: PeticionChat = {
     pregunta,
     historial: historial.map(({ role, text }) => ({ role, text })),
     contexto,
     tema,
+    preferencias,
   };
 
-  let respuesta: Response;
-
+  const controlador = new AbortController();
+  const cancelar = () => controlador.abort();
+  signal?.addEventListener("abort", cancelar, { once: true });
+  if (signal?.aborted) cancelar();
+  if (typeof window !== "undefined") window.addEventListener("offline", cancelar);
   try {
-    respuesta = await fetchImpl(RUTA_CHAT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(cuerpo),
-      signal: AbortSignal.timeout(TIEMPO_MAXIMO_MS),
-    });
-  } catch (error) {
-    console.error("[Muyu] Error de conexión con Gemini:", error);
+    return await conLimite(async (signal) => {
+      const respuesta = await fetchImpl(RUTA_CHAT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(cuerpo),
+        signal,
+      });
+      if (!respuesta.ok) throw new Error("No pude completar la consulta en línea.");
+      const datos = await respuesta.json() as Partial<ChatReply>;
+      if (typeof datos.text !== "string" || !datos.text.trim()) {
+        throw new Error("No recibí una respuesta completa. ¿Intentamos otra vez?");
+      }
 
-    if (
-      error instanceof Error &&
-      (error.name === "TimeoutError" ||
-        error.name === "AbortError")
-    ) {
-      throw new Error(
-        "Gemini tardó más de 60 segundos en responder.",
-      );
-    }
+      const sugerencias = Array.isArray(datos.sugerencias)
+        ? datos.sugerencias
+            .filter(
+              (s): s is Sugerencia =>
+                typeof s?.texto === "string",
+            )
+            .slice(0, 3)
+        : undefined;
 
-    throw new Error(
-      "No se pudo completar la conexión con el servidor de Muyu.",
-    );
+      return {
+        text: datos.text.trim(),
+        emotion: datos.emotion === "happy" ? "happy" : "neutral",
+        sugerencias,
+        evidencia: datos.evidencia,
+      };
+    }, TIEMPO_MAXIMO_MS, controlador.signal);
+  } finally {
+    signal?.removeEventListener("abort", cancelar);
+    if (typeof window !== "undefined") window.removeEventListener("offline", cancelar);
   }
-
-  const datos = (await respuesta.json().catch(() => ({}))) as
-    Partial<ChatReply> & { error?: string };
-
-  if (!respuesta.ok) {
-    const mensaje =
-      datos.error ?? `El servidor respondió HTTP ${respuesta.status}`;
-
-    console.error("[Muyu] Error del backend:", {
-      status: respuesta.status,
-      mensaje,
-    });
-
-    throw new Error(mensaje);
-  }
-
-  if (typeof datos.text !== "string") {
-    console.error("[Muyu] Respuesta inválida:", datos);
-    throw new Error("Gemini devolvió una respuesta sin texto.");
-  }
-
-  const sugerencias = Array.isArray(datos.sugerencias)
-    ? datos.sugerencias
-        .filter(
-          (s): s is Sugerencia =>
-            typeof s?.texto === "string",
-        )
-        .slice(0, 3)
-    : undefined;
-
-  return {
-    text: datos.text,
-    emotion: datos.emotion === "happy" ? "happy" : "neutral",
-    sugerencias,
-    evidencia: datos.evidencia,
-  };
 }

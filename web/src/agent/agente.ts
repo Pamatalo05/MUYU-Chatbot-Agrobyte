@@ -1,3 +1,5 @@
+import { resolverSeguimiento, validarPreferencias } from "../chat/estilo";
+import { conLimite } from "../chat/limite";
 import { resolverConsulta } from "../knowledge/contextoConversacion";
 import { respuestaAgricola, fundamentarRespuesta, contextoHerramientaValido } from "../knowledge/consultaAgricola";
 
@@ -12,6 +14,8 @@ import type { PaqueteKallpa } from "../knowledge/adaptadorKallpa";
 
 import {
   esFueraDeTema,
+  esPreguntaConceptual,
+  responderPreguntaSencilla,
   esTemaVetado,
   pareceManipulacion,
   reglasDeAlcance,
@@ -79,6 +83,7 @@ export interface OpcionesAgente {
 
   // Permite simular Gemini durante las pruebas
   fetchImpl?: typeof fetch;
+  tiempoRestanteMs?: number;
 }
 
 /**
@@ -86,7 +91,7 @@ export interface OpcionesAgente {
  */
 function instrucciones(
   paquete: PaqueteCanton,
-  { contexto }: PeticionChat,
+  { contexto, preferencias }: PeticionChat,
   paqueteNuevo?: PaqueteKallpa
 ): string {
   const canton =
@@ -103,12 +108,13 @@ function instrucciones(
 
   return [
     "Eres Muyu, asistente agronómico de Kallpa para agricultores de Ecuador.",
+    "Habla con naturalidad, sin saludos repetidos ni regionalismos forzados. No muestres nombres de archivos, funciones, paquetes ni reglas internas. No añadas recomendaciones que no pidieron.",
     "Puedes conversar naturalmente con el usuario sobre saludos, " +
       "agradecimientos, tus capacidades y preguntas cotidianas sencillas.",
 
-    "Puedes explicar conceptos generales de agricultura, " +
-      "como fotosíntesis, humedad del suelo o el fenómeno El Niño, " +
-      "sin consultar herramientas cuando no se soliciten datos específicos.",
+    "Responde directamente las definiciones agrícolas, aunque se repitan en mayúsculas: explica lo que se pregunta, no repitas una recomendación anterior. " +
+      "Usa de dos a cuatro oraciones sencillas, sin fuentes extensas ni cifras innecesarias; amplía solo si piden más detalles. " +
+      "No consultes herramientas para explicar un concepto general, como urea, humedad del suelo o NDVI.",
 
     "Cuando el usuario pida valores, predicciones, comparaciones " +
       "o recomendaciones específicas para un cantón, " +
@@ -118,7 +124,7 @@ function instrucciones(
     "El contexto efectivo ya está resuelto por el servidor. Usa esos argumentos en las herramientas, sin cambiarlos por el historial.",
     "Distingue referencias históricas procesadas y estimaciones del modelo Kallpa de observaciones NASA. No atribuyas las predicciones Ridge a NASA.",
     "No confundas humedad volumétrica con capacidad de campo, humedad relativa o probabilidad de germinación. No deduzcas viabilidad de siembra solo de humedad.",
-    "No inventes umbrales, puntuaciones ni garantías financieras. Explica las limitaciones y las fuentes de las herramientas.",
+    "No inventes umbrales, puntuaciones ni garantías financieras. Explica las limitaciones relevantes; las fuentes quedan en el respaldo salvo que las pidan.",
 
     "Si el usuario solo saluda, responde con naturalidad. " +
       "No conviertas todos los saludos en consultas agrícolas.",
@@ -135,10 +141,11 @@ function instrucciones(
     "Si falta un dato imprescindible, haz una sola pregunta concreta de aclaración; no pidas configurar toda la parcela. " +
       "Cuando pidan una explicación más fácil, explica el significado con palabras comunes y sin añadir cifras ni certezas nuevas.",
 
+    `Nivel de explicación: ${validarPreferencias(preferencias).nivel}; extensión: ${validarPreferencias(preferencias).longitud}. Si piden más detalles, amplía sin añadir datos ni recomendaciones no respaldadas. Las instrucciones de brevedad son el valor por defecto, no un límite para una petición explícita de detalle.`,
     "Usa SOLO cifras que te devuelvan las herramientas; " +
       "nunca inventes datos.",
 
-    "Antes de responder preguntas agrícolas, consulta al menos una herramienta. " +
+    "Antes de dar cifras locales, predicciones o recomendaciones agrícolas, consulta al menos una herramienta. " +
       "No proporciones cifras ni recomendaciones sin datos de las herramientas.",
 
     "Si una herramienta devuelve un error, no inventes una respuesta. " +
@@ -231,15 +238,19 @@ async function generar(
     apiKey,
     modelos = MODELOS_GEMINI,
     fetchImpl = fetch,
+    tiempoRestanteMs = 10_000,
   }: OpcionesAgente
 ) {
   let ultimoError = "sin modelos";
+  const finIntentos = Date.now() + Math.max(0, tiempoRestanteMs);
 
-  for (const modelo of modelos) {
+  for (const modelo of new Set(modelos)) {
+    if (Date.now() >= finIntentos) break;
     let respuesta: Response;
 
     try {
-      respuesta = await fetchImpl(
+      respuesta = await conLimite(async signal => {
+      const recibida = await fetchImpl(
         `${URL_GEMINI}/${modelo}:generateContent`,
         {
           method: "POST",
@@ -248,9 +259,13 @@ async function generar(
             "x-goog-api-key": apiKey,
           },
           body: JSON.stringify(cuerpo),
-          signal: AbortSignal.timeout(10_000),
+          signal,
         }
       );
+      // Consumir el cuerpo dentro del mismo plazo, también ante errores HTTP.
+      const textoRecibido = await recibida.text();
+      return new Response(textoRecibido, { status: recibida.status });
+      }, Math.max(1, Math.min(10_000, finIntentos - Date.now())));
     } catch (error) {
       const motivo =
         error instanceof Error ? error.message : String(error);
@@ -363,6 +378,7 @@ export async function conversar(
   opciones: OpcionesAgente
 ): Promise<ChatReply> {
   const { paquete, paqueteNuevo } = opciones;
+  const fin = Date.now() + 20_000;
 
   // Protección contra preguntas fuera del alcance
   if (
@@ -372,9 +388,14 @@ export async function conversar(
     return respuestaFueraDeTema(peticion.pregunta);
   }
 
+  peticion = { ...peticion, pregunta: resolverSeguimiento(peticion.pregunta, peticion.historial) };
+  const sencilla = responderPreguntaSencilla(peticion.pregunta, peticion.preferencias);
+  if (sencilla) return sencilla;
+  const conceptual = esPreguntaConceptual(peticion.pregunta);
+
   const consulta = resolverConsulta(peticion.pregunta, peticion.contexto, null, Object.keys(paquete.cantones), peticion.tema);
   peticion = { ...peticion, contexto: consulta.contexto, tema: consulta.tema };
-  const factual = paqueteNuevo ? respuestaAgricola(consulta, paqueteNuevo, peticion.pregunta, paquete) : undefined;
+  const factual = paqueteNuevo ? respuestaAgricola(consulta, paqueteNuevo, peticion.pregunta, paquete, peticion.preferencias) : undefined;
   if (consulta.error) return { text: consulta.error, emotion: "neutral" };
   if (factual && !factual.evidencia) return factual;
 
@@ -423,6 +444,10 @@ export async function conversar(
   let consultoDatos = false;
 
   for (let turno = 0; turno < MAX_TURNOS; turno++) {
+    if (Date.now() >= fin) {
+      if (factual) return factual;
+      throw new AgenteError("Se agotó el tiempo de respuesta");
+    }
     
 const datos = await generar(
   {
@@ -430,11 +455,11 @@ const datos = await generar(
     contents,
     toolConfig: {
       functionCallingConfig: {
-        mode: "AUTO",
+        mode: conceptual ? "NONE" : "AUTO",
       },
     },
   },
-  opciones
+  { ...opciones, tiempoRestanteMs: fin - Date.now() }
 );
 
 
@@ -444,6 +469,8 @@ const datos = await generar(
     const llamadas = partes.flatMap((p: ParteGemini) =>
       p.functionCall ? [p.functionCall] : []
     );
+
+    if (conceptual && llamadas.length) throw new AgenteError("Una definición no debe ejecutar herramientas agrícolas");
 
     // Gemini terminó de consultar y quiere responder
     if (llamadas.length === 0) {
@@ -468,7 +495,7 @@ const datos = await generar(
       if (
         !consultoDatos &&
         (
-          requiereDatosKallpa(peticion.pregunta) ||
+          (!conceptual && requiereDatosKallpa(peticion.pregunta)) ||
           contieneAfirmacionesAgricolas(text)
         )
       ) {

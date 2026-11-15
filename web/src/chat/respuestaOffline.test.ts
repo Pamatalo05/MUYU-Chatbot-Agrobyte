@@ -131,3 +131,21 @@ describe("Kallpa ML - modo offline", () => {
   });
 });
 
+
+
+describe("definiciones y conversación sencilla en modo campo", () => {
+  it.each([
+    ["¿Qué es la urea?", "nitrógeno"],
+    ["PERO QUÉ ES UREA", "nitrógeno"],
+    ["¿Qué es la humedad del suelo?", "cantidad de agua"],
+    ["¿Qué significa NDVI?", "imágenes satelitales"],
+    ["¿Qué es la mucuna?", "abono verde"],
+    ["Hola", "Hola"],
+    ["Gracias", "Con gusto"],
+  ])("responde %s sin recomendaciones ni fuentes innecesarias", (pregunta, esperado) => {
+    const r = responderOffline(paquete, daule, pregunta, undefined, paqueteNuevo, "urea");
+    expect(r.text).toContain(esperado);
+    expect(r.evidencia).toBeUndefined();
+    expect(r.text).not.toMatch(/USD|kg\/ha|Fuente:|Opción orientativa/);
+  });
+});

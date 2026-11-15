@@ -1,3 +1,4 @@
+import type { Preferencias } from "./estilo";
 import { resolverConsulta, type TemaConsulta } from "../knowledge/contextoConversacion";
 import { respuestaAgricola } from "../knowledge/consultaAgricola";
 
@@ -22,6 +23,8 @@ import { evaluarSemaforo } from "../knowledge/semaforo";
 import type { Escenario, PaqueteCanton } from "../knowledge/types";
 import {
   esTemaVetado,
+  esPreguntaConceptual,
+  responderPreguntaSencilla,
   respuestaFueraDeTema,
 } from "../agent/guardarrailes";
 import {
@@ -257,16 +260,23 @@ export function responderOffline(
   accion?: AccionRapida,
   paqueteNuevo?: PaqueteKallpa,
   temaConversacion?: TemaConsulta,
+  preferencias?: Preferencias,
 ): ChatReply {
   if (!accion && esTemaVetado(pregunta)) {
     return respuestaFueraDeTema(pregunta);
+  }
+
+  if (!accion) {
+    const sencilla = responderPreguntaSencilla(pregunta, preferencias);
+    if (sencilla) return sencilla;
+    if (esPreguntaConceptual(pregunta)) return { text: "Puedo explicarte la urea, la humedad del suelo, el NDVI o la mucuna sin conexión. ¿Cuál de esos temas necesitas?", emotion: "neutral" };
   }
 
   const consulta = resolverConsulta(pregunta, contexto, null, Object.keys(paquete.cantones), temaConversacion);
   if (accion) consulta.tema = accion;
   if (consulta.error) return { text: consulta.error, emotion: "neutral" };
   if (paqueteNuevo || temaConversacion) {
-    const factual = respuestaAgricola(consulta, paqueteNuevo, pregunta, paquete);
+    const factual = respuestaAgricola(consulta, paqueteNuevo, pregunta, paquete, preferencias);
     if (factual) return factual;
   }
   contexto = consulta.contexto;

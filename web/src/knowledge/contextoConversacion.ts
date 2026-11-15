@@ -1,3 +1,4 @@
+import { esPreguntaConceptual, responderPreguntaSencilla } from "../agent/guardarrailes";
 import type { MuyuContexto } from "./contexto";
 
 export const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
@@ -11,7 +12,7 @@ export function detectarTema(texto: string): TemaConsulta | undefined {
   const variables = [/humedad/, /lluvia|precipitacion|llover/, /temperatura/, /ndvi/].filter(p => p.test(s));
   if (variables.length > 1) return "resumen";
   if (/humedad/.test(s)) return /superficial|smap/.test(s) ? "humedad_superficial" : "humedad_raiz";
-  if (/riesgo|sequia|inundacion|seguro|germinacion|capacidad de campo/.test(s)) return "riesgo";
+  if (/semaforo|riesgo|sequia|inundacion|seguro|germinacion|capacidad de campo/.test(s)) return "riesgo";
   if (/urea|fertiliz|nitrogeno|abono/.test(s)) return "urea";
   if (/rotacion|siembr|sembr|cultiv|cosech|margen|ganancia|costo|ingreso/.test(s)) return "rotacion";
   if (/lluvia|precipitacion|llover/.test(s)) return "lluvia";
@@ -26,8 +27,10 @@ export function resolverConsulta(pregunta: string, parcela: MuyuContexto, memori
   const texto = normalizar(pregunta);
   const volver = /mi parcela|mi canton|mi configuracion/.test(texto);
   const contexto = { ...(volver ? parcela : memoria?.contexto ?? parcela) };
+  const explicacion = /^(?:[¿?¡! ]*)(?:explicame|explicamelo|por que|que significa eso|muestrame las fuentes|fuentes)/.test(texto);
+  if (responderPreguntaSencilla(pregunta) || (esPreguntaConceptual(pregunta) && !/semaforo/.test(texto) && !(explicacion && (memoria?.tema || temaAnterior)))) return { contexto };
   const temaExplicito = detectarTema(pregunta);
-  const continuacion = /^\s*[¿?¡!]*\s*(y\b|en\b|para\b|ahora\b|lo mismo|tambien|compara)/.test(texto);
+  const continuacion = explicacion || /^\s*[¿?¡!]*\s*(y\b|en\b|para\b|ahora\b|lo mismo|tambien|compara)/.test(texto);
   const anterior = memoria?.tema ?? temaAnterior;
   const soloEscenario = temaExplicito === "enso" && continuacion && !/compar|afecta|diferencia/.test(texto);
   const tema = soloEscenario ? (anterior === "enso" ? "humedad_raiz" : anterior) ?? temaExplicito : temaExplicito ?? (continuacion || volver || MESES.some(m => texto.includes(m)) ? anterior : undefined);
@@ -53,7 +56,7 @@ export function resolverConsulta(pregunta: string, parcela: MuyuContexto, memori
   const previo = texto.match(/(?:despues (?:de|del)|coseche|cosechado|cosechar)\s+(?:cosechar )?(?:el |la )?(arroz|maiz|soya|papa|haba|frejol)/);
   if (previo) contexto.cultivoPrevioId = previo[1];
   else if (/(?:despues (?:de|del)|coseche|cosechado|cosechar)\s+(?:el |la )?[a-z]+/.test(texto)) return { ...consulta, error: "No reconozco el cultivo previo solicitado. Indica un cultivo disponible en Tu parcela para no asumir otro." };
-  if (/\b20\d{2}\b|hoy|ayer|tiempo real|actualmente|manana|esta semana|proxima semana/.test(texto)) return { ...consulta, error: "El paquete contiene referencias mensuales históricas y estimaciones por escenario, no observaciones actuales ni pronósticos para una fecha concreta." };
+  if (/\b20\d{2}\b|hoy|ayer|tiempo real|actualmente|manana|esta semana|proxima semana/.test(texto)) return { ...consulta, error: "Tengo referencias de meses anteriores y estimaciones para cada escenario, no observaciones actuales ni pronósticos para una fecha concreta." };
   if (!consulta.tema && continuacion) return { ...consulta, error: "¿Qué variable agrícola quieres consultar? Puedes preguntar por humedad de raíz, lluvia o temperatura." };
   return consulta;
 }

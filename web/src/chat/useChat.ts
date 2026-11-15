@@ -1,3 +1,4 @@
+import { conLimite } from "./limite";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AccionRapida } from "./preguntasRapidas";
 import type { ChatMessage, ChatPhase, ChatRole, Responder } from "./types";
@@ -6,11 +7,11 @@ const GREETING: ChatMessage = {
   id: "greeting",
   role: "muyu",
   text:
-    "¡Hola! Soy Muyu 🌱 Te ayudo a decidir qué sembrar después de tu cosecha, con datos documentados de Kallpa y estimaciones de sus modelos.\n" +
+    "¡Hola! Soy Muyu 🌱 Puedes preguntarme sobre tu cultivo o pedirme que te explique algo.\n" +
     "Toca una pregunta de abajo o escríbeme con tus palabras.",
 };
 
-const ERROR_TEXT = "Ups, mis raíces perdieron la conexión. ¿Lo intentamos de nuevo?";
+const ERROR_TEXT = "Uy, tuve un problema al responder. ¿Intentamos otra vez?";
 
 /** Ritmo del efecto de escritura y duración de las emociones. */
 const TYPE_INTERVAL_MS = 30;
@@ -44,6 +45,10 @@ export function useChat(responder: Responder) {
   const [phase, setPhase] = useState<ChatPhase>("idle");
   const messagesRef = useRef(messages);
   const timersRef = useRef<number[]>([]);
+  const activa = useRef<AbortController | null>(null);
+  const ultimoHistorial = useRef<ChatMessage[]>([]);
+  const terminarEscritura = useRef<(() => void) | null>(null);
+  const [reintento, setReintento] = useState<{ texto: string; accion?: AccionRapida } | null>(null);
 
   useEffect(() => {
     messagesRef.current = messages;
@@ -54,7 +59,11 @@ export function useChat(responder: Responder) {
     timersRef.current = [];
   }, []);
 
-  useEffect(() => clearTimers, [clearTimers]);
+  useEffect(() => () => {
+    activa.current?.abort();
+    clearTimers();
+    terminarEscritura.current?.();
+  }, [clearTimers]);
 
   const schedule = useCallback((callback: () => void, delay: number) => {
     timersRef.current.push(window.setTimeout(callback, delay));
@@ -64,6 +73,7 @@ export function useChat(responder: Responder) {
   const typeOut = useCallback(
     (messageId: string, fullText: string) =>
       new Promise<void>((resolve) => {
+        terminarEscritura.current = resolve;
         const setText = (text: string) =>
           setMessages((current) =>
             current.map((message) => (message.id === messageId ? { ...message, text } : message)),
@@ -93,21 +103,31 @@ export function useChat(responder: Responder) {
   const isBusy = phase === "thinking" || phase === "speaking";
 
   const send = useCallback(
-    async (text: string, accion?: AccionRapida) => {
+    async (text: string, accion?: AccionRapida, reintentar = false) => {
       const clean = text.trim();
-      if (!clean || isBusy) return;
+      if (!clean || activa.current) return;
+      const controlador = new AbortController();
+      activa.current = controlador;
+      setReintento(null);
 
       clearTimers();
-      const history = messagesRef.current.slice(-HISTORY_LIMIT);
-      setMessages((current) => [...current, createMessage("user", clean)]);
+      const history = reintentar ? ultimoHistorial.current : messagesRef.current.slice(-HISTORY_LIMIT);
+      ultimoHistorial.current = history;
+      if (!reintentar) setMessages((current) => [...current, createMessage("user", clean)]);
       setPhase("thinking");
 
       try {
-        const [reply] = await Promise.all([responder(clean, history, accion), wait(MIN_THINKING_MS)]);
+        const [reply] = await Promise.all([
+          conLimite(signal => responder(clean, history, accion, signal), 30_000, controlador.signal),
+          wait(MIN_THINKING_MS),
+        ]);
+        if (controlador.signal.aborted) return;
+        if (!reply.text.trim()) throw new Error("Respuesta vacía");
         const answer = { ...createMessage("muyu", ""), evidencia: reply.evidencia };
         setMessages((current) => [...current, answer]);
         setPhase("speaking");
         await typeOut(answer.id, reply.text);
+        if (controlador.signal.aborted) return;
         // Las sugerencias aparecen cuando termina de escribir, no antes.
         if (reply.sugerencias?.length) {
           const sugerencias = reply.sugerencias;
@@ -121,13 +141,21 @@ export function useChat(responder: Responder) {
           setPhase("idle");
         }
       } catch {
+        if (controlador.signal.aborted) return;
+        setReintento({ texto: clean, accion });
         setMessages((current) => [...current, createMessage("muyu", ERROR_TEXT)]);
         setPhase("error");
         schedule(() => setPhase("idle"), ERROR_MS);
+      } finally {
+        if (activa.current === controlador) activa.current = null;
+        terminarEscritura.current = null;
       }
     },
-    [isBusy, responder, clearTimers, schedule, typeOut],
+    [responder, clearTimers, schedule, typeOut],
   );
 
-  return { messages, phase, isBusy, send };
+  const retry = useCallback(() => {
+    if (reintento) return send(reintento.texto, reintento.accion, true);
+  }, [reintento, send]);
+  return { messages, phase, isBusy, send, retry, canRetry: reintento !== null };
 }

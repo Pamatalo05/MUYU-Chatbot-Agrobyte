@@ -1,3 +1,4 @@
+import type { Preferencias } from "./estilo";
 import { etiquetaContexto } from "../knowledge/consultaAgricola";
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import MuyuAvatar from "../character/MuyuAvatar";
@@ -8,6 +9,10 @@ import "./ChatPanel.css";
 
 interface ChatPanelProps {
   messages: ChatMessage[];
+  preferencias?: Preferencias;
+  onPreferencias?: (p: Preferencias) => void;
+  onRetry?: () => void;
+  canRetry?: boolean;
   /** Muestra la burbuja "Muyu está pensando…". */
   isThinking: boolean;
   /** Muyu está pensando o escribiendo: no se puede enviar. */
@@ -31,6 +36,10 @@ const AVISO_LARGO = 400;
 
 export default function ChatPanel({
   messages,
+  preferencias,
+  onPreferencias,
+  onRetry,
+  canRetry,
   isThinking,
   isBusy,
   onSend,
@@ -104,7 +113,8 @@ export default function ChatPanel({
               {message.evidencia && (
                 <details className="chat__evidencia">
                   <summary>{etiquetaContexto(message.evidencia)}</summary>
-                  <p>Fuentes documentadas del paquete:</p>
+                  <p>{message.evidencia.tipo} · {message.evidencia.periodo}</p>
+                  <p>Fuentes y detalles:</p>
                   <ul>{message.evidencia.fuentesDocumentadas.map((fuente, i) => <li key={i}>{fuente}</li>)}</ul>
                 </details>
               )}
@@ -162,6 +172,17 @@ export default function ChatPanel({
           {aviso}
         </p>
       )}
+
+      {preferencias && onPreferencias && <details className="chat__preferencias">
+        <summary>Cómo prefieres las respuestas</summary>
+        <label>Explicación <select value={preferencias.nivel} onChange={e => onPreferencias({ ...preferencias, nivel: e.target.value as Preferencias["nivel"] })}>
+          <option value="sencillo">Sencilla</option><option value="normal">Normal</option><option value="tecnico">Técnica</option>
+        </select></label>
+        <label>Extensión <select value={preferencias.longitud} onChange={e => onPreferencias({ ...preferencias, longitud: e.target.value as Preferencias["longitud"] })}>
+          <option value="breve">Breve</option><option value="detallada">Detallada</option>
+        </select></label>
+      </details>}
+      {canRetry && <button type="button" className="chat__sugerencia" disabled={isBusy} onClick={onRetry}>Intentar otra vez</button>}
 
       <div className="chat__quick" role="group" aria-label="Preguntas rápidas">
         {PREGUNTAS_RAPIDAS.map(({ accion, texto, etiqueta, icono }) => (

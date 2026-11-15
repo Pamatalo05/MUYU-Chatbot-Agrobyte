@@ -56,4 +56,5 @@ export type Responder = (
   pregunta: string,
   historial: ChatMessage[],
   accion?: AccionRapida,
+  signal?: AbortSignal,
 ) => Promise<ChatReply>;
