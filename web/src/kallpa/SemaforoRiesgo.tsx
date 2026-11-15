@@ -3,9 +3,9 @@ import "./SemaforoRiesgo.css";
 
 /** Titular en lenguaje del agricultor; el detalle técnico va debajo, sin cortarse. */
 const TITULAR: Record<ColorSemaforo, string> = {
-  verde: "Buen momento para sembrar",
-  amarillo: "Siembra con precaución",
-  rojo: "Momento riesgoso para sembrar",
+  verde: "Indicador orientativo: verde",
+  amarillo: "Indicador orientativo: amarillo",
+  rojo: "Indicador orientativo: rojo",
 };
 
 const primeraMayuscula = (texto: string) => texto.charAt(0).toUpperCase() + texto.slice(1);
@@ -18,6 +18,7 @@ export default function SemaforoRiesgo({ color, motivo }: Semaforo) {
       <p className="semaforo__texto">
         <strong>{TITULAR[color]}</strong>
         <span>{primeraMayuscula(motivo)}</span>
+        <small>Reglas de Kallpa del paquete original; no garantiza resultados de siembra.</small>
       </p>
     </div>
   );

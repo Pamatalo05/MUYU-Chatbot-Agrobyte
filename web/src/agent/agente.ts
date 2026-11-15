@@ -1,3 +1,5 @@
+import { resolverConsulta } from "../knowledge/contextoConversacion";
+import { respuestaAgricola, fundamentarRespuesta, contextoHerramientaValido } from "../knowledge/consultaAgricola";
 
 import type { ChatReply } from "../chat/types";
 
@@ -46,6 +48,7 @@ interface Parte {
   };
 
   functionResponse?: {
+    id?: string;
     name: string;
     response: Record<string, unknown>;
   };
@@ -112,6 +115,10 @@ function instrucciones(
       "consulta las herramientas de Kallpa antes de responder.",
 
     "No inventes cifras, pronósticos ni recomendaciones locales.",
+    "El contexto efectivo ya está resuelto por el servidor. Usa esos argumentos en las herramientas, sin cambiarlos por el historial.",
+    "Distingue referencias históricas procesadas y estimaciones del modelo Kallpa de observaciones NASA. No atribuyas las predicciones Ridge a NASA.",
+    "No confundas humedad volumétrica con capacidad de campo, humedad relativa o probabilidad de germinación. No deduzcas viabilidad de siembra solo de humedad.",
+    "No inventes umbrales, puntuaciones ni garantías financieras. Explica las limitaciones y las fuentes de las herramientas.",
 
     "Si el usuario solo saluda, responde con naturalidad. " +
       "No conviertas todos los saludos en consultas agrícolas.",
@@ -120,6 +127,13 @@ function instrucciones(
     "Responde en español sencillo, cálido y respetuoso, " +
       "en máximo 3 frases cortas, sin markdown. " +
       "Pon cada idea en su propia línea y la cifra clave primero.",
+    "Habla de forma clara, breve y respetuosa para agricultores, sin asumir conocimientos técnicos. " +
+      "Di 'agua en el suelo cerca de las raíces' antes que 'humedad radicular'. Evita siglas y nombres de modelos si no son necesarios para responder.",
+    "Explica en una frase sencilla qué representa el dato consultado. Conserva exactamente las cifras verificadas, sus unidades y el contexto; no inventes causas ni consejos de siembra.",
+    "Distingue siempre una estimación de una medición: puedes decir 'es un cálculo de referencia, no una medición actual de tu parcela'. " +
+      "Mantén las fuentes y los detalles técnicos en la información de respaldo; no atribuyas a NASA resultados propios de Kallpa.",
+    "Si falta un dato imprescindible, haz una sola pregunta concreta de aclaración; no pidas configurar toda la parcela. " +
+      "Cuando pidan una explicación más fácil, explica el significado con palabras comunes y sin añadir cifras ni certezas nuevas.",
 
     "Usa SOLO cifras que te devuelvan las herramientas; " +
       "nunca inventes datos.",
@@ -165,8 +179,7 @@ function instrucciones(
           "No presentes las predicciones del modelo como certezas.",
 
           "Cuando presentes humedad volumétrica del suelo, " +
-            "convierte el valor de m³/m³ a porcentaje multiplicándolo por 100. " +
-            "Por ejemplo, 0.499 m³/m³ equivale a 49,9 %.",
+            "convierte la fracción volumétrica de m³/m³ a porcentaje volumétrico multiplicándola por cien.",
 
           "Utiliza coma decimal en español. " +
             "Indica siempre si la humedad es superficial o de raíz.",
@@ -187,7 +200,7 @@ function instrucciones(
       `(id ${contexto.cultivoPrevioId}), ` +
       `escenario ${ESCENARIO_NOMBRE[contexto.escenario]} ` +
       `(id ${contexto.escenario}), mes ${contexto.mes}. ` +
-      "Úsalo si la pregunta no dice otra cosa.",
+      "Este es el contexto efectivo de esta consulta, separado de la parcela.",
 
     hayDatosNuevos
       ? "El cantón seleccionado tiene datos actualizados de Kallpa ML."
@@ -201,12 +214,14 @@ function instrucciones(
  * Si un modelo no está disponible, intenta con el siguiente.
  */
 type LlamadaHerramienta = {
+  id?: string;
   name: string;
   args?: Record<string, unknown>;
 };
 
 type ParteGemini = {
   text?: string;
+  thought?: boolean;
   functionCall?: LlamadaHerramienta;
 };
 
@@ -357,6 +372,12 @@ export async function conversar(
     return respuestaFueraDeTema(peticion.pregunta);
   }
 
+  const consulta = resolverConsulta(peticion.pregunta, peticion.contexto, null, Object.keys(paquete.cantones), peticion.tema);
+  peticion = { ...peticion, contexto: consulta.contexto, tema: consulta.tema };
+  const factual = paqueteNuevo ? respuestaAgricola(consulta, paqueteNuevo, peticion.pregunta, paquete) : undefined;
+  if (consulta.error) return { text: consulta.error, emotion: "neutral" };
+  if (factual && !factual.evidencia) return factual;
+
   const contents: Contenido[] = [
     ...peticion.historial.map(
       (m): Contenido => ({
@@ -394,7 +415,6 @@ export async function conversar(
     ],
 
     generationConfig: {
-      temperature: 0.3,
       maxOutputTokens: 1024,
     },
   };
@@ -428,7 +448,7 @@ const datos = await generar(
     // Gemini terminó de consultar y quiere responder
     if (llamadas.length === 0) {
       const text = partes
-        .map((p: ParteGemini) => p.text ?? "")
+        .map((p: ParteGemini) => p.thought ? "" : p.text ?? "")
         .join("")
         .trim();
 
@@ -452,6 +472,7 @@ const datos = await generar(
           contieneAfirmacionesAgricolas(text)
         )
       ) {
+        if (factual) return factual;
         throw new AgenteError(
           "Gemini intentó responder sin consultar los datos agrícolas"
         );
@@ -459,13 +480,15 @@ const datos = await generar(
 
 
 
+      if (factual) return fundamentarRespuesta(text, factual);
+      if (/\d/.test(text) && paqueteNuevo) return { text: "No tengo una consulta verificable que respalde esas cifras. Indica la variable, el cantón y el período.", emotion: "neutral" };
       return {
         text,
         emotion: recomendo ? "happy" : "neutral",
       };
     }
 
-    // Guardar las llamadas realizadas por Gemini
+    // Preserve complete parts, including opaque thoughtSignature values and call IDs.
     contents.push({
       role: "model",
       parts: partes,
@@ -476,8 +499,10 @@ const datos = await generar(
       role: "user",
 
       parts: llamadas.map(
-        ({ name, args = {} }: LlamadaHerramienta) => {
-          const response = ejecutarHerramienta(
+        ({ id, name, args = {} }: LlamadaHerramienta) => {
+          const response = paqueteNuevo && name === "consultar_kallpa_ml" && !contextoHerramientaValido(args, peticion.contexto, peticion.tema)
+            ? { error: "Los argumentos no coinciden con el contexto efectivo; usa el contexto indicado por el servidor." }
+            : ejecutarHerramienta(
             paquete,
             name,
             args,
@@ -512,6 +537,7 @@ const datos = await generar(
 
           return {
             functionResponse: {
+              ...(id !== undefined ? { id } : {}),
               name,
               response,
             },
@@ -521,6 +547,7 @@ const datos = await generar(
     });
   }
 
+  if (factual) return factual;
   throw new AgenteError(
     "Demasiadas llamadas a herramientas"
   );

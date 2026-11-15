@@ -303,3 +303,7 @@
     animation: none;
   }
 }
+
+.chat__evidencia { max-width: 42rem; margin-top: .35rem; font-size: .75rem; color: var(--tierra); }
+.chat__evidencia summary { cursor: pointer; }
+.chat__evidencia p, .chat__evidencia ul { margin: .3rem 0; }

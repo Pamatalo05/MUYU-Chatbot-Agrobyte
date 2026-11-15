@@ -40,7 +40,10 @@ export interface PaqueteKallpa {
   meta: {
     proyecto: string;
     periodo_analizado: string;
+    actualizado_utc?: string;
   };
+  fuentes_metodologia?: Record<string, string>;
+  auditoria_reproducibilidad?: Record<string, unknown>;
   ml_metadata: {
     modelo_seleccionado: string;
     r2_test: number;

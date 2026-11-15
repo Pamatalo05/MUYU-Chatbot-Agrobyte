@@ -44,6 +44,51 @@ describe("ejecutarHerramienta", () => {
 });
 
 describe("conversar", () => {
+  it("preserves signed parts and tool IDs with the migrated REST model", async () => {
+    const parts = [
+      { text: "Consultando datos", thoughtSignature: "opaque-text-signature" },
+      {
+        functionCall: {
+          id: "call-nino",
+          name: "consultar_kallpa_ml",
+          args: { canton_id: "daule", escenario: "nino", mes: 1 },
+        },
+        thoughtSignature: "opaque-function-signature",
+      },
+      {
+        functionCall: {
+          id: "call-neutro",
+          name: "consultar_kallpa_ml",
+          args: { canton_id: "daule", escenario: "neutro", mes: 1 },
+        },
+      },
+    ];
+    const { fetchImpl, recibido } = geminiFalso([
+      { parts },
+      { parts: [{ text: "Respuesta basada en las herramientas." }] },
+    ]);
+    await manejarChat(JSON.stringify({ ...peticion, pregunta: "Compara El Niño y La Niña en Daule durante enero" }), {
+      GEMINI_API_KEY: "test-key",
+      GEMINI_MODEL: "gemini-3.5-flash-lite",
+    }, fetchImpl).then(r => expect(r.status).toBe(200));
+    expect(recibido).toHaveLength(2);
+    for (const request of recibido) {
+      expect(request.url).toBe("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent");
+      expect(request.body.generationConfig).toEqual({ maxOutputTokens: 1024 });
+      expect(request.body.contents.at(-1).role).toBe("user");
+    }
+    expect(recibido[1].body.contents.at(-2)).toEqual({ role: "model", parts });
+    const responses = recibido[1].body.contents.at(-1).parts.map((p: any) => p.functionResponse);
+    expect(responses.map((r: any) => [r.id, r.name])).toEqual([
+      ["call-nino", "consultar_kallpa_ml"],
+      ["call-neutro", "consultar_kallpa_ml"],
+    ]);
+    expect(responses[0].response.clima.humedad_raiz_predicha).toBeCloseTo(0.701);
+    expect(responses[0].response.escenario).toBe("nino");
+    expect(responses[1].response.escenario).toBe("neutro");
+    expect(responses[1].response).not.toHaveProperty("error");
+  });
+
     it("rechaza recomendaciones sin consultar herramientas", async () => {
     const { fetchImpl } = geminiFalso([
       { parts: [{ text: "Te recomiendo sembrar maíz y ganarás 500 USD." }] },
@@ -68,6 +113,11 @@ describe("conversar", () => {
 
     expect(resultado.text).toContain("Hola");
     expect(recibido).toHaveLength(1);
+    const instrucciones = recibido[0].body.systemInstruction.parts[0].text;
+    expect(instrucciones).toContain("sin asumir conocimientos técnicos");
+    expect(instrucciones).toContain("Conserva exactamente las cifras verificadas, sus unidades y el contexto");
+    expect(instrucciones).toContain("no inventes causas ni consejos de siembra");
+    expect(instrucciones).toContain("una sola pregunta concreta de aclaración");
   });
   it("ejecuta la herramienta que pide Gemini y devuelve su respuesta final", async () => {
     const { fetchImpl, recibido } = geminiFalso([

@@ -6,7 +6,7 @@ const GREETING: ChatMessage = {
   id: "greeting",
   role: "muyu",
   text:
-    "¡Hola! Soy Muyu 🌱 Te ayudo a decidir qué sembrar después de tu cosecha, con datos de la NASA para tu cantón.\n" +
+    "¡Hola! Soy Muyu 🌱 Te ayudo a decidir qué sembrar después de tu cosecha, con datos documentados de Kallpa y estimaciones de sus modelos.\n" +
     "Toca una pregunta de abajo o escríbeme con tus palabras.",
 };
 
@@ -104,7 +104,7 @@ export function useChat(responder: Responder) {
 
       try {
         const [reply] = await Promise.all([responder(clean, history, accion), wait(MIN_THINKING_MS)]);
-        const answer = createMessage("muyu", "");
+        const answer = { ...createMessage("muyu", ""), evidencia: reply.evidencia };
         setMessages((current) => [...current, answer]);
         setPhase("speaking");
         await typeOut(answer.id, reply.text);

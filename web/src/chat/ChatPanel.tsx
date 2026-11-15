@@ -1,3 +1,4 @@
+import { etiquetaContexto } from "../knowledge/consultaAgricola";
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import MuyuAvatar from "../character/MuyuAvatar";
 import { useEscucha } from "../voz/useEscucha";
@@ -100,6 +101,13 @@ export default function ChatPanel({
                 </span>
                 {message.text}
               </p>
+              {message.evidencia && (
+                <details className="chat__evidencia">
+                  <summary>{etiquetaContexto(message.evidencia)}</summary>
+                  <p>Fuentes documentadas del paquete:</p>
+                  <ul>{message.evidencia.fuentesDocumentadas.map((fuente, i) => <li key={i}>{fuente}</li>)}</ul>
+                </details>
+              )}
               {message.sugerencias && message.sugerencias.length > 0 && (
                 <div className="chat__sugerencias" role="group" aria-label="Preguntas sugeridas">
                   {message.sugerencias.map((sugerencia) => (

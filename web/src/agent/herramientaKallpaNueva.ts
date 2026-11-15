@@ -49,6 +49,15 @@ export function consultarKallpaML(
     return { error: "No existen datos para ese mes" };
   }
 
+  for (const clave of Object.keys(clima) as (keyof typeof clima)[]) {
+    if (["mes", "escenario"].includes(clave)) continue;
+    const valor = clima[clave];
+    const fraccion = ["humedad_superficial_smap", "humedad_raiz_predicha"].includes(clave);
+    if (typeof valor !== "number" || !Number.isFinite(valor) || (fraccion && (valor < 0 || valor > 1)) || (clave === "ndvi" && (valor < -1 || valor > 1)) || (clave === "lluvia_mm" && valor < 0)) {
+      // JSON null explicitly represents unavailable data, never zero.
+      (clima as unknown as Record<string, unknown>)[clave] = null;
+    }
+  }
   const rotaciones = obtenerRotacionesKallpa(canton, fase);
 
   return {
@@ -83,5 +92,16 @@ export function consultarKallpaML(
       "Las recomendaciones son orientativas y requieren validación local.",
     ],
     modelo: paquete.ml_metadata.modelo_seleccionado,
+    trazabilidad: {
+      periodo: paquete.meta.periodo_analizado,
+      actualizado_utc: paquete.meta.actualizado_utc,
+      fuentes_documentadas: paquete.fuentes_metodologia ?? {},
+      tipo_humedad_raiz: "Estimación derivada de Kallpa; no observación directa de NASA",
+      unidad_humedad: "m³/m³ (fracción volumétrica)",
+      unidad_lluvia: "mm/mes",
+      unidad_temperatura: "°C",
+      unidad_ndvi: "adimensional",
+      limitaciones: "No hay fecha de observación individual ni probabilidad de germinación o pérdida financiera en este resultado.",
+    },
   };
 }

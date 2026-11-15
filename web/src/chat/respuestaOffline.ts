@@ -1,3 +1,5 @@
+import { resolverConsulta, type TemaConsulta } from "../knowledge/contextoConversacion";
+import { respuestaAgricola } from "../knowledge/consultaAgricola";
 
 import {
   balanceHidrico,
@@ -254,11 +256,20 @@ export function responderOffline(
   pregunta: string,
   accion?: AccionRapida,
   paqueteNuevo?: PaqueteKallpa,
+  temaConversacion?: TemaConsulta,
 ): ChatReply {
   if (!accion && esTemaVetado(pregunta)) {
     return respuestaFueraDeTema(pregunta);
   }
 
+  const consulta = resolverConsulta(pregunta, contexto, null, Object.keys(paquete.cantones), temaConversacion);
+  if (accion) consulta.tema = accion;
+  if (consulta.error) return { text: consulta.error, emotion: "neutral" };
+  if (paqueteNuevo || temaConversacion) {
+    const factual = respuestaAgricola(consulta, paqueteNuevo, pregunta, paquete);
+    if (factual) return factual;
+  }
+  contexto = consulta.contexto;
   const tema = accion ?? detectarAccion(pregunta);
 
   switch (tema) {

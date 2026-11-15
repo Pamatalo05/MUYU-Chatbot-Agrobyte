@@ -48,10 +48,11 @@ export default function ContextoSimulado({ paquete, contexto, onChange }: Contex
       <summary className="parcela__resumen">
         <span className="parcela__titulo">Tu parcela</span>
         <span className="parcela__datos">{resumen}</span>
-        <span className="parcela__cambiar" aria-hidden="true">Cambiar</span>
+        <span className="parcela__cambiar" aria-hidden="true">Opciones ▾</span>
       </summary>
     <fieldset className="contexto">
       <legend className="visually-hidden">Datos de tu parcela</legend>
+      <p className="contexto__ayuda">Los cambios se aplican automáticamente a las próximas consultas.</p>
 
       <label>
         Cantón

@@ -1,3 +1,4 @@
+import { TEMAS, type TemaConsulta } from "../knowledge/contextoConversacion";
 import type { MuyuContexto } from "../knowledge/contexto";
 import { ESCENARIOS } from "../knowledge/types";
 
@@ -6,6 +7,7 @@ export interface PeticionChat {
   pregunta: string;
   historial: { role: "user" | "muyu"; text: string }[];
   contexto: MuyuContexto;
+  tema?: TemaConsulta;
 }
 
 export const LIMITES = { PREGUNTA: 500, MENSAJES_HISTORIAL: 6, TEXTO_HISTORIAL: 1000 } as const;
@@ -51,5 +53,6 @@ export function validarPeticion(datos: unknown): PeticionChat {
     throw new PeticionInvalidaError("contexto inválido: se espera cantonId, cultivoPrevioId, escenario y mes 1-12");
   }
 
-  return { pregunta, historial, contexto: c as unknown as MuyuContexto };
+  if (datos.tema !== undefined && !(TEMAS as readonly unknown[]).includes(datos.tema)) throw new PeticionInvalidaError("Tema de consulta inválido");
+  return { pregunta, historial, contexto: c as unknown as MuyuContexto, tema: datos.tema as TemaConsulta | undefined };
 }

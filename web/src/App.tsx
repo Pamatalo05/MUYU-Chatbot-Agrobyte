@@ -1,3 +1,4 @@
+import { MemoriaConversacional, resolverConsulta } from "./knowledge/contextoConversacion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Muyu, { type MuyuState } from "./character/Muyu";
 import MuyuDebugPanel from "./character/MuyuDebugPanel";
@@ -25,6 +26,11 @@ export default function App() {
   const paqueteNuevo = usePaqueteNuevo();
   const [contexto, setContexto] = useState<MuyuContexto>(CONTEXTO_INICIAL);
 
+  const memoria = useRef(new MemoriaConversacional());
+  const cambiarParcela = useCallback((nuevo: MuyuContexto) => {
+    memoria.current.reiniciar();
+    setContexto(nuevo);
+  }, []);
   const enLinea = useEnLinea();
   const [modo, setModo] = useState<ModoConexion>("en_vivo");
   const ultimoFallo = useRef<number | null>(null);
@@ -33,6 +39,11 @@ export default function App() {
   // K4: Gemini si hay internet; si no hay o falla, el modo campo responde con los mismos datos.
   const responder = useCallback<Responder>(
     async (pregunta, historial, accion) => {
+      const version = memoria.current.version();
+      const consulta = resolverConsulta(pregunta, contexto, memoria.current.leer(), paquete.estado === "listo" ? Object.keys(paquete.paquete.cantones) : undefined);
+      if (accion) consulta.tema = accion;
+      if (consulta.error) return { text: consulta.error, emotion: "neutral" };
+      const efectivo = consulta.contexto;
       const campo = (): ChatReply => {
         if (paquete.estado === "cargando") {
           return { text: "Estoy cargando los datos de tu cantón, pregúntame en un momento.", emotion: "neutral" };
@@ -40,18 +51,23 @@ export default function App() {
         if (paquete.estado === "error") throw new Error(paquete.mensaje);
         return responderOffline(
           paquete.paquete,
-          contexto,
+          efectivo,
           pregunta,
           accion,
-          paqueteNuevo ?? undefined
+          paqueteNuevo ?? undefined,
+          consulta.tema,
         );
       };
       const elegido = elegirModo({ enLinea, accion, ultimoFalloMs: ultimoFallo.current, ahoraMs: Date.now() });
       const resultado = await responderHibrido(
         elegido,
-        () => responderGemini(pregunta, historial, contexto),
+        () => responderGemini(pregunta, historial, efectivo, undefined, consulta.tema),
         campo,
       );
+      if (resultado.reply.evidencia) memoria.current.aceptar(version, {
+        contexto: resultado.reply.evidencia.contexto,
+        tema: resultado.reply.evidencia.tema,
+      });
       if (resultado.fallo) ultimoFallo.current = Date.now();
       else if (resultado.modo === "en_vivo") ultimoFallo.current = null;
       if (resultado.fallo || resultado.modo === "en_vivo") setFalloReciente(resultado.fallo);
@@ -108,7 +124,7 @@ const enviar = useCallback<typeof send>(
         <Muyu state={muyuState} size={300} />
         <div className="finca">
           {paquete.estado === "listo" && (
-            <ContextoSimulado paquete={paquete.paquete} contexto={contexto} onChange={setContexto} />
+            <ContextoSimulado paquete={paquete.paquete} contexto={contexto} onChange={cambiarParcela} />
           )}
           {semaforo && <SemaforoRiesgo {...semaforo} />}
         </div>

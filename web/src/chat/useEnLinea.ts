@@ -1,68 +1,83 @@
-
 import { useEffect, useState } from "react";
+import { RUTA_CHAT } from "./responderGemini";
 
 const INTERVALO_MS = 15_000;
 const TIMEOUT_MS = 4_000;
 
-// Recurso pequeño que permite comprobar si hay acceso
-// real a internet, no solamente conexión Wi-Fi.
-const URL_PRUEBA = "https://www.gstatic.com/generate_204";
-
+/** Comprueba acceso al backend de Muyu; la disponibilidad de Gemini se evalúa al conversar. */
 export function useEnLinea(): boolean {
   const [enLinea, setEnLinea] = useState(navigator.onLine);
 
   useEffect(() => {
     let activo = true;
-    let comprobando = false;
+    let pendiente: AbortController | null = null;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+
+    function cancelarComprobacion() {
+      const anterior = pendiente;
+      pendiente = null;
+      clearTimeout(timeout);
+      timeout = undefined;
+      anterior?.abort();
+    }
+
+    const desconectado = () => {
+      cancelarComprobacion();
+      if (activo) setEnLinea(false);
+    };
 
     async function comprobarConexion() {
-      if (comprobando) return;
-
+      if (!activo) return;
       if (!navigator.onLine) {
-        if (activo) setEnLinea(false);
+        desconectado();
         return;
       }
-
-      comprobando = true;
+      if (pendiente) return;
 
       const controlador = new AbortController();
-      const timeout = setTimeout(
-        () => controlador.abort(),
-        TIMEOUT_MS
-      );
+      pendiente = controlador;
+      // La identidad invalida resultados anteriores incluso si fetch ignora el aborto.
+      const vigente = () => activo && pendiente === controlador;
+      timeout = setTimeout(() => {
+        if (!vigente()) return;
+        cancelarComprobacion();
+        setEnLinea(false);
+      }, TIMEOUT_MS);
 
       try {
-        await fetch(URL_PRUEBA, {
-          method: "GET",
-          mode: "no-cors",
+        // HEAD no ejecuta el agente: tanto Vite como Netlify responden 405.
+        // Cualquier respuesta HTTP confirma conectividad con nuestro servidor;
+        // los errores de Gemini se gestionan al enviar POST en responderHibrido.
+        await fetch(RUTA_CHAT, {
+          method: "HEAD",
           cache: "no-store",
           signal: controlador.signal,
         });
-
-        if (activo) setEnLinea(true);
+        if (vigente() && navigator.onLine) setEnLinea(true);
       } catch {
-        if (activo) setEnLinea(false);
+        if (vigente()) setEnLinea(false);
       } finally {
-        clearTimeout(timeout);
-        comprobando = false;
+        // Una solicitud vieja no debe limpiar el temporizador de la nueva.
+        if (vigente()) {
+          clearTimeout(timeout);
+          pendiente = null;
+        }
       }
     }
 
-    const desconectado = () => setEnLinea(false);
-    const conectado = () => void comprobarConexion();
+    const conectado = () => {
+      cancelarComprobacion();
+      void comprobarConexion();
+    };
 
     window.addEventListener("offline", desconectado);
     window.addEventListener("online", conectado);
-
-    const intervalo = setInterval(
-      comprobarConexion,
-      INTERVALO_MS
-    );
-
+    const intervalo = setInterval(comprobarConexion, INTERVALO_MS);
     void comprobarConexion();
 
     return () => {
       activo = false;
+      cancelarComprobacion();
       clearInterval(intervalo);
       window.removeEventListener("offline", desconectado);
       window.removeEventListener("online", conectado);

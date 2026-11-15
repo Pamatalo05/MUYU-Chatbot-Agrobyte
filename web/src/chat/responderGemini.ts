@@ -1,3 +1,4 @@
+import type { TemaConsulta } from "../knowledge/contextoConversacion";
 
 import type { PeticionChat } from "../agent/peticion";
 import type { MuyuContexto } from "../knowledge/contexto";
@@ -17,11 +18,13 @@ export async function responderGemini(
   historial: ChatMessage[],
   contexto: MuyuContexto,
   fetchImpl: typeof fetch = fetch,
+  tema?: TemaConsulta,
 ): Promise<ChatReply> {
   const cuerpo: PeticionChat = {
     pregunta,
     historial: historial.map(({ role, text }) => ({ role, text })),
     contexto,
+    tema,
   };
 
   let respuesta: Response;
@@ -86,5 +89,6 @@ export async function responderGemini(
     text: datos.text,
     emotion: datos.emotion === "happy" ? "happy" : "neutral",
     sugerencias,
+    evidencia: datos.evidencia,
   };
 }

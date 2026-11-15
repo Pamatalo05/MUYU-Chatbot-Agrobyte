@@ -99,3 +99,5 @@
     font-size: 0.85rem;
   }
 }
+
+.contexto__ayuda { grid-column: 1 / -1; margin: 0; font-size: .75rem; color: var(--tierra); }

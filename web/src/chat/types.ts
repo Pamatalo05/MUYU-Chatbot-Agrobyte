@@ -1,3 +1,5 @@
+import type { MuyuContexto } from "../knowledge/contexto";
+import type { TemaConsulta } from "../knowledge/contextoConversacion";
 import type { AccionRapida } from "./preguntasRapidas";
 
 export type ChatRole = "user" | "muyu";
@@ -8,12 +10,32 @@ export interface Sugerencia {
   accion?: AccionRapida;
 }
 
+export interface DatoVerificado {
+  campo: string;
+  etiqueta: string;
+  valor: number;
+  unidad: string;
+  tipo: string;
+}
+export interface EvidenciaConsulta {
+  contexto: MuyuContexto;
+  tema: TemaConsulta;
+  canton: string;
+  fuente: string;
+  periodo: string;
+  tipo: string;
+  fuentesDocumentadas: string[];
+  datos: DatoVerificado[];
+  escenarios?: string[];
+}
+
 export interface ChatMessage {
   id: string;
   role: ChatRole;
   text: string;
   /** Botones que aparecen debajo de la respuesta de Muyu. */
   sugerencias?: Sugerencia[];
+  evidencia?: EvidenciaConsulta;
 }
 
 /** Emoción que acompaña cada respuesta (el backend la devuelve en el Bloque 2). */
@@ -23,6 +45,7 @@ export interface ChatReply {
   text: string;
   emotion: ReplyEmotion;
   sugerencias?: Sugerencia[];
+  evidencia?: EvidenciaConsulta;
 }
 
 /** Momento de la conversación; de aquí se deduce el estado de Muyu. */
