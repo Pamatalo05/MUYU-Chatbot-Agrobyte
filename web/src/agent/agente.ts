@@ -102,7 +102,23 @@ function instrucciones(
 
   return [
     "Eres Muyu, asistente agronómico de Kallpa para agricultores de Ecuador.",
+    "Puedes conversar naturalmente con el usuario sobre saludos, " +
+      "agradecimientos, tus capacidades y preguntas cotidianas sencillas.",
 
+    "Puedes explicar conceptos generales de agricultura, " +
+      "como fotosíntesis, humedad del suelo o el fenómeno El Niño, " +
+      "sin consultar herramientas cuando no se soliciten datos específicos.",
+
+    "Cuando el usuario pida valores, predicciones, comparaciones " +
+      "o recomendaciones específicas para un cantón, " +
+      "consulta las herramientas de Kallpa antes de responder.",
+
+    "No inventes cifras, pronósticos ni recomendaciones locales.",
+
+    "Si el usuario solo saluda, responde con naturalidad. " +
+      "No conviertas todos los saludos en consultas agrícolas.",
+
+      
     "Responde en español sencillo, cálido y respetuoso, " +
       "en máximo 3 frases cortas, sin markdown. " +
       "Pon cada idea en su propia línea y la cifra clave primero.",
@@ -126,10 +142,19 @@ function instrucciones(
       ? [
           "Tienes disponible la herramienta consultar_kallpa_ml " +
             "con información actualizada de Daule y Babahoyo.",
+          
+          "Para Daule y Babahoyo, consulta exclusivamente " +
+            "consultar_kallpa_ml cuando necesites datos agrícolas específicos. " +
+            "No utilices valores del paquete anterior.",
 
-          "Para estos dos cantones, prioriza consultar_kallpa_ml " +
-            "cuando pregunten por lluvia, temperatura, humedad, " +
-            "NDVI, escenarios ENSO o rotaciones.",
+          "Responde únicamente lo que preguntó el usuario. " +
+            "Si pregunta por humedad, informa la humedad y su tipo; " +
+            "no agregues lluvia, temperatura o NDVI salvo que lo solicite.",
+
+          "Si el usuario pregunta por humedad sin especificar el tipo, " +
+            "utiliza la humedad de raíz predicha e indica claramente " +
+            "que es una estimación del modelo.",
+
 
           "La lluvia mensual del paquete actualizado no cambia " +
             "según el escenario ENSO. La humedad de raíz predicha sí.",
@@ -140,6 +165,20 @@ function instrucciones(
             "costo de insumos. No lo presentes como ganancia neta.",
 
           "No presentes las predicciones del modelo como certezas.",
+
+          "Cuando presentes humedad volumétrica del suelo, " +
+            "convierte el valor de m³/m³ a porcentaje multiplicándolo por 100. " +
+            "Por ejemplo, 0.499 m³/m³ equivale a 49,9 %.",
+
+          "Utiliza coma decimal en español. " +
+            "Indica siempre si la humedad es superficial o de raíz.",
+
+          "No confundas humedad volumétrica del suelo " +
+            "con humedad relativa del aire.",
+
+          "Para predicciones de humedad de raíz, aclara que " +
+            "son estimaciones del modelo y no mediciones directas.",
+
         ]
       : []),
 
@@ -163,6 +202,16 @@ function instrucciones(
  * Llama a Gemini.
  * Si un modelo no está disponible, intenta con el siguiente.
  */
+type LlamadaHerramienta = {
+  name: string;
+  args?: Record<string, unknown>;
+};
+
+type ParteGemini = {
+  text?: string;
+  functionCall?: LlamadaHerramienta;
+};
+
 async function generar(
   cuerpo: unknown,
   {
@@ -174,26 +223,41 @@ async function generar(
   let ultimoError = "sin modelos";
 
   for (const modelo of modelos) {
-    const respuesta = await fetchImpl(
-      `${URL_GEMINI}/${modelo}:generateContent`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey,
-        },
-        body: JSON.stringify(cuerpo),
-      }
-    );
+    let respuesta: Response;
 
-    if (respuesta.ok) {
-      return (await respuesta.json()) as {
-        candidates?: {
-          content?: Contenido;
-        }[];
-      };
+    try {
+      respuesta = await fetchImpl(
+        `${URL_GEMINI}/${modelo}:generateContent`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey,
+          },
+          body: JSON.stringify(cuerpo),
+          signal: AbortSignal.timeout(12_000),
+        }
+      );
+    } catch (error) {
+      const motivo =
+        error instanceof Error ? error.message : String(error);
+
+      console.warn(
+        `[Muyu] Falló la solicitud a ${modelo}: ${motivo}`
+      );
+
+      ultimoError = `${modelo}: ${motivo}`;
+
+      // Si falla la conexión, probamos otro modelo.
+      continue;
     }
 
+    // Si Gemini respondió correctamente, devolvemos el JSON.
+    if (respuesta.ok) {
+      return await respuesta.json();
+    }
+
+    // Solo llegamos aquí si Gemini respondió con un error HTTP.
     const motivo = await respuesta
       .text()
       .then((t) => t.slice(0, 200))
@@ -210,6 +274,7 @@ async function generar(
   throw new AgenteError(ultimoError);
 }
 
+
 /**
  * Agente principal de Muyu.
  *
@@ -217,6 +282,69 @@ async function generar(
  * Nuestro código ejecuta la herramienta con datos reales.
  * Gemini utiliza el resultado para redactar su respuesta.
  */
+
+
+function requiereDatosKallpa(pregunta: string): boolean {
+  const texto = pregunta
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+
+  // Preguntas que necesitan datos agrícolas reales.
+  const patrones = [
+    /humedad/,
+    /ndvi/,
+    /temperatura/,
+    /lluvia/,
+    /precipitacion/,
+    /pronostico/,
+    /prediccion/,
+    /estimacion/,
+    /rotacion/,
+    /sembrar/,
+    /siembra/,
+    /cosecha/,
+    /cultivar/,
+    /cultivo/,
+    /recomiend/,
+    /recomendacion/,
+    /conviene/,
+    /riesgo/,
+    /sequia/,
+    /inundacion/,
+    /fertilizante/,
+    /urea/,
+    /rentabilidad/,
+    /ganancia/,
+    /ingreso/,
+    /costo/,
+    /margen/,
+    /daule/,
+    /babahoyo/,
+  ];
+
+  return patrones.some((patron) => patron.test(texto));
+}
+
+
+function contieneAfirmacionesAgricolas(texto: string): boolean {
+  const normalizado = texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  const patrones = [
+    /(?:recomiend|sugier|conviene|deberias).*(?:sembrar|cultivar|cosechar)/,
+    /(?:sembrar|cultivar).*(?:maiz|arroz|soya|frejol)/,
+    /(?:ganaras|ganancia|rentabilidad|ingreso|margen).*(?:\d|usd|dolar)/,
+    /\d+(?:[.,]\d+)?\s*(?:usd|dolares|mm|kg\/ha|m3\/m3|%)/,
+  ];
+
+  return patrones.some((patron) => patron.test(normalizado));
+}
+
+
 export async function conversar(
   peticion: PeticionChat,
   opciones: OpcionesAgente
@@ -277,22 +405,32 @@ export async function conversar(
   let consultoDatos = false;
 
   for (let turno = 0; turno < MAX_TURNOS; turno++) {
-    const datos = await generar(
-      { ...base, contents },
-      opciones
-    );
+    
+const datos = await generar(
+  {
+    ...base,
+    contents,
+    toolConfig: {
+      functionCallingConfig: {
+        mode: "AUTO",
+      },
+    },
+  },
+  opciones
+);
+
 
     const contenido = datos.candidates?.[0]?.content;
     const partes = contenido?.parts ?? [];
 
-    const llamadas = partes.flatMap((p) =>
+    const llamadas = partes.flatMap((p: ParteGemini) =>
       p.functionCall ? [p.functionCall] : []
     );
 
     // Gemini terminó de consultar y quiere responder
     if (llamadas.length === 0) {
       const text = partes
-        .map((p) => p.text ?? "")
+        .map((p: ParteGemini) => p.text ?? "")
         .join("")
         .trim();
 
@@ -309,18 +447,19 @@ export async function conversar(
       }
 
       // Evita respuestas agrícolas sin consultar datos
-      if (!consultoDatos) {
-        const saludo =
-          /^(hola|buenos días|buenas tardes|buenas noches|gracias|adiós)[!¡.\s]*$/i.test(
-            peticion.pregunta.trim()
-          );
-
-        if (!saludo) {
-          throw new AgenteError(
-            "Gemini intentó responder sin consultar los datos agrícolas"
-          );
-        }
+      if (
+        !consultoDatos &&
+        (
+          requiereDatosKallpa(peticion.pregunta) ||
+          contieneAfirmacionesAgricolas(text)
+        )
+      ) {
+        throw new AgenteError(
+          "Gemini intentó responder sin consultar los datos agrícolas"
+        );
       }
+
+
 
       return {
         text,
@@ -339,7 +478,7 @@ export async function conversar(
       role: "user",
 
       parts: llamadas.map(
-        ({ name, args = {} }) => {
+        ({ name, args = {} }: LlamadaHerramienta) => {
           const response = ejecutarHerramienta(
             paquete,
             name,

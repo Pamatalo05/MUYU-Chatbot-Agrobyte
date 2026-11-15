@@ -1,6 +1,5 @@
-
+import { declararHerramientas } from "./herramientas";
 import { describe, expect, it } from "vitest";
-
 import datosOriginales from "../../public/datos/paquete_canton.json";
 import datosNuevos from "../../public/datos/nuevo/paquete_canton.json";
 
@@ -121,48 +120,18 @@ describe("Integración Gemini + Kallpa ML", () => {
     expect(respuesta.text).toContain("70.1%");
   });
 
-  it("conserva las herramientas anteriores", async () => {
-    const solicitudes: Record<string, any>[] = [];
+  
+it("usa exclusivamente Kallpa ML cuando hay datos actualizados", () => {
+  const herramientas = declararHerramientas(
+    paquete,
+    paqueteNuevo
+  );
 
-    const fetchFalso = (async (
-      _url: string,
-      opciones: RequestInit
-    ) => {
-      solicitudes.push(JSON.parse(String(opciones.body)));
+  const nombres = herramientas.map(
+    (herramienta) => herramienta.name
+  );
 
-      return new Response(
-        JSON.stringify({
-          candidates: [
-            {
-              content: {
-                role: "model",
-                parts: [{ text: "Hola" }],
-              },
-            },
-          ],
-        }),
-        { status: 200 }
-      );
-    }) as typeof fetch;
+  expect(nombres).toEqual(["consultar_kallpa_ml"]);
+});
 
-    await conversar(
-      { ...peticion, pregunta: "hola" },
-      {
-        apiKey: "clave-de-prueba",
-        paquete,
-        paqueteNuevo,
-        fetchImpl: fetchFalso,
-      }
-    );
-
-    const nombres = solicitudes[0].tools[0]
-      .functionDeclarations.map(
-        (h: { name: string }) => h.name
-      );
-
-    expect(nombres).toContain("resumen_canton");
-    expect(nombres).toContain("recomendar_rotacion");
-    expect(nombres).toContain("comparar_escenarios");
-    expect(nombres).toContain("consultar_kallpa_ml");
-  });
 });

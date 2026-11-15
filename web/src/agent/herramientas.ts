@@ -99,7 +99,12 @@ export function declararHerramientas(
       required: ["canton_id", "escenario", "mes"],
     },
   };
-
+    if (
+    paqueteNuevo &&
+    Object.keys(paqueteNuevo.cantones).length > 0
+  ) {
+    return [herramientaNueva];
+  }
   return [
     {
       name: "resumen_canton",
@@ -198,6 +203,20 @@ export function ejecutarHerramienta(
   try {
     const cantonId = texto(args.canton_id);
     const mes = Number(args.mes);
+
+    // Evita consultar fuentes antiguas cuando existen
+    // datos actualizados para el cantón solicitado.
+    if (
+      paqueteNuevo?.cantones[cantonId] &&
+      nombre !== "consultar_kallpa_ml"
+    ) {
+      return {
+        error:
+          "Este cantón tiene datos actualizados. " +
+          "Utiliza consultar_kallpa_ml.",
+      };
+    }
+
 
     switch (nombre as NombreHerramienta) {
       case "resumen_canton": {
