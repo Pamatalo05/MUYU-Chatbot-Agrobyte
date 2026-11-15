@@ -46,6 +46,8 @@ export default function App() {
       const version = memoria.current.version();
       const consulta = resolverConsulta(pregunta, contexto, memoria.current.leer(), paquete.estado === "listo" ? Object.keys(paquete.paquete.cantones) : undefined);
       if (accion) consulta.tema = accion;
+      // El ahorro sigue pendiente aunque falte una aclaración o todavía no haya evidencia.
+      if (consulta.tema === "urea") memoria.current.recordarIntencion(version, consulta);
       if (consulta.error) return { text: consulta.error, emotion: "neutral" };
       const efectivo = consulta.contexto;
       const campo = (): ChatReply => {

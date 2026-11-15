@@ -43,7 +43,7 @@ export function resolverConsulta(pregunta: string, parcela: MuyuContexto, memori
   if (lugares.length) contexto.cantonId = lugares[0];
   // Unknown explicit places must not silently fall back to the selected parcel.
   const candidatos = [...texto.matchAll(/\b(?:en|para|canton(?: de)?)\s+([a-z]+)/g)].map(m => m[1]);
-  const ignorar = new Set([...MESES, ...cantones.map(normalizar), "el", "la", "los", "las", "mi", "un", "una", "este", "ese", "enero", "noviembre", "sembrar", "cultivar", "neutro", "humedad", "raiz", "suelo", "porcentaje", "mm", "grados"]);
+  const ignorar = new Set([...MESES, ...cantones.map(normalizar), "el", "la", "los", "las", "mi", "un", "una", "este", "ese", "enero", "noviembre", "sembrar", "cultivar", "neutro", "urea", "humedad", "raiz", "suelo", "porcentaje", "mm", "grados"]);
   if (candidatos.some(c => !ignorar.has(c))) return { ...consulta, error: "No reconozco el lugar o período solicitado. Indica un cantón disponible y un mes por nombre." };
   const nino = /\bnino\b/.test(texto), nina = /\bnina\b/.test(texto), neutro = /neutro|ano normal/.test(texto);
   if (neutro && (nino || nina)) return { ...consulta, error: "La comparación disponible es El Niño frente a La Niña. Consulta el escenario neutro por separado para no mezclar resultados." };
@@ -68,6 +68,11 @@ export class MemoriaConversacional {
   leer() { return this.valor ? { contexto: { ...this.valor.contexto }, tema: this.valor.tema } : null; }
   version() { return this.revision; }
   reiniciar() { this.revision++; this.valor = null; }
+  /** Retiene la intención mientras se espera una respuesta o una aclaración, sin guardar cifras. */
+  recordarIntencion(version: number, consulta: Consulta) {
+    if (!consulta.tema) return false;
+    return this.aceptar(version, { contexto: consulta.contexto, tema: consulta.tema });
+  }
   aceptar(version: number, valor: ContextoConversacion) {
     if (version !== this.revision) return false;
     this.valor = { contexto: { ...valor.contexto }, tema: valor.tema };

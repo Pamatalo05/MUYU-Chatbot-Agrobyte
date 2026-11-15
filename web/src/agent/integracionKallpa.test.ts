@@ -1,3 +1,5 @@
+import { MemoriaConversacional, resolverConsulta } from "../knowledge/contextoConversacion";
+import { responderOffline } from "../chat/respuestaOffline";
 import { describe, expect, it } from "vitest";
 import { declararHerramientas } from "./herramientas";
 import datosOriginales from "../../public/datos/paquete_canton.json";
@@ -125,5 +127,44 @@ describe("Integración Gemini + Kallpa ML", () => {
     );
 
     expect(nombres).toEqual(["consultar_kallpa_ml"]);
+  });
+});
+
+
+describe("regresión: ahorro de urea en Daule durante noviembre", () => {
+  const contexto = { cantonId: "daule", cultivoPrevioId: "arroz", escenario: "neutro" as const, mes: 11 };
+  const mayorAhorro = Math.max(...paqueteNuevo.cantones.daule.top_rotaciones_por_enso.neutro.map(r => r.ahorro_urea_kg_ha));
+  it.each(["¿Cuánto ahorro en urea?", "Daule noviembre"])("mantiene el ahorro y las fuentes en Gemini y campo: %s", async pregunta => {
+    const memoria = new MemoriaConversacional();
+    memoria.recordarIntencion(memoria.version(), resolverConsulta("¿Cuánto ahorro en urea?", contexto));
+    const consulta = resolverConsulta(pregunta, contexto, memoria.leer());
+    let llamadas = 0;
+    let resultadoHerramienta: any;
+    const falso = (async (_url, init) => {
+      llamadas++;
+      const cuerpo = JSON.parse(String(init?.body));
+      if (llamadas > 1) resultadoHerramienta = cuerpo.contents.at(-1).parts[0].functionResponse.response;
+      const parts = llamadas === 1 ? [{ functionCall: { name: "consultar_kallpa_ml", args: { canton_id: "daule", mes: 11, escenario: "neutro" } } }]
+        : [{ text: "Resumen climático: la temperatura es 99 °C." }];
+      return new Response(JSON.stringify({ candidates: [{ content: { role: "model", parts } }] }));
+    }) as typeof fetch;
+    const enLinea = await conversar({ pregunta, historial: [{ role: "user", text: "¿Cuánto ahorro en urea?" }], contexto: consulta.contexto, tema: consulta.tema }, { apiKey: "fake", paquete, paqueteNuevo, fetchImpl: falso });
+    const campo = responderOffline(paquete, consulta.contexto, pregunta, undefined, paqueteNuevo, consulta.tema);
+    expect(llamadas).toBe(2);
+    expect(resultadoHerramienta).toMatchObject({ mes: 11, escenario: "neutro" });
+    expect(enLinea).toEqual(campo);
+    expect(campo.evidencia).toMatchObject({ contexto, tema: "urea", datos: [{ campo: "ahorro_urea_kg_ha", valor: mayorAhorro, unidad: "kg/ha" }] });
+    expect(campo.evidencia?.fuentesDocumentadas.length).toBeGreaterThan(0);
+    expect(campo.text).toContain("Ahorro estimado de urea");
+    expect(campo.text).toContain("kg de urea por hectárea");
+    expect(campo.text).not.toMatch(/No reconozco|Resumen climático|99 °C/);
+  });
+  it("si falta el dato de ahorro no lo inventa ni lo sustituye por clima", () => {
+    const incompleto = structuredClone(paqueteNuevo);
+    for (const rotacion of incompleto.cantones.daule.top_rotaciones_por_enso.neutro) (rotacion as any).ahorro_urea_kg_ha = null;
+    const r = responderOffline(paquete, contexto, "¿Cuánto ahorro en urea?", undefined, incompleto);
+    expect(r.evidencia).toBeUndefined();
+    expect(r.text).toContain("Faltan datos válidos");
+    expect(r.text).not.toMatch(/kg de urea|Resumen climático/);
   });
 });

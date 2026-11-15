@@ -57,3 +57,36 @@ describe("contexto conversacional compartido", () => {
     expect(resolverConsulta("Humedad", { ...parcela, mes: 9 }, memoria.leer()).contexto.mes).toBe(9);
   });
 });
+
+
+describe("regresión: ahorro de urea y aclaraciones", () => {
+  const seleccion: MuyuContexto = { cantonId: "daule", cultivoPrevioId: "arroz", escenario: "neutro", mes: 11 };
+  it("en urea es el tema, no un lugar; utiliza los cuatro campos seleccionados", () => {
+    expect(resolverConsulta("¿Cuánto ahorro en urea?", seleccion)).toEqual({ contexto: seleccion, tema: "urea" });
+  });
+  it("retiene el ahorro al aclarar Daule noviembre antes de recibir evidencia", () => {
+    const memoria = new MemoriaConversacional();
+    memoria.aceptar(memoria.version(), { contexto: seleccion, tema: "resumen" });
+    const inicial = resolverConsulta("¿Cuánto ahorro en urea?", seleccion, memoria.leer());
+    memoria.recordarIntencion(memoria.version(), inicial);
+    const aclaracion = resolverConsulta("Daule noviembre", seleccion, memoria.leer());
+    expect(aclaracion).toEqual({ contexto: seleccion, tema: "urea" });
+  });
+  it("una aclaración retiene el ahorro incluso si la primera consulta pidió corregir el lugar", () => {
+    const memoria = new MemoriaConversacional();
+    const inicial = resolverConsulta("¿Cuánto ahorro en urea en Quito?", seleccion);
+    expect(inicial.error).toBeTruthy();
+    memoria.recordarIntencion(memoria.version(), inicial);
+    expect(resolverConsulta("Daule noviembre", seleccion, memoria.leer())).toEqual({ contexto: seleccion, tema: "urea" });
+    expect(resolverConsulta("¿Cuánto ahorro en urea en Quito?", seleccion).error).toBeTruthy();
+  });
+  it("no permite que una intención antigua sobrescriba una edición de los selectores", () => {
+    const memoria = new MemoriaConversacional();
+    const version = memoria.version();
+    const inicial = resolverConsulta("¿Cuánto ahorro en urea?", seleccion);
+    memoria.reiniciar();
+    expect(memoria.recordarIntencion(version, inicial)).toBe(false);
+    expect(memoria.leer()).toBeNull();
+    expect(seleccion).toEqual({ cantonId: "daule", cultivoPrevioId: "arroz", escenario: "neutro", mes: 11 });
+  });
+});
