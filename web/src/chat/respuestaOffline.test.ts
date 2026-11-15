@@ -29,47 +29,66 @@ describe("responderOffline fuera de tema", () => {
   });
 });
 
+describe("tono de Muyu", () => {
+  it("abre con una frase cálida, salvo ante un riesgo alto", () => {
+    const normal = responderOffline(paquete, daule, "¿qué siembro?", "rotacion");
+    expect(/^¡.+!/.test(normal.text)).toBe(true);
+    const riesgo = responderOffline(paquete, { ...daule, escenario: "el_nino", mes: 3 }, "", "rotacion");
+    expect(riesgo.text.startsWith("⚠️")).toBe(true);
+  });
+});
+
 describe("responderOffline", () => {
-  it("rotación: recomienda soya tras arroz en Neutro, con margen y fuente", () => {
+  it("rotación: sigue el orden de Kallpa (soya en año normal), con ganancia y fuente", () => {
     const r = responderOffline(paquete, daule, "", "rotacion");
-    expect(r.text).toContain("soya");
-    expect(r.text).toContain("750 USD/ha");
+    expect(r.text).toContain("soya de rotación INIAP-308");
+    expect(r.text).toContain("85 kg de nitrógeno");
+    expect(r.text).toContain("660 USD por hectárea"); // 1180 − 520
     expect(r.text).toContain("INIAP");
+    expect(r.text).toContain("fréjol caupí y mucuna");
     expect(r.emotion).toBe("happy");
   });
 
-  it("urea: calcula el ahorro por hectárea sin asumir el tamaño de la parcela", () => {
-    const r = responderOffline(paquete, daule, "", "urea");
-
-    expect(r.text).toContain("290 USD");
-    expect(r.text).toContain("por hectárea");
-    expect(r.text).toContain("cuántas hectáreas tienes");
-    expect(r.text).not.toContain("1.450 USD");
+  it("rotación con El Niño: fréjol caupí primero", () => {
+    expect(responderOffline(paquete, { ...daule, escenario: "el_nino" }, "", "rotacion").text).toContain("fréjol caupí INIAP-463");
   });
-  it("ENSO: compara la lluvia y explica el riesgo para sembrar", () => {
+
+  it("urea: ahorro por hectárea en kilos, sacos y dólares, sin asumir el tamaño de la parcela", () => {
+    const r = responderOffline(paquete, daule, "", "urea");
+    // La opción que más urea ahorra en Daule (año normal) es la mucuna.
+    expect(r.text).toContain("mucuna");
+    expect(r.text).toContain("235 kg");
+    expect(r.text).toContain("4,7 sacos");
+    expect(r.text).toContain("179 USD por hectárea"); // 235/50 × 38
+    expect(r.text).toContain("cuántas hectáreas tienes");
+    expect(r.text).not.toContain("5 hectáreas");
+  });
+
+  it("ENSO: compara la humedad del suelo predicha y explica el riesgo", () => {
     const r = responderOffline(paquete, daule, "", "enso");
     expect(r.text).toContain("enero");
-    expect(r.text).toContain("+22");
-    expect(r.text).toContain("exceso de lluvia");
-    expect(r.text).toContain("sequía");
+    expect(r.text).toContain("67 %");
+    expect(r.text).toContain("70 % (+3 puntos)");
+    expect(r.text).toContain("siembra con precaución");
   });
 
   it("resumen: usa el escenario y mes del contexto", () => {
     const r = responderOffline(paquete, { ...daule, escenario: "la_nina" }, "", "resumen");
     expect(r.text).toContain("Daule");
     expect(r.text).toContain("La Niña");
-    expect(r.text).toContain("115 mm");
+    expect(r.text).toContain("137 mm");
+    expect(r.text).toContain("64 %");
   });
 
-  it("Sierra: recomienda cultivos de altura", () => {
-    const r = responderOffline(paquete, { ...daule, cantonId: "latacunga", cultivoPrevioId: "papa" }, "", "rotacion");
-    expect(r.text).toContain("haba");
-    expect(r.emotion).toBe("happy");
+  it("Babahoyo: usa sus propios datos", () => {
+    const r = responderOffline(paquete, { ...daule, cantonId: "babahoyo" }, "", "resumen");
+    expect(r.text).toContain("Babahoyo");
+    expect(r.text).toContain("136 mm");
   });
 
   it("pregunta desconocida: ofrece 3 sugerencias sin inventar", () => {
     const r = responderOffline(paquete, daule, "cuéntame un chiste");
-    expect(r.text).toContain("Te sugiero");
+    expect(r.text).toContain("te sugiero");
     expect(r.sugerencias).toHaveLength(3);
   });
 });

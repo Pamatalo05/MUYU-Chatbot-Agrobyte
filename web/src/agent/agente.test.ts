@@ -35,7 +35,7 @@ describe("ejecutarHerramienta", () => {
       escenario: "neutro",
       mes: 1,
     }) as { recomendaciones: { id: string }[] };
-    expect(r.recomendaciones[0].id).toBe("soya");
+    expect(r.recomendaciones[0].id).toBe("soya_iniap_308");
   });
 
   it("devuelve un error en lugar de lanzar", () => {
@@ -123,7 +123,7 @@ describe("conversar", () => {
     const r = await conversar(peticion, { apiKey: "k", paquete, fetchImpl });
     expect(r).toEqual({ text: "Te recomiendo soya, ahorras 180 USD/ha.", emotion: "happy" });
     const respuestaHerramienta = recibido[1].body.contents[recibido[1].body.contents.length - 1].parts[0].functionResponse;
-    expect(respuestaHerramienta.response.recomendaciones[0].id).toBe("soya");
+    expect(respuestaHerramienta.response.recomendaciones[0].id).toBe("soya_iniap_308");
     expect(recibido[0].body.systemInstruction.parts[0].text).toContain("Daule");
   });
 
@@ -205,7 +205,8 @@ describe("guardrails", () => {
     expect(r.sugerencias).toHaveLength(3);
     const sistema = recibido[0].body.systemInstruction.parts[0].text;
     expect(sistema).toContain("ALCANCE");
-    expect(sistema).toContain("Latacunga");
+    expect(sistema).toContain("Babahoyo");
+    expect(sistema).not.toContain("Latacunga");
   });
 });
 
