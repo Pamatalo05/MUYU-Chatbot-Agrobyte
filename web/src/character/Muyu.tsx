@@ -52,7 +52,8 @@ const EYE_GREEN = "#b0cf2e";
 const SPARKLE_YELLOW = "#f5c518";
 const DROP_BLUE = "#6ec6ff";
 
-const layer = (name: string) => `/muyu/${name}.png`;
+// BASE_URL: "/" en la web y "./" dentro de Kallpa (las imágenes van junto al index.html).
+const layer = (name: string) => `${import.meta.env.BASE_URL}muyu/${name}.png`;
 
 /**
  * Muyu armado por capas PNG alineadas (mismo lienzo) más boca y destellos en SVG.

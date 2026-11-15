@@ -209,3 +209,32 @@ body {
     padding: 0.9rem;
   }
 }
+
+/* ---------- Muyu dentro de la app Kallpa (WebView) ---------- */
+.chat-header__titulo {
+  flex: 1;
+  min-width: 0;
+}
+
+.volver-kallpa {
+  width: 48px;
+  height: 48px;
+  margin-right: 4px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--verde-bosque, #0b5d2a);
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.volver-kallpa:active {
+  background: rgba(103, 168, 60, 0.15);
+}
+
+/* En el teléfono, Muyu ocupa menos y el chat gana espacio. */
+.layout--kallpa .character-area {
+  padding-top: 8px;
+  gap: 8px;
+}

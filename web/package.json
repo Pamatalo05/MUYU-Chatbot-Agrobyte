@@ -8,7 +8,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "datos": "node scripts/sincronizar-datos.mjs"
+    "datos": "node scripts/sincronizar-datos.mjs",
+    "build:kallpa": "tsc --noEmit && vite build --mode kallpa && node scripts/copiar-a-kallpa.mjs"
   },
   "dependencies": {
     "@fontsource-variable/nunito": "^5.1.0",
