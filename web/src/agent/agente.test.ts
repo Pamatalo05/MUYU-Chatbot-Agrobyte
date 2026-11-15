@@ -89,7 +89,12 @@ describe("conversar", () => {
 
     const r = await conversar(
       { ...peticion, pregunta: "Hola" },
-      { apiKey: "k", paquete, fetchImpl }
+      {
+        apiKey: "k",
+        paquete,
+        fetchImpl,
+        modelos: ["gemini-3.5-flash-lite", "gemini-2.5-flash"],
+      }
     );
 
     expect(r.text).toBe("Hola");
@@ -104,7 +109,12 @@ describe("conversar", () => {
 
   const resultado = await conversar(
     { ...peticion, pregunta: "Hola" },
-    { apiKey: "k", paquete, fetchImpl }
+    {
+        apiKey: "k",
+        paquete,
+        fetchImpl,
+        modelos: ["gemini-3.5-flash-lite", "gemini-2.5-flash"],
+      }
   );
 
   expect(resultado.text).toBe("Hola");
