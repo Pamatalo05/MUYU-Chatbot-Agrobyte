@@ -7,7 +7,7 @@ describe("puente con Kallpa", () => {
     expect(cultivoDesdeKallpa("Maíz duro")).toBe("maiz_duro");
     expect(cultivoDesdeKallpa("MAIZ")).toBe("maiz_duro");
     expect(cultivoDesdeKallpa("Arroz")).toBe("arroz");
-    expect(cultivoDesdeKallpa(undefined)).toBe("arroz");
+    expect(cultivoDesdeKallpa(undefined)).toBe("");
   });
 
   it("lee el JSON del puente Android", () => {
@@ -34,4 +34,13 @@ describe("puente con Kallpa", () => {
     const ok = contextoDesdeKallpa(base, { cantonId: "babahoyo", cultivoPrevioId: "maiz_duro", mes: 5 }, ["daule", "babahoyo"]);
     expect(ok).toEqual({ ...base, cantonId: "babahoyo", cultivoPrevioId: "maiz_duro", mes: 5 });
   });
+});
+
+it("no sustituye un cultivo desconocido por arroz", () => {
+  expect(cultivoDesdeKallpa("Mucuna")).toBe("");
+  expect(interpretarParcela({ cantonId: "Daule", cultivo: "Mucuna" })).toBeNull();
+});
+it("un cantón sin datos no altera silenciosamente otros campos de la parcela", () => {
+  const base = { ...CONTEXTO_INICIAL, cultivoPrevioId: "arroz", mes: 1 };
+  expect(contextoDesdeKallpa(base, { cantonId: "quito", cultivoPrevioId: "maiz_duro", mes: 5 }, ["daule", "babahoyo"])).toEqual(base);
 });

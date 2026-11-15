@@ -203,7 +203,8 @@ const enviar = useCallback<typeof send>(
           isBusy={isBusy}
           onSend={enviar}
           onTypingChange={setIsUserTyping}
-          aviso={aviso}
+          aviso={[aviso, enKallpa && (!parcelaKallpa || (paquete.estado === "listo" && !paquete.paquete.cantones[parcelaKallpa.cantonId]))
+            ? "No pude aplicar la parcela de Kallpa: falta un cultivo o cantón compatible. Revisa Tu parcela antes de consultar; los selectores no representan automáticamente tu terreno." : null].filter(Boolean).join(" ")}
           puedeEscuchar={enLinea}
           onEscuchar={voz.disponible ? voz.hablar : undefined}
           onAntesDeEscuchar={voz.callar}

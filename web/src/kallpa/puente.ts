@@ -35,9 +35,12 @@ export interface ParcelaKallpa {
 
 const sinTildes = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 
-/** "Maíz duro", "maiz", "MAÍZ" -> "maiz_duro"; lo demás se trata como arroz (el caso más común). */
+/** Solo reconoce cultivos previos documentados; nunca sustituye uno desconocido por arroz. */
 export function cultivoDesdeKallpa(cultivo: unknown): string {
-  return typeof cultivo === "string" && sinTildes(cultivo).startsWith("maiz") ? "maiz_duro" : "arroz";
+  if (typeof cultivo !== "string") return "";
+  const nombre = sinTildes(cultivo);
+  if (/^maiz(?:\s|$)/.test(nombre)) return "maiz_duro";
+  return /^arroz(?:\s|$)/.test(nombre) ? "arroz" : "";
 }
 
 /**
@@ -56,12 +59,13 @@ export function interpretarParcela(crudo: unknown): ParcelaKallpa | null {
   if (!dato || typeof dato !== "object") return null;
   const d = dato as Record<string, unknown>;
   const canton = typeof d.cantonId === "string" ? d.cantonId : typeof d.canton === "string" ? d.canton : "";
-  if (!canton.trim()) return null;
+  const cultivoPrevioId = cultivoDesdeKallpa(d.cultivo ?? d.cultivoActual);
+  if (!canton.trim() || !cultivoPrevioId) return null;
   const hectareas = Number(d.hectareas);
   const mes = Number(d.mes);
   return {
     cantonId: sinTildes(canton),
-    cultivoPrevioId: cultivoDesdeKallpa(d.cultivo ?? d.cultivoActual),
+    cultivoPrevioId,
     nombreParcela: typeof d.nombreParcela === "string" ? d.nombreParcela : undefined,
     hectareas: Number.isFinite(hectareas) && hectareas > 0 ? hectareas : undefined,
     conRiego: typeof d.conRiego === "boolean" ? d.conRiego : d.conRiego === "1" || d.conRiego === "true",
@@ -97,7 +101,7 @@ export function contextoDesdeKallpa(
   parcela: ParcelaKallpa | null,
   cantonesValidos: readonly string[],
 ): MuyuContexto {
-  if (!parcela) return base;
+  if (!parcela || !cantonesValidos.includes(parcela.cantonId)) return base;
   return {
     ...base,
     cantonId: cantonesValidos.includes(parcela.cantonId) ? parcela.cantonId : base.cantonId,

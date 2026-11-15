@@ -10,7 +10,9 @@ import type { ChatMessage, ChatReply, Sugerencia } from "./types";
  * En la web, /api/chat es del mismo sitio. Dentro de Kallpa la página vive en el teléfono,
  * así que se usa la dirección completa del sitio en Netlify (VITE_MUYU_API_BASE en web/.env.kallpa).
  */
-export const RUTA_CHAT = `${import.meta.env.VITE_MUYU_API_BASE ?? ""}/api/chat`;
+const BASE_API = import.meta.env.VITE_MUYU_API_BASE
+  ?? (import.meta.env.MODE === "kallpa" ? "https://muyu-agrobyte.netlify.app" : "");
+export const RUTA_CHAT = `${BASE_API}/api/chat`;
 const TIEMPO_MAXIMO_MS = 25_000;
 
 /**

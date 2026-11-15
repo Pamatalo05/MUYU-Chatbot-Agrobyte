@@ -52,7 +52,10 @@ export interface PaqueteKallpa {
   cantones: Record<string, CantonKallpa>;
 }
 
-const RUTA_NUEVA = "/datos/nuevo/paquete_canton.json";
+// En Android se reutiliza el mismo paquete científico empaquetado por Kallpa.
+const RUTA_NUEVA = import.meta.env?.MODE === "kallpa"
+  ? "../datos/paquete_canton.json"
+  : `${import.meta.env?.BASE_URL ?? "/"}datos/nuevo/paquete_canton.json`;
 
 function esObjeto(valor: unknown): valor is Record<string, unknown> {
   return typeof valor === "object" && valor !== null && !Array.isArray(valor);
