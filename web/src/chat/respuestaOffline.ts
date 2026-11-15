@@ -108,13 +108,23 @@ function responderRotacion(paquete: PaqueteCanton, contexto: MuyuContexto): Chat
 }
 
 function responderUrea(paquete: PaqueteCanton, contexto: MuyuContexto): ChatReply {
-  // El cultivo que Kallpa recomienda primero: así la cifra coincide con la recomendación.
-  const [r] = recomendarRotacion(paquete, contexto).recomendaciones;
+  // Se elige la opción que más urea ahorra y la cifra va por hectárea:
+  // no asumimos el tamaño de la parcela, se lo preguntamos al agricultor.
+  const { recomendaciones } = recomendarRotacion(paquete, contexto);
+  const mejor = [...recomendaciones].sort((a, b) => b.ahorro_urea_kg_ha - a.ahorro_urea_kg_ha)[0];
+
+  if (!mejor || mejor.ahorro_urea_kg_ha <= 0) {
+    return {
+      text: "Con las opciones que hay para tu cantón y escenario, no encuentro ahorro en urea. Te conviene revisar otra rotación.",
+      emotion: "neutral",
+    };
+  }
   const lineas = [
-    `Si siembras ${nombreCorto(r.nombre)}, ese cultivo deja nitrógeno en la tierra.`,
-    `Así el siguiente cultivo necesita unos ${numero(r.ahorro_urea_kg_ha)} kg menos de urea por hectárea: ` +
-      `son unos ${numero(r.ahorro_urea_sacos, 1)} sacos de 50 kg, más o menos ${numero(r.ahorro_urea_usd)} USD.`,
+    `Si siembras ${nombreCorto(mejor.nombre)}, ese cultivo deja nitrógeno en la tierra.`,
+    `Así el siguiente cultivo necesita unos ${numero(mejor.ahorro_urea_kg_ha)} kg menos de urea por hectárea: ` +
+      `son unos ${numero(mejor.ahorro_urea_sacos, 1)} sacos de 50 kg, más o menos ${numero(mejor.ahorro_urea_usd)} USD por hectárea.`,
     "Es un cálculo aproximado, con el precio de referencia del MAG; depende de tu suelo y de cuánta urea usas hoy.",
+    "Para calcular el ahorro total, necesito saber cuántas hectáreas tienes.",
   ];
   return { text: lineas.join("\n"), emotion: "happy" };
 }

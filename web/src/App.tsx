@@ -73,9 +73,9 @@ export default function App() {
 
   // Al preguntar algo nuevo, Muyu deja de hablar.
   const enviar = useCallback<typeof send>(
-    (texto, accion) => {
+    async (texto, accion) => {
       voz.callar();
-      send(texto, accion);
+      await send(texto, accion);
     },
     [send, voz],
   );

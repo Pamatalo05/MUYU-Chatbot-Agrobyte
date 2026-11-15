@@ -50,11 +50,14 @@ describe("responderOffline", () => {
     expect(responderOffline(paquete, { ...daule, escenario: "el_nino" }, "", "rotacion").text).toContain("fréjol caupí INIAP-463");
   });
 
-  it("urea: kilos, sacos y dólares con el precio de referencia, sin inventar hectáreas", () => {
+  it("urea: ahorro por hectárea en kilos, sacos y dólares, sin asumir el tamaño de la parcela", () => {
     const r = responderOffline(paquete, daule, "", "urea");
-    expect(r.text).toContain("185 kg");
-    expect(r.text).toContain("3,7 sacos");
-    expect(r.text).toContain("141 USD"); // 185/50 × 38
+    // La opción que más urea ahorra en Daule (año normal) es la mucuna.
+    expect(r.text).toContain("mucuna");
+    expect(r.text).toContain("235 kg");
+    expect(r.text).toContain("4,7 sacos");
+    expect(r.text).toContain("179 USD por hectárea"); // 235/50 × 38
+    expect(r.text).toContain("cuántas hectáreas tienes");
     expect(r.text).not.toContain("5 hectáreas");
   });
 
